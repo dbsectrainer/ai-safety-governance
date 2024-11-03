@@ -1,0 +1,15 @@
+{
+    "region": "us-west-2",
+    "cloudwatch": {
+        "log_group": "ai-safety-governance",
+        "log_stream": "application-logs"
+    },
+    "s3": {
+        "model_bucket": "ai-safety-governance-models",
+        "data_bucket": "ai-safety-governance-data"
+    },
+    "eks": {
+        "cluster_name": "ai-safety-cluster",
+        "node_group": "standard-workers"
+    }
+}

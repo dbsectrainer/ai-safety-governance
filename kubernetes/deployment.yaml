@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-safety-governance
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ai-safety-governance
+  template:
+    metadata:
+      labels:
+        app: ai-safety-governance
+    spec:
+      containers:
+      - name: ai-safety-governance
+        image: ai-safety-governance:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: aws-access-key-id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: aws-secret-access-key
