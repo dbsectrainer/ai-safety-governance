@@ -1,37 +1,175 @@
 {
     "agent": {
         "metrics_collection_interval": 60,
-        "run_as_user": "root"
+        "run_as_user": "cwagent",
+        "region": "${AWS_REGION}"
     },
     "logs": {
         "logs_collected": {
             "files": {
                 "collect_list": [
                     {
-                        "file_path": "/var/log/ai-safety-governance.log",
-                        "log_group_name": "ai-safety-governance",
-                        "log_stream_name": "{instance_id}",
-                        "timezone": "UTC"
+                        "file_path": "/var/log/ai-safety/application.log",
+                        "log_group_name": "/ai-safety/application",
+                        "log_stream_name": "{instance_id}-application",
+                        "timezone": "UTC",
+                        "timestamp_format": "%Y-%m-%d %H:%M:%S",
+                        "multi_line_start_pattern": "{timestamp_format}",
+                        "encoding": "utf-8",
+                        "retention_in_days": 90
+                    },
+                    {
+                        "file_path": "/var/log/ai-safety/security.log",
+                        "log_group_name": "/ai-safety/security",
+                        "log_stream_name": "{instance_id}-security",
+                        "timezone": "UTC",
+                        "timestamp_format": "%Y-%m-%d %H:%M:%S",
+                        "multi_line_start_pattern": "{timestamp_format}",
+                        "encoding": "utf-8",
+                        "retention_in_days": 365
+                    },
+                    {
+                        "file_path": "/var/log/ai-safety/model.log",
+                        "log_group_name": "/ai-safety/model",
+                        "log_stream_name": "{instance_id}-model",
+                        "timezone": "UTC",
+                        "timestamp_format": "%Y-%m-%d %H:%M:%S",
+                        "multi_line_start_pattern": "{timestamp_format}",
+                        "encoding": "utf-8",
+                        "retention_in_days": 90
+                    },
+                    {
+                        "file_path": "/var/log/ai-safety/audit.log",
+                        "log_group_name": "/ai-safety/audit",
+                        "log_stream_name": "{instance_id}-audit",
+                        "timezone": "UTC",
+                        "timestamp_format": "%Y-%m-%d %H:%M:%S",
+                        "multi_line_start_pattern": "{timestamp_format}",
+                        "encoding": "utf-8",
+                        "retention_in_days": 365
+                    }
+                ]
+            }
+        },
+        "log_stream_name": "{instance_id}"
+    },
+    "metrics": {
+        "namespace": "AI/Safety",
+        "metrics_collected": {
+            "cpu": {
+                "measurement": [
+                    "cpu_usage_idle",
+                    "cpu_usage_iowait",
+                    "cpu_usage_user",
+                    "cpu_usage_system"
+                ],
+                "metrics_collection_interval": 60,
+                "totalcpu": false
+            },
+            "disk": {
+                "measurement": [
+                    "used_percent",
+                    "inodes_free",
+                    "disk_io_time",
+                    "disk_write_bytes",
+                    "disk_read_bytes"
+                ],
+                "metrics_collection_interval": 60,
+                "resources": [
+                    "*"
+                ]
+            },
+            "memory": {
+                "measurement": [
+                    "mem_used_percent",
+                    "mem_total",
+                    "mem_used",
+                    "mem_cached"
+                ],
+                "metrics_collection_interval": 60
+            },
+            "net": {
+                "measurement": [
+                    "bytes_sent",
+                    "bytes_recv",
+                    "packets_sent",
+                    "packets_recv"
+                ],
+                "metrics_collection_interval": 60
+            },
+            "netstat": {
+                "measurement": [
+                    "tcp_established",
+                    "tcp_time_wait",
+                    "tcp_close_wait"
+                ],
+                "metrics_collection_interval": 60
+            },
+            "processes": {
+                "measurement": [
+                    "running",
+                    "sleeping",
+                    "dead"
+                ],
+                "metrics_collection_interval": 60
+            }
+        },
+        "append_dimensions": {
+            "ImageId": "${aws:ImageId}",
+            "InstanceId": "${aws:InstanceId}",
+            "InstanceType": "${aws:InstanceType}",
+            "AutoScalingGroupName": "${aws:AutoScalingGroupName}"
+        },
+        "aggregation_dimensions": [
+            ["InstanceId"],
+            ["AutoScalingGroupName"],
+            ["InstanceType"],
+            []
+        ]
+    },
+    "logs_metrics": {
+        "metrics_collected": {
+            "emf": {
+                "service_address": ":25888",
+                "log_group_name": "/ai-safety/metrics",
+                "log_stream_name": "{instance_id}",
+                "force_flush_interval": 5,
+                "output_format": "json",
+                "metrics": [
+                    {
+                        "name": "model_accuracy",
+                        "unit": "Percent",
+                        "namespace": "AI/Safety/Model"
+                    },
+                    {
+                        "name": "model_latency",
+                        "unit": "Milliseconds",
+                        "namespace": "AI/Safety/Model"
+                    },
+                    {
+                        "name": "drift_score",
+                        "unit": "None",
+                        "namespace": "AI/Safety/Model"
+                    },
+                    {
+                        "name": "security_events",
+                        "unit": "Count",
+                        "namespace": "AI/Safety/Security"
+                    },
+                    {
+                        "name": "privacy_score",
+                        "unit": "Percent",
+                        "namespace": "AI/Safety/Privacy"
                     }
                 ]
             }
         }
     },
-    "metrics": {
-        "metrics_collected": {
-            "cpu": {
-                "measurement": [
-                    "cpu_usage_idle",
-                    "cpu_usage_user",
-                    "cpu_usage_system"
-                ],
-                "metrics_collection_interval": 60
-            },
-            "memory": {
-                "measurement": [
-                    "mem_used_percent"
-                ],
-                "metrics_collection_interval": 60
+    "traces": {
+        "traces_collected": {
+            "xray": {
+                "daemon_address": "127.0.0.1:2000",
+                "log_paths": ["/var/log/xray/xray.log"]
             }
         }
     }

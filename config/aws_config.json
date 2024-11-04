@@ -1,15 +1,242 @@
 {
-    "region": "us-west-2",
-    "cloudwatch": {
-        "log_group": "ai-safety-governance",
-        "log_stream": "application-logs"
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "eks.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ],
+    "Policies": [
+        {
+            "PolicyName": "AISafetyEKSClusterPolicy",
+            "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "eks:*",
+                            "ecr:GetAuthorizationToken",
+                            "ecr:BatchCheckLayerAvailability",
+                            "ecr:GetDownloadUrlForLayer",
+                            "ecr:BatchGetImage"
+                        ],
+                        "Resource": "*"
+                    }
+                ]
+            }
+        },
+        {
+            "PolicyName": "AISafetyCloudWatchPolicy",
+            "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "cloudwatch:PutMetricData",
+                            "cloudwatch:GetMetricData",
+                            "cloudwatch:GetMetricStatistics",
+                            "cloudwatch:ListMetrics"
+                        ],
+                        "Resource": "*"
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "logs:CreateLogGroup",
+                            "logs:CreateLogStream",
+                            "logs:PutLogEvents",
+                            "logs:DescribeLogStreams",
+                            "logs:DescribeLogGroups"
+                        ],
+                        "Resource": [
+                            "arn:aws:logs:*:*:log-group:/ai-safety/*",
+                            "arn:aws:logs:*:*:log-group:/ai-safety/*:log-stream:*"
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "PolicyName": "AISafetyS3Policy",
+            "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "s3:GetObject",
+                            "s3:PutObject",
+                            "s3:ListBucket"
+                        ],
+                        "Resource": [
+                            "arn:aws:s3:::ai-safety-models/*",
+                            "arn:aws:s3:::ai-safety-models"
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "PolicyName": "AISafetySecretsPolicy",
+            "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "secretsmanager:GetSecretValue",
+                            "secretsmanager:DescribeSecret"
+                        ],
+                        "Resource": [
+                            "arn:aws:secretsmanager:*:*:secret:ai-safety/*"
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "PolicyName": "AISafetyKMSPolicy",
+            "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "kms:Decrypt",
+                            "kms:GenerateDataKey"
+                        ],
+                        "Resource": [
+                            "arn:aws:kms:*:*:key/*"
+                        ]
+                    }
+                ]
+            }
+        }
+    ],
+    "SecurityGroups": {
+        "EKSClusterSecurityGroup": {
+            "Description": "Security group for AI Safety EKS cluster",
+            "IngressRules": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 443,
+                    "ToPort": 443,
+                    "CidrIp": "0.0.0.0/0",
+                    "Description": "Allow HTTPS inbound for API server"
+                }
+            ],
+            "EgressRules": [
+                {
+                    "IpProtocol": "-1",
+                    "FromPort": -1,
+                    "ToPort": -1,
+                    "CidrIp": "0.0.0.0/0",
+                    "Description": "Allow all outbound traffic"
+                }
+            ]
+        },
+        "WorkerNodesSecurityGroup": {
+            "Description": "Security group for AI Safety EKS worker nodes",
+            "IngressRules": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 1025,
+                    "ToPort": 65535,
+                    "Description": "Allow worker node communication"
+                }
+            ],
+            "EgressRules": [
+                {
+                    "IpProtocol": "-1",
+                    "FromPort": -1,
+                    "ToPort": -1,
+                    "CidrIp": "0.0.0.0/0",
+                    "Description": "Allow all outbound traffic"
+                }
+            ]
+        }
     },
-    "s3": {
-        "model_bucket": "ai-safety-governance-models",
-        "data_bucket": "ai-safety-governance-data"
+    "VPC": {
+        "CidrBlock": "10.0.0.0/16",
+        "Subnets": {
+            "Public": [
+                {
+                    "CidrBlock": "10.0.1.0/24",
+                    "AvailabilityZone": "us-west-2a"
+                },
+                {
+                    "CidrBlock": "10.0.2.0/24",
+                    "AvailabilityZone": "us-west-2b"
+                }
+            ],
+            "Private": [
+                {
+                    "CidrBlock": "10.0.3.0/24",
+                    "AvailabilityZone": "us-west-2a"
+                },
+                {
+                    "CidrBlock": "10.0.4.0/24",
+                    "AvailabilityZone": "us-west-2b"
+                }
+            ]
+        },
+        "NatGateways": true,
+        "VPCEndpoints": [
+            "s3",
+            "ecr.api",
+            "ecr.dkr",
+            "logs",
+            "secretsmanager"
+        ]
     },
-    "eks": {
-        "cluster_name": "ai-safety-cluster",
-        "node_group": "standard-workers"
+    "Monitoring": {
+        "CloudWatch": {
+            "LogRetention": {
+                "Application": 90,
+                "Security": 365,
+                "Audit": 365
+            },
+            "Alarms": [
+                {
+                    "Name": "HighCPUUtilization",
+                    "Metric": "CPUUtilization",
+                    "Threshold": 80,
+                    "Period": 300,
+                    "EvaluationPeriods": 2,
+                    "ComparisonOperator": "GreaterThanThreshold",
+                    "Statistic": "Average"
+                },
+                {
+                    "Name": "HighMemoryUtilization",
+                    "Metric": "MemoryUtilization",
+                    "Threshold": 80,
+                    "Period": 300,
+                    "EvaluationPeriods": 2,
+                    "ComparisonOperator": "GreaterThanThreshold",
+                    "Statistic": "Average"
+                }
+            ]
+        }
+    },
+    "Backup": {
+        "RetentionPeriod": 30,
+        "Schedule": "cron(0 5 ? * * *)",
+        "Resources": [
+            "EBS",
+            "RDS",
+            "EFS"
+        ]
+    },
+    "Tags": {
+        "Environment": "production",
+        "Project": "ai-safety-governance",
+        "Owner": "ai-safety-team",
+        "CostCenter": "ai-research",
+        "SecurityLevel": "high"
     }
 }

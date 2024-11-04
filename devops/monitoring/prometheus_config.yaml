@@ -1,22 +1,190 @@
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  external_labels:
+    monitor: 'ai-safety-governance'
 
-scrape_configs:
-  - job_name: 'ai-safety-governance'
-    static_configs:
-      - targets: ['localhost:5000']
-
-  - job_name: 'model-monitoring'
-    static_configs:
-      - targets: ['localhost:5000']
-    metrics_path: '/metrics'
+rule_files:
+  - /etc/prometheus/rules/*.rules.yaml
 
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
-          - 'alertmanager:9093'
+          - alertmanager:9093
 
-rule_files:
-  - 'alert_rules.yml'
+scrape_configs:
+  - job_name: 'kubernetes-apiservers'
+    kubernetes_sd_configs:
+      - role: endpoints
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+
+  - job_name: 'kubernetes-nodes'
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    kubernetes_sd_configs:
+      - role: node
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
+
+  - job_name: 'ai-safety-governance'
+    metrics_path: '/metrics'
+    kubernetes_sd_configs:
+      - role: service
+        namespaces:
+          names:
+            - ai-safety
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app]
+        regex: ai-safety-governance
+        action: keep
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: service
+
+  - job_name: 'node-exporter'
+    kubernetes_sd_configs:
+      - role: endpoints
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_endpoints_name]
+        regex: node-exporter
+        action: keep
+
+  - job_name: 'kube-state-metrics'
+    kubernetes_sd_configs:
+      - role: service
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+        regex: kube-state-metrics
+        action: keep
+
+# Recording rules for AI Safety metrics
+recording_rules:
+  groups:
+    - name: ai_safety_recording_rules
+      rules:
+        - record: ai_safety:model_accuracy:avg_5m
+          expr: avg_over_time(model_accuracy[5m])
+        
+        - record: ai_safety:model_latency:p95_5m
+          expr: histogram_quantile(0.95, sum(rate(model_latency_seconds_bucket[5m])) by (le))
+        
+        - record: ai_safety:drift_score:max_1h
+          expr: max_over_time(model_drift_score[1h])
+
+# Alerting rules
+alerting_rules:
+  groups:
+    - name: ai_safety_alerts
+      rules:
+        - alert: HighModelLatency
+          expr: ai_safety:model_latency:p95_5m > 0.5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: High model latency detected
+            description: Model latency P95 is above 500ms for 5 minutes
+
+        - alert: LowModelAccuracy
+          expr: ai_safety:model_accuracy:avg_5m < 0.95
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: Low model accuracy detected
+            description: Model accuracy is below 95% for 15 minutes
+
+        - alert: HighDriftScore
+          expr: ai_safety:drift_score:max_1h > 0.3
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: High drift score detected
+            description: Model drift score is above 0.3 for 1 hour
+
+        - alert: PodRestartingFrequently
+          expr: rate(kube_pod_container_status_restarts_total{namespace="ai-safety"}[1h]) * 3600 > 5
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Pod is restarting frequently
+            description: Pod {{ $labels.pod }} is restarting more than 5 times per hour
+
+        - alert: HighMemoryUsage
+          expr: container_memory_usage_bytes{namespace="ai-safety"} / container_spec_memory_limit_bytes{namespace="ai-safety"} > 0.9
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: High memory usage detected
+            description: Container {{ $labels.container }} memory usage is above 90%
+
+        - alert: HighCPUUsage
+          expr: rate(container_cpu_usage_seconds_total{namespace="ai-safety"}[5m]) / container_spec_cpu_quota{namespace="ai-safety"} > 0.8
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: High CPU usage detected
+            description: Container {{ $labels.container }} CPU usage is above 80%
+
+# Grafana dashboard configuration
+grafana_dashboards:
+  - name: AI Safety Overview
+    panels:
+      - title: Model Performance
+        type: graph
+        targets:
+          - expr: ai_safety:model_accuracy:avg_5m
+          - expr: ai_safety:model_latency:p95_5m
+          - expr: ai_safety:drift_score:max_1h
+
+      - title: System Resources
+        type: graph
+        targets:
+          - expr: sum(rate(container_cpu_usage_seconds_total{namespace="ai-safety"}[5m])) by (pod)
+          - expr: sum(container_memory_usage_bytes{namespace="ai-safety"}) by (pod)
+
+      - title: Security Events
+        type: table
+        targets:
+          - expr: sum(rate(security_events_total{namespace="ai-safety"}[5m])) by (type, severity)
