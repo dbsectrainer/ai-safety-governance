@@ -1,0 +1,225 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: ai-safety-chaos-schedule
+  namespace: ai-safety
+spec:
+  schedule: "0 * * * *"
+  historyLimit: 5
+  concurrencyPolicy: Forbid
+  type: PodChaos
+  podChaos:
+    action: pod-failure
+    mode: one
+    duration: "5m"
+    selector:
+      namespaces:
+        - ai-safety
+      labelSelectors:
+        "app": "ai-safety"
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-delay
+  namespace: ai-safety
+spec:
+  action: delay
+  mode: one
+  selector:
+    namespaces:
+      - ai-safety
+    labelSelectors:
+      "app": "ai-safety"
+  delay:
+    latency: "100ms"
+    correlation: "100"
+    jitter: "0ms"
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: cpu-stress
+  namespace: ai-safety
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - ai-safety
+    labelSelectors:
+      "app": "ai-safety"
+  stressors:
+    cpu:
+      workers: 1
+      load: 20
+    memory:
+      workers: 1
+      size: "256MB"
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: IOChaos
+metadata:
+  name: io-delay
+  namespace: ai-safety
+spec:
+  action: latency
+  mode: one
+  selector:
+    namespaces:
+      - ai-safety
+    labelSelectors:
+      "app": "ai-safety"
+  volumePath: /data
+  path: "*"
+  delay: "100ms"
+  percent: 50
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: DNSChaos
+metadata:
+  name: dns-error
+  namespace: ai-safety
+spec:
+  action: error
+  mode: one
+  selector:
+    namespaces:
+      - ai-safety
+    labelSelectors:
+      "app": "ai-safety"
+  patterns:
+    - api.aws.amazon.com
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: TimeChaos
+metadata:
+  name: time-shift
+  namespace: ai-safety
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - ai-safety
+    labelSelectors:
+      "app": "ai-safety"
+  timeOffset: "10s"
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: resilience-test
+  namespace: ai-safety
+spec:
+  entry: resilience-template
+  templates:
+    - name: resilience-template
+      templateType: Serial
+      deadline: 30m
+      children:
+        - workflow-pod-failure
+        - workflow-network-delay
+        - workflow-cpu-stress
+    - name: workflow-pod-failure
+      templateType: PodChaos
+      deadline: 5m
+      podChaos:
+        action: pod-failure
+        mode: one
+        duration: "1m"
+        selector:
+          namespaces:
+            - ai-safety
+          labelSelectors:
+            "app": "ai-safety"
+    - name: workflow-network-delay
+      templateType: NetworkChaos
+      deadline: 5m
+      networkChaos:
+        action: delay
+        mode: one
+        selector:
+          namespaces:
+            - ai-safety
+          labelSelectors:
+            "app": "ai-safety"
+        delay:
+          latency: "200ms"
+          correlation: "100"
+    - name: workflow-cpu-stress
+      templateType: StressChaos
+      deadline: 5m
+      stressChaos:
+        mode: one
+        selector:
+          namespaces:
+            - ai-safety
+          labelSelectors:
+            "app": "ai-safety"
+        stressors:
+          cpu:
+            workers: 1
+            load: 20
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: daily-resilience-test
+  namespace: ai-safety
+spec:
+  schedule: "0 0 * * *"
+  entry: resilience-test
+  templateType: WorkflowTemplate
+  templateRef: resilience-test
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: AWSChaos
+metadata:
+  name: aws-failure
+  namespace: ai-safety
+spec:
+  action: ec2-stop
+  mode: one
+  selector:
+    namespaces:
+      - ai-safety
+    labelSelectors:
+      "app": "ai-safety"
+  awsRegion: "us-west-2"
+  ec2Instance: "i-example123"
+  duration: "5m"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaos-mesh-monitoring
+  namespace: ai-safety
+data:
+  prometheus-config.yaml: |
+    global:
+      scrape_interval: 15s
+    scrape_configs:
+      - job_name: 'chaos-mesh'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            regex: chaos-mesh
+            action: keep
+  grafana-dashboard.json: |
+    {
+      "dashboard": {
+        "title": "Chaos Mesh Monitoring",
+        "panels": [
+          {
+            "title": "Chaos Experiments Status",
+            "type": "graph",
+            "datasource": "Prometheus"
+          },
+          {
+            "title": "System Metrics During Chaos",
+            "type": "graph",
+            "datasource": "Prometheus"
+          }
+        ]
+      }
+    }

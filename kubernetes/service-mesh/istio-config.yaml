@@ -1,0 +1,231 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: ai-safety-istio-config
+spec:
+  profile: default
+  components:
+    egressGateways:
+    - name: istio-egressgateway
+      enabled: true
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: true
+    pilot:
+      enabled: true
+  values:
+    global:
+      proxy:
+        privileged: false
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+      defaultPodDisruptionBudget:
+        enabled: true
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: ai-safety
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ai-safety-vs
+  namespace: ai-safety
+spec:
+  hosts:
+  - "ai-safety.example.com"
+  gateways:
+  - ai-safety-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1
+    route:
+    - destination:
+        host: ai-safety-service
+        port:
+          number: 80
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+    fault:
+      delay:
+        percentage:
+          value: 0.1
+        fixedDelay: 5s
+    corsPolicy:
+      allowOrigins:
+      - exact: "https://ai-safety.example.com"
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      allowHeaders:
+      - authorization
+      - content-type
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: ai-safety-dr
+  namespace: ai-safety
+spec:
+  host: ai-safety-service
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http2MaxRequests: 1000
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: ai-safety-auth
+  namespace: ai-safety
+spec:
+  selector:
+    matchLabels:
+      app: ai-safety
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/ai-safety/sa/ai-safety-sa"]
+    to:
+    - operation:
+        methods: ["GET", "POST"]
+        paths: ["/api/v1/*"]
+---
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: ai-safety-telemetry
+  namespace: ai-safety
+spec:
+  tracing:
+    - providers:
+      - name: jaeger
+      randomSamplingPercentage: 100.0
+  metrics:
+    - providers:
+      - name: prometheus
+    overrides:
+    - match:
+        metric: REQUEST_COUNT
+        mode: CLIENT_AND_SERVER
+      tagOverrides:
+        response_code:
+          operation: UPSERT
+          value: "response.code"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ai-safety-gateway
+  namespace: ai-safety
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "ai-safety.example.com"
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - "ai-safety.example.com"
+    tls:
+      mode: SIMPLE
+      credentialName: ai-safety-cert
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: external-apis
+  namespace: ai-safety
+spec:
+  hosts:
+  - api.aws.amazon.com
+  - api.monitoring.aws.com
+  location: MESH_EXTERNAL
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: jwt-auth
+  namespace: ai-safety
+spec:
+  selector:
+    matchLabels:
+      app: ai-safety
+  jwtRules:
+  - issuer: "https://ai-safety.auth0.com/"
+    jwksUri: "https://ai-safety.auth0.com/.well-known/jwks.json"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: ai-safety-filter
+  namespace: ai-safety
+spec:
+  workloadSelector:
+    labels:
+      app: ai-safety
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.wasm
+        typed_config:
+          "@type": type.googleapis.com/udpa.type.v1.TypedStruct
+          type_url: type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+          value:
+            config:
+              vm_config:
+                runtime: envoy.wasm.runtime.v8
+                code:
+                  local:
+                    filename: /etc/istio/extensions/ai-safety-filter.wasm
+              configuration:
+                "@type": type.googleapis.com/google.protobuf.StringValue
+                value: |
+                  {
+                    "max_requests_per_minute": 100,
+                    "enable_rate_limiting": true
+                  }

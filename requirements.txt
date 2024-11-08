@@ -14,22 +14,44 @@ shap>=0.40.0
 lime>=0.2.0
 mlflow>=1.20.0
 prometheus-client>=0.12.0
+statsmodels>=0.13.0  # For predictive monitoring
+scipy>=1.7.0  # For statistical calculations
 
-# Security
+# Security & Privacy
 cryptography>=3.4.0
 python-jose>=3.3.0
 passlib>=1.7.4
+diffprivlib>=0.5.0  # For differential privacy
+pyspark>=3.2.0  # For distributed privacy computations
+tensorflow-privacy>=0.7.0  # For privacy-preserving ML
 
-# Testing
-pytest>=6.2.5
-pytest-cov>=2.12.0
+# Fairness & Explainability
+aif360>=0.4.0  # For fairness metrics
+fairlearn>=0.7.0  # For fairness assessment
+interpret>=0.2.7  # For model interpretability
+alibi>=0.6.0  # For algorithmic explanations
 
-# Logging & Monitoring
-python-json-logger>=2.0.0
+# Monitoring & Observability
 opentelemetry-api>=1.7.0
 opentelemetry-sdk>=1.7.0
+python-json-logger>=2.0.0
+elasticsearch>=7.17.0  # For log aggregation
+grafana-api>=1.0.3  # For dashboard automation
 
-# Development
+# Testing & Quality
+pytest>=6.2.5
+pytest-cov>=2.12.0
+pytest-benchmark>=3.4.1  # For performance testing
+safety>=1.10.3  # For security testing
+bandit>=1.7.0  # For security linting
+mypy>=0.910  # For type checking
+
+# Development & Formatting
 black>=21.5b2
 flake8>=3.9.0
-mypy>=0.910
+isort>=5.9.0  # For import sorting
+pre-commit>=2.15.0  # For git hooks
+
+# Documentation
+sphinx>=4.2.0  # For documentation generation
+sphinx-rtd-theme>=1.0.0  # For documentation theme

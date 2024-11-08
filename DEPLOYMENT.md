@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide provides detailed instructions for deploying the AI Safety & Governance platform in a production environment.
+This guide provides comprehensive instructions for deploying the AI Safety & Governance platform in production environments.
 
 ## Prerequisites
 
@@ -9,6 +9,9 @@ This guide provides detailed instructions for deploying the AI Safety & Governan
 - Kubernetes 1.21+
 - Docker 20.10+
 - Helm 3.0+
+- FluxCD
+- Istio 1.12+
+- Chaos Mesh
 - kubectl CLI tool
 - AWS CLI v2
 
@@ -19,6 +22,7 @@ This guide provides detailed instructions for deploying the AI Safety & Governan
 - Secrets Manager access
 - KMS key management
 - IAM role management
+- SageMaker deployment permissions
 
 ## Environment Setup
 
@@ -39,42 +43,69 @@ aws iam create-role --role-name ai-safety-eks-role --assume-role-policy-document
 aws kms create-key --description "AI Safety Encryption Key"
 ```
 
-### 2. EKS Cluster Setup
-
-1. Create EKS cluster:
+4. Configure Secrets Manager:
 ```bash
-eksctl create cluster -f kubernetes/cluster.yaml
+aws secretsmanager create-secret --name ai-safety-secrets \
+  --description "AI Safety Platform Secrets" \
+  --secret-string file://config/secrets.json
 ```
 
-2. Configure kubectl:
+### 2. GitOps Setup
+
+1. Install FluxCD:
 ```bash
-aws eks update-kubeconfig --name ai-safety-cluster --region your-region
+flux install
+
+# Bootstrap Git repository
+flux bootstrap github \
+  --owner=$GITHUB_USER \
+  --repository=ai-safety-governance \
+  --branch=main \
+  --path=./kubernetes/flux
 ```
 
-3. Create namespaces:
+2. Configure Flux sources:
 ```bash
-kubectl create namespace ai-safety
-kubectl create namespace monitoring
-kubectl create namespace logging
+flux create source git ai-safety-governance \
+  --url=https://github.com/$GITHUB_USER/ai-safety-governance \
+  --branch=main \
+  --interval=1m
 ```
 
-### 3. Security Configuration
+### 3. Service Mesh Setup
 
-1. Apply RBAC configurations:
+1. Install Istio:
 ```bash
-kubectl apply -f kubernetes/rbac/
+istioctl install -f kubernetes/service-mesh/istio-config.yaml
+
+# Enable injection
+kubectl label namespace ai-safety istio-injection=enabled
 ```
 
-2. Create secrets:
+2. Configure mTLS:
 ```bash
-kubectl create secret generic ai-safety-secrets \
-  --from-file=config/secrets.env \
-  --namespace ai-safety
+kubectl apply -f kubernetes/service-mesh/mtls-policy.yaml
 ```
 
-3. Apply network policies:
+3. Setup monitoring:
 ```bash
-kubectl apply -f kubernetes/network-policies/
+kubectl apply -f kubernetes/service-mesh/monitoring/
+```
+
+### 4. Chaos Engineering Setup
+
+1. Install Chaos Mesh:
+```bash
+helm repo add chaos-mesh https://charts.chaos-mesh.org
+helm install chaos-mesh chaos-mesh/chaos-mesh \
+  --namespace=chaos-testing \
+  --create-namespace \
+  --values=kubernetes/chaos/values.yaml
+```
+
+2. Configure chaos experiments:
+```bash
+kubectl apply -f kubernetes/chaos/chaos-mesh.yaml
 ```
 
 ## Deployment Steps
@@ -94,179 +125,187 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 kubectl apply -f devops/logging/cloudwatch_config.json
 ```
 
-### 2. Application Deployment
-
-1. Deploy core services:
+3. Setup secret rotation:
 ```bash
-kubectl apply -f kubernetes/deployment.yaml
-kubectl apply -f kubernetes/service.yaml
+kubectl apply -f kubernetes/security/secret-rotation/
 ```
 
-2. Verify deployment:
+### 2. Core Services Deployment
+
+1. Deploy model monitoring:
 ```bash
-kubectl get pods -n ai-safety
-kubectl get services -n ai-safety
+kubectl apply -f kubernetes/model-monitoring/
 ```
 
-3. Apply security policies:
+2. Deploy security services:
 ```bash
 kubectl apply -f kubernetes/security/
 ```
 
-### 3. Post-Deployment Configuration
-
-1. Configure monitoring:
+3. Deploy privacy protection:
 ```bash
-kubectl apply -f devops/monitoring/
+kubectl apply -f kubernetes/privacy/
 ```
 
-2. Setup alerts:
+### 3. A/B Testing Setup
+
+1. Configure A/B testing framework:
 ```bash
-kubectl apply -f devops/alerts/
+kubectl apply -f kubernetes/ab-testing/
 ```
 
-3. Configure autoscaling:
+2. Setup experiment tracking:
 ```bash
-kubectl apply -f kubernetes/hpa.yaml
+kubectl apply -f kubernetes/ab-testing/tracking/
+```
+
+### 4. Model Rollback Configuration
+
+1. Configure rollback manager:
+```bash
+kubectl apply -f kubernetes/model-rollback/
+```
+
+2. Setup monitoring triggers:
+```bash
+kubectl apply -f kubernetes/model-rollback/triggers/
 ```
 
 ## Verification
 
-### 1. Security Checks
+### 1. Infrastructure Verification
 
-1. Verify RBAC:
+1. Check GitOps sync:
 ```bash
-kubectl auth can-i --list --namespace ai-safety
+flux get kustomizations
 ```
 
-2. Check network policies:
+2. Verify service mesh:
+```bash
+istioctl analyze
+```
+
+3. Test chaos experiments:
+```bash
+kubectl apply -f kubernetes/chaos/test-experiment.yaml
+```
+
+### 2. Security Verification
+
+1. Verify mTLS:
+```bash
+istioctl authn tls-check
+```
+
+2. Check secret rotation:
+```bash
+kubectl get secretproviderclass
+```
+
+3. Verify network policies:
 ```bash
 kubectl describe networkpolicies -n ai-safety
 ```
 
-3. Verify encryption:
-```bash
-kubectl get pods -n ai-safety -o yaml | grep -i encryption
-```
+### 3. Monitoring Verification
 
-### 2. Monitoring Verification
-
-1. Access Prometheus:
-```bash
-kubectl port-forward svc/prometheus-server 9090:9090 -n monitoring
-```
-
-2. Check CloudWatch logs:
-```bash
-aws logs describe-log-groups --log-group-prefix /ai-safety
-```
-
-### 3. Performance Testing
-
-1. Run load tests:
-```bash
-kubectl apply -f tests/load-test.yaml
-```
-
-2. Monitor metrics:
+1. Access Grafana:
 ```bash
 kubectl port-forward svc/grafana 3000:3000 -n monitoring
 ```
 
-## Maintenance
-
-### Backup and Recovery
-
-1. Configure backups:
+2. Check Prometheus metrics:
 ```bash
-kubectl apply -f kubernetes/backup/
+kubectl port-forward svc/prometheus-server 9090:9090 -n monitoring
 ```
 
-2. Verify backup status:
-```bash
-velero backup-location get
-```
+## Production Considerations
 
-### Updates and Patches
+### High Availability
+1. Multi-zone deployment
+2. Pod anti-affinity
+3. Horizontal pod autoscaling
+4. Node auto-scaling
+5. Database replication
 
-1. Update dependencies:
-```bash
-helm dependency update
-```
+### Security Hardening
+1. Regular security audits
+2. Certificate rotation
+3. Secret rotation
+4. Network policy reviews
+5. Compliance checks
 
-2. Apply security patches:
-```bash
-kubectl apply -f kubernetes/security/patches/
-```
+### Monitoring & Alerting
+1. Set up alert rules
+2. Configure on-call rotations
+3. Implement incident response
+4. Enable audit logging
+5. Configure metric retention
 
-### Scaling
-
-1. Adjust HPA settings:
-```bash
-kubectl edit hpa ai-safety-governance-hpa -n ai-safety
-```
-
-2. Scale worker nodes:
-```bash
-eksctl scale nodegroup --cluster=ai-safety-cluster --nodes=3
-```
+### Backup & Recovery
+1. Regular state backups
+2. Disaster recovery testing
+3. Data retention policies
+4. Backup verification
+5. Recovery procedures
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. Pod startup failures:
+1. GitOps sync issues:
 ```bash
-kubectl describe pod <pod-name> -n ai-safety
-kubectl logs <pod-name> -n ai-safety
+flux logs --all-namespaces
 ```
 
-2. Network connectivity:
+2. Service mesh problems:
 ```bash
-kubectl exec -it <pod-name> -n ai-safety -- ping <service-name>
+istioctl proxy-status
+istioctl proxy-config all
 ```
 
-3. Permission issues:
+3. Chaos testing issues:
 ```bash
-kubectl auth reconcile -f kubernetes/rbac/
+kubectl logs -n chaos-testing -l app.kubernetes.io/component=controller-manager
 ```
 
-### Monitoring and Debugging
+### Performance Issues
 
-1. View real-time logs:
-```bash
-kubectl logs -f deployment/ai-safety-governance -n ai-safety
-```
-
-2. Check metrics:
+1. Check resource usage:
 ```bash
 kubectl top pods -n ai-safety
 ```
 
-3. Debug network policies:
+2. Monitor service mesh:
 ```bash
-kubectl exec -it <pod-name> -n ai-safety -- wget -qO- http://another-service
+istioctl dashboard envoy
 ```
 
-## Security Considerations
+3. Analyze metrics:
+```bash
+kubectl port-forward -n monitoring svc/grafana 3000:3000
+```
 
-1. Regular security audits
-2. Certificate rotation
-3. Secret management
-4. Access reviews
-5. Security patch management
+## Maintenance
 
-## Compliance
+### Regular Updates
+1. Update dependencies
+2. Patch security vulnerabilities
+3. Rotate certificates
+4. Update compliance checks
+5. Refresh chaos tests
 
-1. Maintain audit logs
-2. Regular compliance checks
-3. Data retention policy enforcement
-4. Privacy protection verification
+### Scaling
+1. Adjust resource limits
+2. Configure auto-scaling
+3. Optimize performance
+4. Monitor capacity
+5. Plan for growth
 
 ## Support
 
 For production support:
-1. Open GitHub issues for bug reports
-2. Contact the security team for security-related issues
-3. Review logs and metrics for troubleshooting
-4. Consult AWS documentation for infrastructure issues
+1. Check logs and metrics
+2. Review documentation
+3. Open GitHub issues
+4. Contact security team
