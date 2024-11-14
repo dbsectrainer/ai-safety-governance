@@ -1,0 +1,76 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  serviceAccountName: prometheus
+  serviceMonitorSelector:
+    matchLabels:
+      team: ai-safety
+  resources:
+    requests:
+      memory: 400Mi
+  enableAdminAPI: false
+  additionalScrapeConfigs:
+    name: additional-scrape-configs
+    key: prometheus-additional.yaml
+  externalLabels:
+    cluster: ai-safety-aks
+  remoteWrite:
+    - url: "http://prometheus-server/api/v1/write"
+      writeRelabelConfigs:
+        - sourceLabels: [__name__]
+          regex: '{__name__=~"instance:.+"}'
+          action: keep
+  storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: managed-premium
+        resources:
+          requests:
+            storage: 40Gi
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ai-safety-monitor
+  namespace: monitoring
+  labels:
+    team: ai-safety
+spec:
+  selector:
+    matchLabels:
+      app: ai-safety-governance
+  endpoints:
+  - port: metrics
+    interval: 15s
+  namespaceSelector:
+    matchNames:
+    - default
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: azure-specific-rules
+  namespace: monitoring
+  labels:
+    team: ai-safety
+spec:
+  groups:
+  - name: azure.rules
+    rules:
+    - alert: AzureNodeNotReady
+      expr: kube_node_status_condition{condition="Ready",status="false"} == 1
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        description: "Node {{ $labels.node }} has been unready for more than 10 minutes"
+    - alert: AzurePodCrashLooping
+      expr: rate(kube_pod_container_status_restarts_total{namespace!="kube-system"}[15m]) * 60 * 5 > 0
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping"

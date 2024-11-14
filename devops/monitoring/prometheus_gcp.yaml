@@ -1,0 +1,76 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  serviceAccountName: prometheus
+  serviceMonitorSelector:
+    matchLabels:
+      team: ai-safety
+  resources:
+    requests:
+      memory: 400Mi
+  enableAdminAPI: false
+  additionalScrapeConfigs:
+    name: additional-scrape-configs
+    key: prometheus-additional.yaml
+  externalLabels:
+    cluster: ai-safety-gke
+  remoteWrite:
+    - url: "http://prometheus-server/api/v1/write"
+      writeRelabelConfigs:
+        - sourceLabels: [__name__]
+          regex: '{__name__=~"instance:.+"}'
+          action: keep
+  storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: standard-rwo
+        resources:
+          requests:
+            storage: 40Gi
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ai-safety-monitor
+  namespace: monitoring
+  labels:
+    team: ai-safety
+spec:
+  selector:
+    matchLabels:
+      app: ai-safety-governance
+  endpoints:
+  - port: metrics
+    interval: 15s
+  namespaceSelector:
+    matchNames:
+    - default
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gcp-specific-rules
+  namespace: monitoring
+  labels:
+    team: ai-safety
+spec:
+  groups:
+  - name: gcp.rules
+    rules:
+    - alert: GCPNodeMemoryPressure
+      expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        description: "Node {{ $labels.instance }} has less than 10% available memory"
+    - alert: GCPPodOOMKilled
+      expr: kube_pod_container_status_terminated_reason{reason="OOMKilled"} == 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        description: "Container {{ $labels.container }} in pod {{ $labels.pod }} was OOM killed"

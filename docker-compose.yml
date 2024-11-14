@@ -17,4 +17,14 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./devops/monitoring/prometheus_config.yaml:/etc/prometheus/prometheus.yml
+      - ./devops/monitoring/prometheus_local.yaml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus

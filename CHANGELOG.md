@@ -2,6 +2,53 @@
 
 All notable changes to the AI Safety & Governance project will be documented in this file.
 
+## [2.1.0] - 2024-02-15
+
+### Added
+- Enhanced Documentation Generation
+  * Automated code analysis for documentation
+  * Markdown generation from source code
+  * Comprehensive architecture documentation
+  * Inline code documentation extraction
+
+- Expanded Compliance Framework
+  * Multi-jurisdictional regulatory alignment
+  * Enhanced reporting mechanisms
+  * Automated compliance log generation
+  * Dynamic regulatory requirement tracking
+
+- Advanced Security Enhancements
+  * Extended threat detection capabilities
+  * Improved secret management
+  * Advanced privacy guard mechanisms
+  * Comprehensive security configuration management
+
+- Predictive Model Monitoring
+  * Enhanced explainability features
+  * Advanced root cause analysis
+  * Improved anomaly detection algorithms
+  * Extended time series forecasting
+
+- Chaos Engineering Improvements
+  * More granular infrastructure chaos testing
+  * Enhanced resilience simulation
+  * Multi-cloud chaos testing support
+  * Improved chaos scenario management
+
+### Changed
+- Refined GitOps deployment strategies
+- Improved configuration management
+- Enhanced multi-cloud support
+- Optimized performance monitoring
+- Streamlined user management interface
+
+### Fixed
+- Resolved minor bugs in monitoring systems
+- Improved error handling across modules
+- Enhanced logging and traceability
+- Fixed configuration synchronization issues
+- Improved dependency management
+
 ## [2.0.0] - 2024-01-20
 
 ### Added

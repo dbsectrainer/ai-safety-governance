@@ -13,6 +13,42 @@ env:
   KUBE_NAMESPACE: ai-safety
 
 jobs:
+  documentation-workflow:
+    name: Documentation Generation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install networkx matplotlib markdown2 pygments
+
+      - name: Generate Documentation
+        run: |
+          python -m src.documentation_generator.documentation_workflow
+
+      - name: Deploy Documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+
+      - name: Archive Documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation
+          path: ./docs
+          retention-days: 30
+
+  # Existing jobs remain unchanged
   security-scan:
     name: Security Scanning
     runs-on: ubuntu-latest
@@ -42,10 +78,13 @@ jobs:
         with:
           config-path: .gitleaks.toml
 
+  # Rest of the existing pipeline remains the same...
   compliance-test:
     name: Compliance Testing
     runs-on: ubuntu-latest
-    needs: security-scan
+    needs: 
+      - security-scan
+      - documentation-workflow
     steps:
       - uses: actions/checkout@v2
 

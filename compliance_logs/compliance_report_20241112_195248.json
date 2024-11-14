@@ -1,0 +1,14 @@
+{
+  "timestamp": "2024-11-12T19:52:48.776553",
+  "total_rules": 1,
+  "compliant_rules": 1,
+  "non_compliant_rules": 0,
+  "rules_status": [
+    {
+      "rule_id": "e8e46720-4e0d-42dd-ba50-350f1cb2d550",
+      "regulation": "General Data Protection Regulation",
+      "description": "Report Generation Test",
+      "status": "COMPLIANT"
+    }
+  ]
+}
