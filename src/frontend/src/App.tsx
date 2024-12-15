@@ -1,8 +1,7 @@
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useLocation } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { SnackbarProvider } from 'notistack';
 import { createTheme } from '@mui/material/styles';
-
 import AppRoutes from './routes';
 import Layout from './components/Layout';
 
@@ -42,6 +41,21 @@ const theme = createTheme({
   },
 });
 
+// Wrapper component to conditionally render Layout
+const AppContent = () => {
+  const location = useLocation();
+  const publicPaths = ['/', '/login', '/register', '/unauthorized'];
+  const isPublicPath = publicPaths.includes(location.pathname);
+
+  return isPublicPath ? (
+    <AppRoutes />
+  ) : (
+    <Layout>
+      <AppRoutes />
+    </Layout>
+  );
+};
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -54,9 +68,7 @@ function App() {
         }}
       >
         <BrowserRouter>
-          <Layout>
-            <AppRoutes />
-          </Layout>
+          <AppContent />
         </BrowserRouter>
       </SnackbarProvider>
     </ThemeProvider>

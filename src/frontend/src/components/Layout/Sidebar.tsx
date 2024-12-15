@@ -16,6 +16,7 @@ import {
   Assessment as AssessmentIcon,
   Security as SecurityIcon,
   Gavel as GavelIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -26,7 +27,8 @@ interface SidebarProps {
 const DRAWER_WIDTH = 240;
 
 const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+  { text: 'Home', icon: <HomeIcon />, path: '/' },
+  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
   { text: 'Users', icon: <PeopleIcon />, path: '/users' },
   { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
   { text: 'Monitoring', icon: <AssessmentIcon />, path: '/monitoring' },
