@@ -29,6 +29,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
+# Make start script executable
+RUN chmod +x /app/src/start.sh
+
 # Set correct permissions
 RUN chown -R appuser:appuser /app
 
@@ -42,5 +45,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE 5000
 
-# Run the application with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--threads", "2", "--timeout", "60", "--access-logfile", "-", "--error-logfile", "-", "src.main:app"]
+# Run the startup script
+CMD ["/app/src/start.sh"]

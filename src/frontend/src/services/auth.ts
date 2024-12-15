@@ -1,11 +1,12 @@
 import axios, { AxiosError } from 'axios';
 import { axiosSecurityConfig, AuthState, validationPatterns } from '../config/security';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_V1 = `${API_URL}/api/v1`;
 
 // Create axios instance with security configurations
 const authApi = axios.create({
-  baseURL: `${API_URL}/auth`,
+  baseURL: `${API_V1}`,
   ...axiosSecurityConfig,
 });
 
@@ -23,37 +24,6 @@ authApi.interceptors.request.use(
   }
 );
 
-interface ApiErrorResponse {
-  message: string;
-  status: number;
-}
-
-// Add response interceptor for token refresh
-authApi.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        const response = await authApi.post('/refresh', { refreshToken });
-        const { token } = response.data;
-        localStorage.setItem('token', token);
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return authApi(originalRequest);
-      } catch (error) {
-        // Handle refresh token failure
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-        return Promise.reject(error);
-      }
-    }
-    return Promise.reject(error);
-  }
-);
-
 interface LoginCredentials {
   email: string;
   password: string;
@@ -65,9 +35,14 @@ interface RegisterData extends LoginCredentials {
 }
 
 interface LoginResponse {
-  token: string;
-  refreshToken: string;
-  user: AuthState['user'];
+  access_token: string;
+  token_type: string;
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    roles: string[];
+  };
 }
 
 class AuthService {
@@ -89,23 +64,28 @@ class AuthService {
     }
 
     try {
-      const response = await authApi.post<LoginResponse>('/login', credentials);
-      const { token, refreshToken, user } = response.data;
+      const formData = new FormData();
+      formData.append('username', credentials.email); // FastAPI OAuth2 expects 'username'
+      formData.append('password', credentials.password);
+
+      const response = await authApi.post<LoginResponse>('/auth/token', formData);
+      const { access_token, user } = response.data;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('token', access_token);
 
       return {
         isAuthenticated: true,
         user,
-        token,
+        token: access_token,
       };
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      throw new Error(
-        axiosError.response?.data?.message || 
-        'Login failed. Please check your credentials and try again.'
-      );
+      if (error instanceof AxiosError) {
+        throw new Error(
+          error.response?.data?.detail || 
+          'Login failed. Please check your credentials and try again.'
+        );
+      }
+      throw error;
     }
   }
 
@@ -127,36 +107,34 @@ class AuthService {
     }
 
     try {
-      await authApi.post('/register', data);
+      await authApi.post('/auth/register', data);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      throw new Error(
-        axiosError.response?.data?.message || 
-        'Registration failed. Please try again later.'
-      );
+      if (error instanceof AxiosError) {
+        throw new Error(
+          error.response?.data?.detail || 
+          'Registration failed. Please try again later.'
+        );
+      }
+      throw error;
     }
   }
 
   async logout(): Promise<void> {
     try {
-      await authApi.post('/logout');
+      await authApi.post('/auth/logout');
     } catch (error) {
-      const axiosError = error as AxiosError;
-      console.error('Logout error:', axiosError.message);
-      // Continue with local cleanup even if server logout fails
+      console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
     }
   }
 
   async getCurrentUser(): Promise<AuthState['user']> {
     try {
-      const response = await authApi.get<AuthState['user']>('/me');
+      const response = await authApi.get('/users/me');
       return response.data;
     } catch (error) {
-      const axiosError = error as AxiosError;
-      console.error('Error fetching current user:', axiosError.message);
+      console.error('Error fetching current user:', error);
       return null;
     }
   }

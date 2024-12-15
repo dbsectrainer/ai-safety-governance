@@ -1,16 +1,44 @@
 version: '3.8'
 
 services:
-  app:
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./src/frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:5002
+    depends_on:
+      - backend
+
+  backend:
     build: .
     ports:
-      - "5000:5000"
+      - "5002:5000"
     volumes:
       - ./src:/app/src
+      - ./start.sh:/app/start.sh
     env_file:
       - config/secrets.env
+    command: sh -c "chmod +x /app/src/start.sh && /app/src/start.sh"
     depends_on:
+      - db
       - prometheus
+
+  db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ai_safety_governance
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   prometheus:
     image: prom/prometheus
@@ -28,3 +56,6 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - prometheus
+
+volumes:
+  postgres_data:

@@ -1,35 +1,50 @@
-"""
-Main application entry point for AI Safety Governance Platform.
-"""
+import os
 from fastapi import FastAPI
-from src.api import create_app
-from src.database import init_db, Base
+from fastapi.middleware.cors import CORSMiddleware
+from .api.routers import auth, users, compliance, models
+from .database import engine, Base
 
-# Create FastAPI application
-app = create_app()
+app = FastAPI(
+    title="AI Safety Governance Platform",
+    description="API for managing AI safety and governance",
+    version="1.0.0",
+)
 
-# Initialize database on startup
-@app.on_event("startup")
-async def startup_event():
-    """Initialize components on application startup."""
-    engine, SessionLocal = init_db()
-    
-    # Create database tables if they don't exist
-    # Note: In production, use Alembic migrations instead
-    Base.metadata.create_all(bind=engine)
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Frontend origin
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Explicitly list allowed methods
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "Accept",
+        "Origin",
+        "X-Requested-With",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
+    ],
+    expose_headers=[
+        "Content-Type",
+        "Authorization",
+        "Access-Control-Allow-Origin",
+        "Access-Control-Allow-Credentials"
+    ],
+    max_age=3600,  # Cache preflight requests for 1 hour
+)
 
-# Health check endpoint
+# Include routers
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
+app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
+app.include_router(compliance.router, prefix="/api/v1/compliance", tags=["compliance"])
+app.include_router(models.router, prefix="/api/v1/models", tags=["models"])
+
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    """Health check endpoint"""
     return {"status": "healthy"}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,  # Enable auto-reload during development
-        workers=1     # Number of worker processes
-    )
+    uvicorn.run(app, host="0.0.0.0", port=5000)
