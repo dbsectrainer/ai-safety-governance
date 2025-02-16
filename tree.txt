@@ -1,0 +1,151 @@
+.
+├── CHANGELOG.md
+├── DEPLOYMENT.md
+├── Dockerfile
+├── README.md
+├── ai_safety_governance.db
+├── alembic.ini
+├── compliance_logs
+│   └── compliance_report_20241112_195248.json
+├── config
+│   ├── aws_config.json
+│   ├── compliance_config.json
+│   └── documentation_config.json
+├── devops
+│   ├── CI_CD_pipeline.yaml
+│   ├── logging
+│   │   └── cloudwatch_config.json
+│   └── monitoring
+│       ├── prometheus_aws.yaml
+│       ├── prometheus_azure.yaml
+│       ├── prometheus_config.yaml
+│       ├── prometheus_gcp.yaml
+│       └── prometheus_local.yaml
+├── docker-compose.yml
+├── docs
+│   ├── architecture.md
+│   ├── multi_cloud_deployment.md
+│   ├── security_policy.md
+│   └── usage.md
+├── kubernetes
+│   ├── chaos
+│   │   └── chaos-mesh.yaml
+│   ├── deployment.yaml
+│   ├── flux
+│   │   └── gotk-components.yaml
+│   ├── service-mesh
+│   │   └── istio-config.yaml
+│   └── service.yaml
+├── requirements.txt
+├── roadmap.md
+├── src
+│   ├── __init__.py
+│   ├── api
+│   │   ├── __init__.py
+│   │   ├── routers
+│   │   │   ├── auth.py
+│   │   │   ├── compliance.py
+│   │   │   ├── models.py
+│   │   │   └── users.py
+│   │   ├── schemas.py
+│   │   └── security.py
+│   ├── chaos_engineering
+│   │   └── chaos_manager.py
+│   ├── compliance
+│   │   ├── __init__.py
+│   │   └── regulatory_alignment.py
+│   ├── database
+│   │   ├── __init__.py
+│   │   ├── migrations
+│   │   │   ├── env.py
+│   │   │   ├── script.py.mako
+│   │   │   └── versions
+│   │   │       └── 20241117_071740_initial_database_setup.py
+│   │   └── models.py
+│   ├── documentation_generator
+│   │   ├── __init__.py
+│   │   ├── code_analyzer.py
+│   │   ├── doc_builder.py
+│   │   ├── documentation_workflow.py
+│   │   └── markdown_generator.py
+│   ├── frontend
+│   │   ├── Dockerfile.dev
+│   │   ├── README.md
+│   │   ├── eslint.config.js
+│   │   ├── index.html
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── public
+│   │   │   ├── ai-governance.svg
+│   │   │   └── vite.svg
+│   │   ├── src
+│   │   │   ├── App.css
+│   │   │   ├── App.tsx
+│   │   │   ├── assets
+│   │   │   │   └── react.svg
+│   │   │   ├── components
+│   │   │   │   ├── Layout
+│   │   │   │   │   ├── Header.tsx
+│   │   │   │   │   ├── Sidebar.tsx
+│   │   │   │   │   └── index.tsx
+│   │   │   │   └── ProtectedRoute.tsx
+│   │   │   ├── config
+│   │   │   │   └── security.ts
+│   │   │   ├── index.css
+│   │   │   ├── main.tsx
+│   │   │   ├── pages
+│   │   │   │   ├── Auth
+│   │   │   │   │   ├── Login.tsx
+│   │   │   │   │   ├── Register.tsx
+│   │   │   │   │   └── Unauthorized.tsx
+│   │   │   │   ├── Compliance
+│   │   │   │   │   └── index.tsx
+│   │   │   │   ├── Config
+│   │   │   │   │   └── index.tsx
+│   │   │   │   ├── Dashboard
+│   │   │   │   │   └── index.tsx
+│   │   │   │   ├── Landing
+│   │   │   │   │   └── index.tsx
+│   │   │   │   ├── Monitoring
+│   │   │   │   │   └── index.tsx
+│   │   │   │   ├── Security
+│   │   │   │   │   └── index.tsx
+│   │   │   │   └── Users
+│   │   │   │       └── index.tsx
+│   │   │   ├── routes
+│   │   │   │   └── index.tsx
+│   │   │   ├── services
+│   │   │   │   └── auth.ts
+│   │   │   └── vite-env.d.ts
+│   │   ├── tsconfig.app.json
+│   │   ├── tsconfig.json
+│   │   ├── tsconfig.node.json
+│   │   └── vite.config.ts
+│   ├── gitops
+│   │   └── deployment_manager.py
+│   ├── main.py
+│   ├── management_interface
+│   │   ├── configuration_manager.py
+│   │   ├── dashboard.py
+│   │   └── user_management.py
+│   ├── model_monitoring
+│   │   ├── ab_testing.py
+│   │   ├── explainer.py
+│   │   ├── fairness.py
+│   │   ├── monitoring.py
+│   │   ├── predictive_monitoring.py
+│   │   └── rollback_manager.py
+│   ├── security
+│   │   ├── advanced_privacy.py
+│   │   ├── compliance_framework.py
+│   │   ├── differential_privacy.py
+│   │   ├── privacy_guard.py
+│   │   ├── secret_manager.py
+│   │   └── threat_detection.py
+│   └── start.sh
+├── tests
+│   └── compliance
+│       └── test_regulatory_alignment.py
+└── tree.txt
+
+44 directories, 105 files

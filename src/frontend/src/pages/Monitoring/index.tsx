@@ -1,120 +1,123 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import {
   Box,
   Typography,
   Grid,
-  Paper,
-  CircularProgress,
   IconButton,
   Tooltip,
   Chip,
   useTheme,
   Fade,
 } from '@mui/material';
-import {
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  Legend,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-} from 'recharts';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { format } from 'date-fns';
+import { monitoringService } from '../../services/monitoring';
+import type { MetricData, SystemMetrics, ModelMetrics, ModelPerformance } from '../../services/monitoring';
+import ModelPerformanceCard from '../../components/Monitoring/ModelPerformanceCard';
+import ResourceUtilizationCard from '../../components/Monitoring/ResourceUtilizationCard';
 
-interface MetricData {
-  timestamp: number;
-  value: number;
+interface ResourceHistoricalData {
+  [key: string]: MetricData[];
 }
-
-interface SystemMetrics {
-  cpu: number;
-  memory: number;
-  storage: number;
-  network: number;
-}
-
-interface ModelMetrics {
-  activeModels: number;
-  responseTime: number;
-  errorRate: number;
-  requestsPerMinute: number;
-}
-
-// Sample data - would be replaced with real-time data from backend
-const generatePerformanceData = (hours: number): MetricData[] => {
-  const now = Date.now();
-  return Array.from({ length: hours }, (_, i) => ({
-    timestamp: now - (hours - i) * 3600000,
-    value: 65 + Math.random() * 30,
-  }));
-};
 
 const Monitoring = () => {
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [performanceData, setPerformanceData] = useState<MetricData[]>([]);
-  const [systemMetrics] = useState<SystemMetrics>({
-    cpu: 45,
-    memory: 62,
-    storage: 38,
-    network: 75,
+  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics>({
+    cpu: 0,
+    memory: 0,
+    storage: 0,
+    network: 0,
   });
-  const [modelMetrics] = useState<ModelMetrics>({
-    activeModels: 12,
-    responseTime: 245,
-    errorRate: 0.02,
-    requestsPerMinute: 1250,
+  const [modelMetrics, setModelMetrics] = useState<ModelMetrics>({
+    activeModels: 0,
+    responseTime: 0,
+    errorRate: 0,
+    requestsPerMinute: 0,
+    accuracy: 0,
+    latency: 0,
+    throughput: 0,
   });
+  const [modelPerformance, setModelPerformance] = useState<ModelPerformance[]>([]);
+  const [resourceHistory, setResourceHistory] = useState<ResourceHistoricalData>({});
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    setIsLoading(true);
+  const loadData = useCallback(async () => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setPerformanceData(generatePerformanceData(24));
-      // In a real implementation, we would fetch actual data from the backend
+      const [
+        systemMetricsData,
+        modelMetricsData,
+        modelPerformanceData,
+        cpuHistory,
+        memoryHistory,
+        storageHistory,
+        networkHistory,
+      ] = await Promise.all([
+        monitoringService.getSystemMetrics(),
+        monitoringService.getModelMetrics(),
+        monitoringService.getModelPerformance(),
+        monitoringService.getResourceUtilization('cpu'),
+        monitoringService.getResourceUtilization('memory'),
+        monitoringService.getResourceUtilization('storage'),
+        monitoringService.getResourceUtilization('network'),
+      ]);
+
+      setSystemMetrics(systemMetricsData);
+      setModelMetrics(modelMetricsData);
+      setModelPerformance(modelPerformanceData);
+      setResourceHistory({
+        cpu: cpuHistory,
+        memory: memoryHistory,
+        storage: storageHistory,
+        network: networkHistory,
+      });
     } catch (error) {
       console.error('Error loading monitoring data:', error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      await loadData();
+      setIsLoading(false);
+    };
+    fetchData();
+
+    // Set up polling every 30 seconds
+    const interval = setInterval(loadData, 30000);
+    return () => clearInterval(interval);
+  }, [loadData]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    try {
-      await loadData();
-    } finally {
-      setIsRefreshing(false);
-    }
+    await loadData();
+    setIsRefreshing(false);
   };
 
-  const getStatusIcon = (value: number, threshold: number) =>
-    value > threshold ? (
-      <ErrorIcon fontSize="small" color="error" />
-    ) : (
-      <CheckCircleIcon fontSize="small" color="success" />
+  const getSystemStatus = () => {
+    const thresholds = {
+      cpu: 80,
+      memory: 80,
+      storage: 80,
+      network: 80,
+    };
+
+    const isHealthy = Object.entries(thresholds).every(
+      ([key, threshold]) => systemMetrics[key as keyof SystemMetrics] < threshold
     );
 
-  if (isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
-      </Box>
-    );
-  }
+    return {
+      label: isHealthy ? 'All Systems Operational' : 'System Warning',
+      color: isHealthy ? 'success' : 'warning' as 'success' | 'warning',
+      icon: isHealthy ? <CheckCircleIcon /> : <ErrorIcon />,
+    };
+  };
+
+  const systemStatus = getSystemStatus();
 
   return (
     <>
@@ -143,212 +146,37 @@ const Monitoring = () => {
               </IconButton>
             </Tooltip>
             <Chip
-              icon={<CheckCircleIcon />}
-              label="All Systems Operational"
-              color="success"
+              icon={systemStatus.icon}
+              label={systemStatus.label}
+              color={systemStatus.color}
               variant="outlined"
             />
           </Box>
         </Box>
 
         <Grid container spacing={3}>
-          {/* Performance Chart */}
+          {/* Resource Utilization */}
           <Grid item xs={12}>
             <Fade in timeout={800}>
-              <Paper
-                sx={{
-                  p: 3,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  },
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  System Performance
-                </Typography>
-                <Box sx={{ height: 400 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={performanceData}>
-                      <defs>
-                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                          <stop
-                            offset="5%"
-                            stopColor={theme.palette.primary.main}
-                            stopOpacity={0.8}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor={theme.palette.primary.main}
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="timestamp"
-                        tickFormatter={(timestamp) => format(timestamp, 'HH:mm')}
-                      />
-                      <YAxis />
-                      <RechartsTooltip
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const value = payload[0].value as number;
-                            return (
-                              <Paper sx={{ p: 1 }}>
-                                <Typography variant="body2">
-                                  Time: {format(payload[0].payload.timestamp, 'HH:mm')}
-                                </Typography>
-                                <Typography variant="body2">
-                                  Value: {value.toFixed(2)}%
-                                </Typography>
-                              </Paper>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Legend />
-                      <Area
-                        type="monotone"
-                        dataKey="value"
-                        stroke={theme.palette.primary.main}
-                        fillOpacity={1}
-                        fill="url(#colorValue)"
-                        name="Performance Score"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </Box>
-              </Paper>
+              <Box>
+                <ResourceUtilizationCard
+                  currentMetrics={systemMetrics}
+                  historicalData={resourceHistory}
+                  isLoading={isLoading}
+                />
+              </Box>
             </Fade>
           </Grid>
 
-          {/* Resource Usage */}
-          <Grid item xs={12} md={6}>
+          {/* Model Performance */}
+          <Grid item xs={12}>
             <Fade in timeout={800}>
-              <Paper
-                sx={{
-                  p: 3,
-                  height: '100%',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  },
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  Resource Usage
-                </Typography>
-                <Grid container spacing={2}>
-                  {Object.entries(systemMetrics).map(([key, value]) => (
-                    <Grid item xs={6} key={key}>
-                      <Box
-                        sx={{
-                          p: 2,
-                          borderRadius: 1,
-                          bgcolor: theme.palette.grey[50],
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 1 }}
-                        >
-                          {key.charAt(0).toUpperCase() + key.slice(1)}
-                        </Typography>
-                        <Box display="flex" alignItems="center" gap={1}>
-                          <Typography variant="h6">{value}%</Typography>
-                          {getStatusIcon(value, 80)}
-                        </Box>
-                      </Box>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Paper>
-            </Fade>
-          </Grid>
-
-          {/* Model Metrics */}
-          <Grid item xs={12} md={6}>
-            <Fade in timeout={800}>
-              <Paper
-                sx={{
-                  p: 3,
-                  height: '100%',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  },
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  Model Status
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Box
-                      sx={{
-                        p: 2,
-                        borderRadius: 1,
-                        bgcolor: theme.palette.grey[50],
-                      }}
-                    >
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        Active Models
-                      </Typography>
-                      <Typography variant="h6">{modelMetrics.activeModels}</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Box
-                      sx={{
-                        p: 2,
-                        borderRadius: 1,
-                        bgcolor: theme.palette.grey[50],
-                      }}
-                    >
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        Response Time
-                      </Typography>
-                      <Typography variant="h6">{modelMetrics.responseTime}ms</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Box
-                      sx={{
-                        p: 2,
-                        borderRadius: 1,
-                        bgcolor: theme.palette.grey[50],
-                      }}
-                    >
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        Error Rate
-                      </Typography>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Typography variant="h6">{modelMetrics.errorRate}%</Typography>
-                        {getStatusIcon(modelMetrics.errorRate, 1)}
-                      </Box>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Box
-                      sx={{
-                        p: 2,
-                        borderRadius: 1,
-                        bgcolor: theme.palette.grey[50],
-                      }}
-                    >
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        Requests/min
-                      </Typography>
-                      <Typography variant="h6">
-                        {modelMetrics.requestsPerMinute.toLocaleString()}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Paper>
+              <Box>
+                <ModelPerformanceCard
+                  data={modelPerformance}
+                  isLoading={isLoading}
+                />
+              </Box>
             </Fade>
           </Grid>
         </Grid>
