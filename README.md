@@ -47,15 +47,39 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-The AI Safety & Governance platform addresses the critical need for responsible AI development and deployment in enterprise environments. It provides a comprehensive suite of tools for:
+The AI Safety & Governance platform addresses the critical need for responsible AI development and deployment in enterprise environments. **Updated for 2025 industry standards**, it provides a comprehensive suite of tools for:
 
-* AI model monitoring and explainability
-* Regulatory compliance (GDPR, CCPA, etc.)
-* Security and privacy protection
-* Multi-cloud deployment and management
-* Real-time monitoring and alerting
+* **2025 Compliance Frameworks**
+  - EU AI Act compliance (August 2025 GPAI requirements)
+  - NIST AI Risk Management Framework (RMF) 1.0 + 2025 updates
+  - ISO 42001 AI Management Systems alignment
+  - OWASP LLM Top 10 security controls
 
-Our platform helps organizations implement AI systems responsibly while maintaining compliance with regulatory requirements and industry best practices.
+* **Advanced AI Security**
+  - AI red teaming and adversarial testing
+  - Automated security vulnerability scanning
+  - Prompt injection and jailbreak detection
+  - Supply chain security with AI Bill of Materials (AIBOM)
+
+* **Model Governance & Transparency**
+  - Model registry with versioning and approval workflows
+  - Model cards for transparent documentation
+  - Data sheets for datasets
+  - Automated transparency reporting
+
+* **Comprehensive Monitoring**
+  - Real-time performance and drift detection
+  - Fairness and bias monitoring with intersectional analysis
+  - Adversarial robustness testing
+  - Environmental impact tracking
+
+* **Privacy & Security**
+  - Differential privacy implementation
+  - GDPR, CCPA, and EU AI Act privacy controls
+  - Threat detection and prevention
+  - Data minimization and protection
+
+Our platform helps organizations implement AI systems responsibly while maintaining compliance with 2025 regulatory requirements and industry best practices.
 
 ### Built With
 
@@ -133,29 +157,105 @@ For detailed usage instructions, see the [Documentation](docs/usage.md).
 <!-- FEATURES -->
 ## Features
 
-### AI Model Monitoring and Explainability
-* Real-time performance monitoring
-* Drift detection and alerts
-* Model explanation generation
-* A/B testing framework
+### 2025 Compliance Frameworks
+* **EU AI Act Compliance**
+  - Risk classification (Unacceptable, High, Limited, Minimal)
+  - GPAI model requirements (August 2025)
+  - Technical documentation and transparency reports
+  - Prohibited practices monitoring
+  - Copyright and training data compliance
 
-### Responsible AI Framework
-* Fairness metrics and bias detection
-* Privacy-preserving techniques
-* Ethical AI guidelines enforcement
-* Audit trails and logging
+* **NIST AI Risk Management Framework (2025)**
+  - GOVERN, MAP, MEASURE, MANAGE functions
+  - Generative AI Profile (NIST AI 600-1)
+  - Privacy Framework 1.1 integration
+  - Comprehensive risk assessment and tracking
 
-### Security and Compliance
-* GDPR and CCPA compliance tools
-* Threat detection and prevention
-* Data privacy protection
-* Access control and authentication
+* **ISO 42001 Alignment**
+  - AI management system controls
+  - Continuous improvement processes
+  - Stakeholder engagement framework
+
+### AI Red Teaming & Security
+* **Automated Adversarial Testing**
+  - Prompt injection detection (OWASP LLM01)
+  - Jailbreak attempt testing
+  - Data poisoning detection
+  - Model extraction prevention
+  - Privacy leakage testing
+  - Bias amplification detection
+
+* **Security Standards Integration**
+  - OWASP LLM Top 10 alignment
+  - NIST AI security controls (SP 800-53)
+  - Vulnerability severity assessment
+  - Remediation recommendations
+
+### Model Governance & Lifecycle Management
+* **Model Registry**
+  - Version control and tracking
+  - Approval workflows (pending, approved, rejected)
+  - Status management (development → production)
+  - Model lineage and provenance
+
+* **Model Cards & Documentation**
+  - Comprehensive model documentation
+  - Performance and fairness metrics
+  - Intended use and limitations
+  - Environmental impact tracking
+  - Regulatory compliance status
+
+* **AI Bill of Materials (AIBOM)**
+  - Complete component inventory
+  - Dependency tracking (frameworks, libraries, datasets)
+  - Vulnerability scanning and management
+  - License compliance analysis
+  - CycloneDX and SPDX export formats
+
+### Advanced Monitoring & Fairness
+* **Real-time Performance Monitoring**
+  - Drift detection (KL divergence, statistical tests)
+  - Performance degradation alerts
+  - OpenTelemetry integration
+  - Prometheus metrics collection
+
+* **Fairness & Bias Detection**
+  - Demographic parity analysis
+  - Equal opportunity metrics
+  - Disparate impact ratios
+  - Intersectional fairness assessment
+  - Bias mitigation recommendations
+
+### Privacy & Data Protection
+* **Enhanced Privacy Controls**
+  - Differential privacy implementation
+  - Data minimization techniques
+  - PII detection and protection
+  - Privacy-preserving computation
+
+* **Regulatory Compliance**
+  - GDPR Article 22 (automated decision-making)
+  - CCPA privacy rights
+  - EU AI Act transparency requirements
+
+### Transparency & Explainability
+* **Model Transparency**
+  - Automated transparency reporting
+  - Data sheets for datasets
+  - Training data provenance
+  - Carbon footprint documentation
+
+* **Stakeholder Communication**
+  - Non-technical explanations
+  - Risk communication frameworks
+  - Incident reporting mechanisms
 
 ### DevOps and Infrastructure
 * Multi-cloud deployment support
 * Kubernetes orchestration
 * Automated CI/CD pipelines
 * Prometheus/Grafana monitoring
+* GitOps with FluxCD integration
 
 <!-- DEPLOYMENT -->
 ## Deployment

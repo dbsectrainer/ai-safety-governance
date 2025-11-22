@@ -4,7 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an AI Safety & Governance platform that provides comprehensive tools for responsible AI development, monitoring, and compliance. The platform implements a microservices architecture with FastAPI backend, React/TypeScript frontend, and includes advanced monitoring, security, and compliance features.
+This is an AI Safety & Governance platform that provides comprehensive tools for responsible AI development, monitoring, and compliance. **Updated for 2025 industry standards**, the platform implements a microservices architecture with FastAPI backend, React/TypeScript frontend, and includes advanced monitoring, security, and compliance features.
+
+### 2025 Standards Compliance
+- **EU AI Act** (August 2025 GPAI requirements)
+- **NIST AI Risk Management Framework** (RMF 1.0 + 2025 updates)
+- **OWASP LLM Top 10** security controls
+- **ISO 42001** AI Management Systems alignment
 
 ## Development Commands
 
@@ -39,10 +45,25 @@ This is an AI Safety & Governance platform that provides comprehensive tools for
 - **Database** (PostgreSQL): Primary data storage with Alembic migrations
 - **Monitoring** (Prometheus/Grafana): Metrics collection and visualization
 
-### Key Modules
-- **Model Monitoring** (`src/model_monitoring/`): A/B testing, fairness monitoring, drift detection
-- **Security** (`src/security/`): Threat detection, privacy protection, differential privacy
-- **Compliance** (`src/compliance/`): Regulatory alignment and compliance frameworks
+### Key Modules (2025 Update)
+- **Model Monitoring** (`src/model_monitoring/`):
+  - A/B testing, fairness monitoring, drift detection
+  - **NEW:** AI Bill of Materials (AIBOM) tracking (`ai_bom.py`)
+  - **NEW:** Model registry with versioning (`model_registry.py`)
+  - **NEW:** Model cards and data sheets for transparency
+
+- **Security** (`src/security/`):
+  - **NEW:** AI red teaming and adversarial testing (`ai_red_teaming.py`)
+  - Threat detection, privacy protection, differential privacy
+  - **NEW:** OWASP LLM Top 10 security controls
+  - **NEW:** Prompt injection and jailbreak detection
+
+- **Compliance** (`src/compliance/`):
+  - **NEW:** EU AI Act compliance framework (`eu_ai_act.py`)
+  - **NEW:** NIST AI Risk Management Framework (`nist_ai_rmf.py`)
+  - Regulatory alignment and compliance frameworks
+  - **NEW:** Automated compliance reporting
+
 - **Documentation Generator** (`src/documentation_generator/`): Automated documentation generation
 - **GitOps** (`src/gitops/`): Infrastructure deployment management
 - **Chaos Engineering** (`src/chaos_engineering/`): Resilience testing
@@ -128,11 +149,20 @@ This is an AI Safety & Governance platform that provides comprehensive tools for
 - Fairness and bias detection
 - Predictive monitoring with rollback capabilities
 
-### Compliance Framework
-- GDPR and CCPA compliance tools
-- Regulatory alignment tracking
-- Audit trail generation
-- Privacy-preserving techniques
+### Compliance Framework (2025 Update)
+- **EU AI Act Compliance**
+  - Risk classification (Unacceptable, High, Limited, Minimal)
+  - GPAI model requirements and transparency reports
+  - Prohibited practices monitoring
+- **NIST AI RMF 2025**
+  - GOVERN, MAP, MEASURE, MANAGE functions
+  - Generative AI Profile (NIST AI 600-1)
+  - Privacy Framework 1.1 integration
+- **Traditional Compliance**
+  - GDPR and CCPA compliance tools
+  - Regulatory alignment tracking
+  - Audit trail generation
+  - Privacy-preserving techniques
 
 ### Infrastructure
 - Kubernetes deployment configurations
@@ -144,7 +174,43 @@ This is an AI Safety & Governance platform that provides comprehensive tools for
 ## Important Notes
 
 - The platform focuses on defensive security and responsible AI practices
-- All model monitoring includes fairness and bias detection
-- Privacy protection is built into core functionality
+- **2025 Compliance**: EU AI Act, NIST AI RMF, and OWASP LLM Top 10
+- All model monitoring includes fairness and bias detection with intersectional analysis
+- Privacy protection is built into core functionality (GDPR, CCPA, EU AI Act)
 - Infrastructure is designed for high availability and disaster recovery
 - Compliance frameworks are integrated throughout the system
+- **NEW:** AI red teaming and adversarial testing for security validation
+- **NEW:** Model registry and AIBOM for supply chain transparency
+- **NEW:** Automated transparency reporting for regulatory compliance
+
+## New 2025 Features
+
+### AI Red Teaming (`src/security/ai_red_teaming.py`)
+- Automated adversarial testing against OWASP LLM Top 10
+- Prompt injection, jailbreak, and data poisoning detection
+- Privacy leakage and model extraction prevention
+- Comprehensive vulnerability scanning and reporting
+
+### AI Bill of Materials (`src/model_monitoring/ai_bom.py`)
+- Complete component inventory (models, datasets, frameworks, libraries)
+- Dependency tracking and vulnerability scanning
+- License compliance analysis
+- CycloneDX and SPDX export formats
+
+### Model Registry (`src/model_monitoring/model_registry.py`)
+- Version control and approval workflows
+- Model cards with comprehensive documentation
+- Data sheets for datasets
+- Lifecycle management (development → testing → production)
+
+### EU AI Act Compliance (`src/compliance/eu_ai_act.py`)
+- Risk classification system
+- GPAI model compliance (August 2025 requirements)
+- Technical documentation and transparency reporting
+- Prohibited practices monitoring
+
+### NIST AI RMF (`src/compliance/nist_ai_rmf.py`)
+- Four core functions: GOVERN, MAP, MEASURE, MANAGE
+- Generative AI Profile implementation
+- Risk assessment and tracking
+- Comprehensive compliance reporting
