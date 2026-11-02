@@ -41,7 +41,7 @@ test("administrator can create, edit, deactivate and delete a user", async ({
   await expect(
     page.getByRole("heading", { name: "User Management" }),
   ).toBeVisible();
-  await expect(page.getByText("admin@example.com")).toBeVisible();
+  await expect(page.getByRole("row", { name: /E2E Administrator/ })).toBeVisible();
 
   const suffix = uniqueSuffix();
   const username = `e2e${suffix}`.slice(0, 16);

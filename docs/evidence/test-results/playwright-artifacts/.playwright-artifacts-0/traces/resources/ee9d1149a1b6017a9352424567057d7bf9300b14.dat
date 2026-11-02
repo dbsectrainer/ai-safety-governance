@@ -1,9 +1,0 @@
-------WebKitFormBoundaryzHbkX4rjq6q5AKAj
-Content-Disposition: form-data; name="username"
-
-e2e-admin@example.com
-------WebKitFormBoundaryzHbkX4rjq6q5AKAj
-Content-Disposition: form-data; name="password"
-
-E2eAdmin123!
-------WebKitFormBoundaryzHbkX4rjq6q5AKAj--
