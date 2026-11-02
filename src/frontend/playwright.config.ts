@@ -43,7 +43,12 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
-        channel: "chrome",
+        // Local runs drive the installed Google Chrome; CI drives the bundled
+        // full Chromium the workflow installs, so the job stays pinned to the
+        // Playwright version. Keep "chromium" instead of omitting the channel:
+        // the default headless shell never reports MUI buttons as stable here,
+        // so every click times out.
+        channel: process.env.CI ? "chromium" : "chrome",
         viewport: { width: 1440, height: 900 },
       },
     },

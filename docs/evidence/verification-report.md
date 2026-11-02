@@ -48,7 +48,7 @@ All application-breaking defects found in the verified scope were fixed. The bac
 | OS | macOS (darwin), 2026-11-01 |
 | Python | 3.12.7 (virtualenv `.venv`) |
 | Node / npm | 26.13.0 / 11.20.0 |
-| Browser | Google Chrome via `@playwright/test` 1.55.0 |
+| Browser | Google Chrome via `@playwright/test` 1.64.1 |
 | Docker | Docker 29.9.2, Compose v5.6.1 |
 | Local DB | SQLite 3.50.6 at `ai_safety_governance.db` (untracked) |
 | Container DB | PostgreSQL 15 |
@@ -102,6 +102,7 @@ All application-breaking defects found in the verified scope were fixed. The bac
 | OPS-5 | Medium | Generated DB, coverage HTML, and stale compliance report were tracked; UI/CI docs claimed checks that did not exist. | Removed generated artifacts from the index, added `.gitignore` entries; rewrote README and docs; added CI workflow. | `git ls-files` contains no generated DB/coverage/playwright artifacts. |
 | OPS-6 | High | Starting Gunicorn with two workers against a fresh SQLite DB raced schema creation/stamping; one worker exited (`Worker failed to boot`). | Added a cross-process initialization lock (SQLite file lock / PostgreSQL advisory lock) around create/stamp/upgrade in `src/database/__init__.py`. | Fresh DB + 2 Gunicorn workers: health 200, login 200, both workers survived; production smoke passed. |
 | K8S-1 | High (unverified) | Deployment used container port 8080 while the app listens on 5000; probes/ingress referenced a separate 9090 metrics port; init container chmod could not work on a read-only ConfigMap; a removed PodSecurityPolicy API was present. | Ports/probes/ServiceMonitor/service aligned to 5000; logs emptyDir added; init container and PSP removed; invalid ingress `auth_request` block removed; duplicate NetworkPolicy key merged. | YAML parses; static review only — **not applied to a cluster**. |
+| CI-1 | High | `npx playwright install --with-deps chromium` aborted on the `e2e` job with `Playwright does not support chromium on ubuntu26.04-x64`. The `ubuntu-latest` label moved to Ubuntu 26.04 in November 2026, and `@playwright/test` 1.55.0 ships no `ubuntu26.04-x64` entry in either its Chromium download paths or its host dependency set, so `--with-deps` refused to continue. | `@playwright/test` 1.55.0 → 1.64.1 in `src/frontend/package.json`, with `package-lock.json` regenerated; 1.64.1 declares `ubuntu26.04-x64` for Chromium downloads and native apt dependencies. | `npm ci` from the new lockfile; `tsc -b`, ESLint, and `vite build` pass; full Playwright suite 14/14 passed with the upgraded runner. GitHub run not yet observed. |
 
 ---
 
@@ -327,9 +328,9 @@ The compliance JSON download is preserved at [`test-results/compliance-report.js
 | Role assignment UI | Low | Default roles exist; assigning roles requires DB/API work. Superuser management is available. |
 | Settings not enforced | Low | MFA/IP whitelist/notification flags persist but no enforcement/sender exists. |
 | SQLite production use | Medium | SQLite is for local/tests; use PostgreSQL for multi-worker production. |
-| CI not executed on GitHub | Low | Workflow committed; equivalent local commands all pass. |
+| CI not yet green on GitHub | Low | Workflow committed but never executed on GitHub until the `ubuntu-latest` → Ubuntu 26.04 move broke the Playwright install (see CI-1). The dependency fix and equivalent local commands pass locally; the corrected workflow still needs one observed GitHub run. |
 | Docker secrets defaults | Medium | Compose uses development placeholders for `SECRET_KEY`, PostgreSQL, and Grafana; operators must override them. |
-| `npm run e2e` local browser | Low | Uses installed Chrome channel locally; CI uses bundled Chromium. |
+| `npm run e2e` browser channel | Low | `playwright.config.ts` drives the installed Google Chrome locally and the workflow-installed bundled Chromium when `CI` is set, so GitHub runs stay pinned to the Playwright version's own browser build. Verified locally by running the suite both ways. |
 | K8s Prometheus rules | Low | `devops/monitoring/prometheus_config.yaml` is a reference configuration with K8s assumptions; not deployed. |
 | Model/fairness/drift automation | Medium | Monitoring logs are API-supplied; no inference pipeline or automatic fairness/drift evaluation is running. |
 
