@@ -1,0 +1,6 @@
+NAME                                IMAGE                           COMMAND                  SERVICE      CREATED          STATUS                    PORTS
+ai-safety-governance-backend-1      ai-safety-governance-backend    "/app/src/start.sh"      backend      33 seconds ago   Up 27 seconds (healthy)   0.0.0.0:5002->5000/tcp, [::]:5002->5000/tcp
+ai-safety-governance-db-1           postgres:15                     "docker-entrypoint.s…"   db           30 minutes ago   Up 33 seconds (healthy)   5432/tcp
+ai-safety-governance-frontend-1     ai-safety-governance-frontend   "docker-entrypoint.s…"   frontend     33 seconds ago   Up 21 seconds             0.0.0.0:5173->5173/tcp, [::]:5173->5173/tcp
+ai-safety-governance-grafana-1      grafana/grafana                 "/run.sh"                grafana      30 minutes ago   Up 32 seconds             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+ai-safety-governance-prometheus-1   prom/prometheus:latest          "/bin/prometheus --c…"   prometheus   30 minutes ago   Up 33 seconds             0.0.0.0:9090->9090/tcp, [::]:9090->9090/tcp

@@ -22,7 +22,7 @@ spec:
         app: ai-safety-governance
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
+        prometheus.io/port: "5000"
         prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: ai-safety-service-account
@@ -35,10 +35,8 @@ spec:
           image: ${ECR_REGISTRY}/ai-safety-governance:${IMAGE_TAG}
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 5000
               name: http
-            - containerPort: 9090
-              name: metrics
           env:
             - name: ENV
               value: "production"
@@ -91,6 +89,8 @@ spec:
             - name: certs
               mountPath: /app/certs
               readOnly: true
+            - name: logs
+              mountPath: /app/compliance_logs
       volumes:
         - name: tmp
           emptyDir: {}
@@ -100,6 +100,8 @@ spec:
         - name: certs
           secret:
             secretName: ai-safety-certs
+        - name: logs
+          emptyDir: {}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -119,13 +121,6 @@ spec:
           labelSelector:
             matchLabels:
               app: ai-safety-governance
-      initContainers:
-        - name: init-config
-          image: busybox
-          command: ["sh", "-c", "chmod 600 /app/config/*"]
-          volumeMounts:
-            - name: config
-              mountPath: /app/config
       tolerations:
         - key: "dedicated"
           operator: "Equal"
@@ -201,17 +196,31 @@ spec:
               name: ingress-nginx
       ports:
         - protocol: TCP
-          port: 8080
+          port: 5000
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
         - protocol: TCP
-          port: 9090
+          port: 5000
   egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
     - to:
         - namespaceSelector:
             matchLabels:
               name: monitoring
       ports:
         - protocol: TCP
-          port: 9090
+          port: 5000
     - to:
         - namespaceSelector:
             matchLabels:

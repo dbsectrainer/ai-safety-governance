@@ -1,7 +1,6 @@
 """Persisted, non-secret platform settings."""
 
 import logging
-from datetime import datetime
 from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Security, status
@@ -9,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from ..security import get_current_active_user
 from ...database import get_db
+from ...utils.time import utcnow
 from ...database.models import AuditLog, SystemSetting, User
 
 logger = logging.getLogger(__name__)
@@ -74,7 +74,7 @@ def _load(db: Session) -> Dict[str, Any]:
 def _validate(payload: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(payload, dict) or not payload:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=422,
             detail="Expected a non-empty object of settings sections",
         )
 
@@ -82,25 +82,25 @@ def _validate(payload: Dict[str, Any]) -> Dict[str, Any]:
     for section, values in payload.items():
         if section not in DEFAULT_SETTINGS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=422,
                 detail=f"Unknown settings section '{section}'",
             )
         if not isinstance(values, dict):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=422,
                 detail=f"Settings section '{section}' must be an object",
             )
         cleaned[section] = {}
         for key, value in values.items():
             if key not in DEFAULT_SETTINGS[section]:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=422,
                     detail=f"Unknown setting '{section}.{key}'",
                 )
             allowed = ALLOWED_VALUES.get((section, key))
             if allowed and value not in allowed:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=422,
                     detail=f"Invalid value for '{section}.{key}'",
                 )
             value_range = ALLOWED_RANGES.get((section, key))
@@ -110,13 +110,13 @@ def _validate(payload: Dict[str, Any]) -> Dict[str, Any]:
                 or not value_range[0] <= value <= value_range[1]
             ):
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=422,
                     detail=f"'{section}.{key}' must be an integer between "
                     f"{value_range[0]} and {value_range[1]}",
                 )
             if isinstance(value, str) and len(value) > 500:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=422,
                     detail=f"'{section}.{key}' is too long",
                 )
             cleaned[section][key] = value
@@ -129,7 +129,7 @@ async def get_settings(
     db: Session = Depends(get_db),
 ) -> Any:
     """Read persisted non-secret platform settings."""
-    return {"settings": _load(db), "updated_at": datetime.utcnow()}
+    return {"settings": _load(db), "updated_at": utcnow()}
 
 
 @router.put("")
@@ -151,7 +151,7 @@ async def update_settings(
         merged.setdefault(section, {}).update(values)
     row.value = merged
     row.updated_by = current_user.id
-    row.updated_at = datetime.utcnow()
+    row.updated_at = utcnow()
 
     try:
         db.add(

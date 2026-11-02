@@ -1,327 +1,155 @@
-# Architecture Documentation
+# Architecture
 
-## System Overview
+This document describes the architecture that is actually implemented and verified. Some original design modules remain in the repository as prototypes; they are listed at the end and are not part of the running API.
 
-The AI Safety & Governance platform implements a comprehensive, secure, and scalable architecture for responsible AI development and deployment. The system integrates advanced monitoring, security, privacy, and governance features through a microservices architecture leveraging cloud-native technologies.
-
-## Core Components
-
-### 1. Model Monitoring Service
-
-- Real-time performance monitoring
-- Drift detection and analysis
-- A/B testing framework
-- Fairness monitoring
-- Automated rollback system
-- Predictive alerting
-
-### 2. Security Service
-
-- Threat detection system
-- Privacy protection
-- Secret management
-- Access control
-- Security event monitoring
-- Zero-trust implementation
-
-### 3. Privacy Service
-
-- Differential privacy mechanisms
-- Data anonymization
-- Privacy budget management
-- Sensitivity analysis
-- Compliance monitoring
-
-### 4. Infrastructure Management
-
-- GitOps automation
-- Service mesh control
-- Chaos engineering
-- Resource management
-- High availability
-
-## Detailed Architecture
-
-### Model Safety Layer
-
-#### 1. Fairness Monitoring
-
-- Demographic parity calculation
-- Equal opportunity assessment
-- Individual fairness metrics
-- Group fairness analysis
-- Feature importance tracking
-
-#### 2. A/B Testing System
-
-- Statistical test execution
-- Experiment management
-- Metric collection
-- Automated analysis
-- Result reporting
-
-#### 3. Model Rollback
-
-- Version management
-- Trigger monitoring
-- Automated rollback
-- Health checking
-- Recovery procedures
-
-### Security Architecture
-
-#### 1. Zero-Trust Security
-
-- Identity verification
-- Network segmentation
-- Least privilege access
-- Continuous validation
-- Trust boundaries
-
-#### 2. Secret Management
-
-- Automated rotation
-- Version control
-- Access logging
-- Secure storage
-- Key management
-
-#### 3. Privacy Protection
-
-- Data anonymization
-- Encryption systems
-- Access control
-- Audit logging
-- Compliance checking
-
-### Infrastructure Layer
-
-#### 1. GitOps Workflow
-
-- Infrastructure as Code
-- Automated synchronization
-- Version control
-- Change management
-- Environment management
-
-#### 2. Service Mesh
-
-- Traffic management
-- Security policies
-- Observability
-- Load balancing
-- Circuit breaking
-
-#### 3. Chaos Engineering
-
-- Resilience testing
-- Failure injection
-- Performance testing
-- Recovery validation
-- System hardening
-
-## Data Flow
-
-### 1. Model Monitoring Flow
+## System context
 
 ```
-Input → Fairness Check → Performance Monitor → Drift Detection → Alerts
+Browser
+  │
+  │ React 18 SPA (Vite, MUI, React Router)
+  │  static assets + /api/* requests
+  ▼
+Reverse proxy / Vite proxy
+  │
+  ▼
+FastAPI application (src/main.py)
+  ├── JWT authentication + scope enforcement
+  ├── /api/v1/users, /models, /compliance, /monitoring,
+  │   /dashboard, /security, /settings
+  ├── SQLAlchemy 2.x ORM ──► SQLite (local/tests) or PostgreSQL (Docker)
+  ├── psutil host sampling ──► system_metric_samples
+  └── compliance runner ──► compliance_records + compliance_logs/*.json
 ```
 
-### 2. Security Processing
+Prometheus scrapes `/metrics` (liveness gauge); Grafana is available in Docker Compose. The application does not currently expose full request/model metrics.
 
-```
-Request → Authentication → Authorization → Privacy Check → Processing
-```
+## Backend
 
-### 3. Infrastructure Management
+### Entry point and lifecycle
 
-```
-Git → FluxCD → Kubernetes → Service Mesh → Applications
-```
+`src/main.py` creates the FastAPI app and a lifespan context that:
 
-## High Availability
+1. resolves the database URL (`DATABASE_URL`, `POSTGRES_*`, or local SQLite);
+2. creates and stamps a fresh schema, or applies pending Alembic migrations for a versioned database (`DB_AUTO_INIT`);
+3. seeds the four default RBAC roles idempotently;
+4. optionally bootstraps an administrator from `ADMIN_EMAIL`/`ADMIN_PASSWORD`.
 
-### Load Balancing
+The app adds CORS middleware driven by `CORS_ORIGINS` and baseline security headers.
 
-- Service mesh routing
-- Pod anti-affinity
-- Node distribution
-- Traffic management
-- Failover handling
+### Routers
 
-### Disaster Recovery
+| Router | Responsibility | Authorization |
+| --- | --- | --- |
+| `auth.py` | login, registration, password-verified refresh, logout | public |
+| `users.py` | `/me`, admin user CRUD, activation, password reset | `user` / `admin` |
+| `models.py` | model version registry and monitoring-log ingestion | `models` |
+| `monitoring.py` | system metrics, persisted samples, model performance, alerts | `user` (read-only) |
+| `compliance.py` | compliance records, check execution, summary, audit logs | `compliance` |
+| `dashboard.py` | aggregate counts, health, growth, activity | `user` |
+| `security.py` | observable security posture and recommendations | `security` |
+| `settings.py` | persisted non-secret settings | `admin` |
 
-- Multi-region deployment
-- Automated backups
-- State replication
-- Recovery procedures
-- Data protection
+### Authentication and authorization
 
-## Security Controls
+- OAuth2 password flow (`/api/v1/auth/token`) accepts email or username.
+- Passwords are bcrypt hashes via `passlib`.
+- JWT claims include `sub`, `scopes`, `exp`, and `iat`; HS256 by default.
+- Superusers receive `user`, `admin`, `models`, `compliance`, and `security`.
+- Regular users receive `user` plus permission keys from assigned roles.
+- `get_current_user` enforces required scopes; `RoleChecker` is available for role-name checks.
+- `/auth/refresh-token` re-verifies the supplied password (regression tested).
+- There is no server-side token denylist or refresh-token rotation.
 
-### Authentication & Authorization
+### Data model
 
-- JWT validation
-- RBAC enforcement
-- Service accounts
-- Network policies
-- Access reviews
+| Table | Purpose |
+| --- | --- |
+| `users` | Accounts, full name, bcrypt hash, active/superuser flags |
+| `roles` / `user_roles` | RBAC roles and assignments |
+| `model_versions` | Model name/version/metadata/status; unique `(name, version)` index |
+| `monitoring_logs` | Version-scoped metric name/value/timestamp |
+| `compliance_records` | Regulation/status/details/next review |
+| `audit_logs` | Actor, action, resource, details, timestamp |
+| `system_metric_samples` | Host resource samples for monitoring charts |
+| `system_settings` | Single-row JSON settings document |
 
-### Data Protection
+### Migrations
 
-- Encryption at rest
-- Encryption in transit
-- Key rotation
-- Data classification
-- Access logging
+- `be9906a7d2c3` — original initial schema (legacy column names).
+- `7a1c9f2d4b6e` — aligns columns with the ORM, adds `users.full_name`, the model-version unique index, monitoring indexes, `system_metric_samples`, and `system_settings`.
+- SQLite uses Alembic batch mode; PostgreSQL uses transactional DDL.
+- Fresh local databases can be created directly from ORM metadata and stamped at head; Docker always runs `alembic upgrade head` before starting Gunicorn.
 
-### Network Security
+### Background/operational behavior
 
-- mTLS encryption
-- Network isolation
-- Traffic filtering
-- DDoS protection
-- Intrusion detection
+- Host resource samples are persisted when `/monitoring/system` or `/monitoring/resources/*` is called; samples older than 24 hours are pruned.
+- Compliance report files are written to `compliance_logs/` (configurable).
+- No background worker, queue, or scheduled notification sender is implemented.
 
-## Monitoring & Observability
+## Frontend
 
-### Metrics Collection
+- React 18 + TypeScript + Vite.
+- MUI theme and components; React Router for routes; Axios client with token injection.
+- Route-level lazy loading via `React.lazy`.
+- `ProtectedRoute` validates the session with `/users/me` and enforces admin/role gates.
+- Shared auth cache avoids duplicate `/users/me` calls from Header/Sidebar.
+- All API calls use relative `/api/v1` in development; Vite proxies to the backend. `VITE_API_URL` supports a separately hosted API.
+- Loading, empty, success, and error states are implemented on the data pages.
+- Responsive behavior: permanent sidebar on desktop, temporary drawer on mobile; metric cards wrap and tables scroll internally.
 
-- Performance metrics
-- Security events
-- Privacy compliance
-- Resource utilization
-- Business KPIs
+### Routes
 
-### Alerting System
+| Route | Access |
+| --- | --- |
+| `/` | public |
+| `/login`, `/register`, `/unauthorized` | public |
+| `/dashboard` | authenticated |
+| `/monitoring` | authenticated |
+| `/users`, `/config` | admin |
+| `/compliance` | admin/compliance-officer |
+| `/security` | admin/security-officer |
 
-- Predictive alerts
-- Threshold monitoring
-- Incident management
-- Escalation procedures
-- Response automation
+## Deployment topologies
 
-## Compliance Framework
+### Local development
 
-### Data Governance
+- SQLite file at the repository root (untracked).
+- Backend via `uvicorn` on 8000.
+- Vite dev server on 5173 with `/api` proxy.
+- No external services required.
 
-- GDPR compliance
-- HIPAA requirements
-- CCPA regulations
-- Data lifecycle
-- Audit trails
+### Docker Compose (verified)
 
-### Privacy Controls
+- Frontend Vite container on 5173, proxying to `backend:5000`.
+- Backend container: Python 3.12, non-root UID 1000, Gunicorn + Uvicorn worker, port 5000 published as 5002.
+- PostgreSQL 15 reachable only on the Compose network.
+- Prometheus scrapes `backend:5000/metrics`; Grafana runs on 3000.
+- `start.sh` waits for the database, applies migrations, then starts Gunicorn.
 
-- Data minimization
-- Purpose limitation
-- Storage limitation
-- User rights
-- Consent management
+### Kubernetes (reference, unverified)
 
-## Integration Points
+Manifests in `kubernetes/` were statically reviewed and corrected for the application port (5000), `/ready` probe, logging volume, removed PodSecurityPolicy, service/ServiceMonitor port naming, duplicate NetworkPolicy keys, and ingress metrics exposure. They still require:
 
-### External Systems
+- substitution of `${ECR_REGISTRY}`, `${IMAGE_TAG}`, `${AWS_ACCOUNT_ID}`;
+- secrets/config maps (`ai-safety-secrets`, `ai-safety-config`, `ai-safety-certs`);
+- database connectivity and egress rules for the target cluster;
+- a cluster to apply and validate them.
 
-- AWS services
-- Monitoring tools
-- Security systems
-- Logging platforms
-- Analytics services
+No Kubernetes deployment was performed in this audit.
 
-### Internal Services
+## Original/experimental modules
 
-- Model services
-- Security services
-- Privacy services
-- Monitoring services
-- Management APIs
+These modules are retained but are not imported by `src/main.py` and are not verified:
 
-## Deployment Architecture
+| Module | Original purpose | Current state |
+| --- | --- | --- |
+| `src/model_monitoring/` | drift, fairness, A/B testing, explainability, predictive rollback | prototypes; require NumPy/pandas/scikit-learn/statsmodels/SHAP/LIME |
+| `src/security/` | threat detection, differential privacy, secret manager | prototypes; require boto3/ML dependencies; not wired |
+| `src/compliance/regulatory_alignment.py` | rule engine used by the API | active |
+| `src/documentation_generator/` | automated docs | prototype; optional networkx/markdown2/pygments |
+| `src/gitops/` | deployment management | prototype |
+| `src/chaos_engineering/` | Chaos Mesh integration | prototype |
+| `src/management_interface/` | dashboard/user/configuration helpers | prototype |
 
-### Production Environment
-
-- Multi-zone deployment
-- Auto-scaling
-- Load balancing
-- High availability
-- Disaster recovery
-
-### Development Pipeline
-
-- CI/CD automation
-- Security scanning
-- Compliance checking
-- Quality assurance
-- Testing automation
-
-## Future Considerations
-
-### Scalability
-
-- Horizontal scaling
-- Vertical scaling
-- Resource optimization
-- Performance tuning
-- Capacity planning
-
-### Security Enhancement
-
-- Zero-trust expansion
-- Threat detection
-- Automated response
-- Security automation
-- Compliance automation
-
-### Monitoring Evolution
-
-- Advanced analytics
-- ML-based monitoring
-- Automated optimization
-- Enhanced visualization
-- Predictive maintenance
-
-## System Requirements
-
-### Hardware Requirements
-
-- CPU: 16+ cores
-- Memory: 64GB+ RAM
-- Storage: 500GB+ SSD
-- Network: 10Gbps
-- Redundancy: N+1
-
-### Software Requirements
-
-- Kubernetes 1.21+
-- Docker 20.10+
-- Istio 1.12+
-- FluxCD
-- Prometheus/Grafana
-
-## Maintenance Procedures
-
-### Regular Updates
-
-- Security patches
-- Version updates
-- Configuration changes
-- Policy updates
-- Documentation updates
-
-### Monitoring
-
-- System health
-- Performance metrics
-- Security events
-- Compliance status
-- Resource usage
-
-### Backup Procedures
-
-- Data backup
-- Configuration backup
-- State backup
-- Recovery testing
-- Retention management
+The README and verification report list the resulting limitations explicitly.

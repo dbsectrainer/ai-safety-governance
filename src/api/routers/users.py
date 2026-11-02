@@ -18,9 +18,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Admin-only dependency reused by every administrative endpoint.
-require_admin = [Security(get_current_active_user, scopes=["admin"])]
-
 
 @router.get("/me", response_model=UserInDB)
 async def read_current_user(
@@ -150,9 +147,7 @@ async def read_user(
     """Get a user by ID. Requires admin scope."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return serialize_user(user)
 
 
@@ -166,9 +161,7 @@ async def update_user(
     """Update a user by ID. Requires admin scope."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     if user_update.username and user_update.username != user.username:
         if db.query(User).filter(User.username == user_update.username).first():
@@ -235,9 +228,7 @@ async def delete_user(
     """Delete a user by ID. Requires admin scope."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     if user.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

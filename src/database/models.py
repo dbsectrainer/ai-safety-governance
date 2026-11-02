@@ -2,8 +2,6 @@
 Database models for AI Safety Governance Platform.
 """
 
-from datetime import datetime
-
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -17,6 +15,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
+from ..utils.time import utcnow
 from . import Base
 
 
@@ -32,25 +31,17 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_superuser = Column(Boolean, default=False, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
-    )
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
 
     # Relationships
-    roles = relationship(
-        "UserRole", back_populates="user", cascade="all, delete-orphan"
-    )
+    roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
     audit_logs = relationship("AuditLog", back_populates="user")
 
     @property
     def role_names(self) -> list[str]:
         """Return role names, including the implicit admin role for superusers."""
-        names = [
-            user_role.role.name
-            for user_role in self.roles
-            if user_role.role is not None
-        ]
+        names = [user_role.role.name for user_role in self.roles if user_role.role is not None]
         if self.is_superuser and "admin" not in names:
             names.insert(0, "admin")
         return names
@@ -75,7 +66,7 @@ class Role(Base):
     name = Column(String, unique=True, nullable=False)
     description = Column(String)
     permissions = Column(JSON)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
 
     # Relationships
     users = relationship("UserRole", back_populates="role")
@@ -86,13 +77,9 @@ class UserRole(Base):
 
     __tablename__ = "user_roles"
 
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
-    )
-    role_id = Column(
-        Integer, ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True
-    )
-    assigned_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    role_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True)
+    assigned_at = Column(DateTime, default=utcnow, nullable=False)
 
     # Relationships
     user = relationship("User", back_populates="roles")
@@ -110,7 +97,7 @@ class AuditLog(Base):
     resource_type = Column(String, nullable=False)
     resource_id = Column(String)
     details = Column(JSON)
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    timestamp = Column(DateTime, default=utcnow, nullable=False, index=True)
 
     # Relationships
     user = relationship("User", back_populates="audit_logs")
@@ -126,7 +113,7 @@ class ModelVersion(Base):
     name = Column(String, nullable=False)
     version = Column(String, nullable=False)
     version_metadata = Column(JSON)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
     deployed_at = Column(DateTime)
     status = Column(String)
 
@@ -147,7 +134,7 @@ class MonitoringLog(Base):
     )
     metric_name = Column(String, nullable=False, index=True)
     metric_value = Column(JSON)
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    timestamp = Column(DateTime, default=utcnow, nullable=False, index=True)
 
     # Relationships
     model_version = relationship("ModelVersion", back_populates="monitoring_logs")
@@ -162,10 +149,8 @@ class ComplianceRecord(Base):
     regulation_type = Column(String, nullable=False, index=True)
     status = Column(String, nullable=False)
     details = Column(JSON)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
-    )
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
     next_review_date = Column(DateTime)
 
 
@@ -181,7 +166,7 @@ class SystemMetricSample(Base):
     id = Column(Integer, primary_key=True, index=True)
     resource = Column(String, nullable=False, index=True)
     value = Column(Float, nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    timestamp = Column(DateTime, default=utcnow, nullable=False, index=True)
 
 
 class SystemSetting(Base):
@@ -191,7 +176,5 @@ class SystemSetting(Base):
 
     key = Column(String, primary_key=True)
     value = Column(JSON, nullable=False)
-    updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
-    )
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
     updated_by = Column(Integer, ForeignKey("users.id"), nullable=True)

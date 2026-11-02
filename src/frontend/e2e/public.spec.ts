@@ -58,3 +58,20 @@ test("unauthenticated dashboard access redirects to login", async ({
   await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/login$/);
 });
+
+test('landing content is visible immediately without waiting for entrance animations', async ({
+  page,
+}) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('h1');
+  const opacity = await page.evaluate(() => {
+    const h1 = document.querySelector('h1');
+    const feature = document.querySelector('h3');
+    return {
+      heading: h1 ? getComputedStyle(h1).opacity : null,
+      feature: feature ? getComputedStyle(feature).opacity : null,
+    };
+  });
+  expect(opacity.heading).toBe('1');
+  expect(opacity.feature).toBe('1');
+});

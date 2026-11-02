@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from ..security import get_current_active_user
 from ...database import PROJECT_ROOT, get_db
+from ...utils.time import utcnow
 from ...database.models import (
     ComplianceRecord,
     ModelVersion,
@@ -95,7 +96,7 @@ def _read_system_metrics() -> Dict[str, float]:
 
 
 def _record_samples(db: Session, values: Dict[str, float]) -> None:
-    now = datetime.utcnow()
+    now = utcnow()
     for resource, value in values.items():
         db.add(SystemMetricSample(resource=resource, value=value, timestamp=now))
     db.query(SystemMetricSample).filter(
@@ -137,13 +138,9 @@ def _metric_value(log: MonitoringLog) -> float:
 def _model_status(model: ModelVersion, metrics: Dict[str, float]) -> str:
     if model.status in {"healthy", "degraded", "error"}:
         return model.status
-    if metrics["errorRate"] > 0.1 or (
-        metrics["accuracy"] and metrics["accuracy"] < 0.8
-    ):
+    if metrics["errorRate"] > 0.1 or (metrics["accuracy"] and metrics["accuracy"] < 0.8):
         return "error"
-    if metrics["errorRate"] > 0.05 or (
-        metrics["accuracy"] and metrics["accuracy"] < 0.9
-    ):
+    if metrics["errorRate"] > 0.05 or (metrics["accuracy"] and metrics["accuracy"] < 0.9):
         return "degraded"
     return "healthy"
 
@@ -173,7 +170,7 @@ async def get_resource_history(
         )
 
     last = _latest_sample_time(db, resource)
-    if last is None or (datetime.utcnow() - last).total_seconds() > 5:
+    if last is None or (utcnow() - last).total_seconds() > 5:
         _record_samples(db, {resource: _read_system_metrics()[resource]})
 
     samples = (
@@ -191,12 +188,7 @@ async def get_resource_history(
 
 def _collect_model_metrics(db: Session) -> Dict[str, float]:
     models = db.query(ModelVersion).all()
-    logs = (
-        db.query(MonitoringLog)
-        .order_by(MonitoringLog.timestamp.desc())
-        .limit(500)
-        .all()
-    )
+    logs = db.query(MonitoringLog).order_by(MonitoringLog.timestamp.desc()).limit(500).all()
 
     accuracies: List[float] = []
     latencies: List[float] = []
@@ -214,7 +206,7 @@ def _collect_model_metrics(db: Session) -> Dict[str, float]:
         elif "throughput" in name:
             throughputs.append(value)
 
-    recent_cutoff = datetime.utcnow() - timedelta(minutes=1)
+    recent_cutoff = utcnow() - timedelta(minutes=1)
     recent_requests = (
         db.query(MonitoringLog).filter(MonitoringLog.timestamp >= recent_cutoff).count()
     )
@@ -223,9 +215,7 @@ def _collect_model_metrics(db: Session) -> Dict[str, float]:
         return round(sum(values) / len(values), 4) if values else 0.0
 
     return {
-        "activeModels": len(
-            [m for m in models if (m.status or "").lower() != "retired"]
-        ),
+        "activeModels": len([m for m in models if (m.status or "").lower() != "retired"]),
         "responseTime": average(latencies),
         "errorRate": average(errors),
         "requestsPerMinute": recent_requests,
@@ -250,9 +240,7 @@ async def get_model_performance(
     db: Session = Depends(get_db),
 ) -> Any:
     """Per-model snapshot using the latest monitoring log for each version."""
-    models = (
-        db.query(ModelVersion).order_by(ModelVersion.created_at.desc()).limit(50).all()
-    )
+    models = db.query(ModelVersion).order_by(ModelVersion.created_at.desc()).limit(50).all()
     result = []
     for model in models:
         logs = (
@@ -295,7 +283,7 @@ async def get_performance_history(
     db: Session = Depends(get_db),
 ) -> Any:
     """Return recent accuracy observations as a time series."""
-    cutoff = datetime.utcnow() - timedelta(hours=24)
+    cutoff = utcnow() - timedelta(hours=24)
     logs = (
         db.query(MonitoringLog)
         .filter(
@@ -322,19 +310,13 @@ async def get_alerts(
 ) -> Any:
     """Derive alerts from compliance and model state."""
     alerts = []
-    for record in (
-        db.query(ComplianceRecord)
-        .order_by(ComplianceRecord.created_at.desc())
-        .limit(50)
-    ):
+    for record in db.query(ComplianceRecord).order_by(ComplianceRecord.created_at.desc()).limit(50):
         if record.status in {"non_compliant", "needs_review"}:
             alerts.append(
                 {
                     "id": f"compliance-{record.id}",
                     "type": "compliance",
-                    "severity": (
-                        "high" if record.status == "non_compliant" else "medium"
-                    ),
+                    "severity": ("high" if record.status == "non_compliant" else "medium"),
                     "message": f"{record.regulation_type} is {record.status.replace('_', ' ')}",
                     "timestamp": record.created_at.isoformat(),
                 }

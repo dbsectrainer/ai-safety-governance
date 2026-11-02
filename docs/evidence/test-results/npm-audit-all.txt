@@ -1,0 +1,353 @@
+# npm audit report
+
+brace-expansion  
+Severity: high
+brace-expansion Regular Expression Denial of Service vulnerability - https://github.com/advisories/GHSA-v6h2-p8h4-qcjw
+brace-expansion: Zero-step sequence causes process hang and memory exhaustion - https://github.com/advisories/GHSA-f886-m6hf-6m8v
+brace-expansion: DoS via exponential-time expansion of consecutive non-expanding {} groups - https://github.com/advisories/GHSA-3jxr-9vmj-r5cp
+brace-expansion: DoS via unbounded expansion length causing an out-of-memory process crash - https://github.com/advisories/GHSA-mh99-v99m-4gvg
+brace-expansion: DoS via unbounded intermediate arrays, bypassing the CVE-2026-14257 mitigation - https://github.com/advisories/GHSA-rgw5-rvv9-x895
+brace-expansion: Quadratic-time expansion of the `{a},b}` rewrite causes CPU denial of service - https://github.com/advisories/GHSA-q2hr-2g5m-vwhr
+brace-expansion: DoS via uncontrolled recursion on nested brace groups causing stack exhaustion - https://github.com/advisories/GHSA-qhr7-859c-m2p7
+brace-expansion: DoS via uncontrolled recursion in parseCommaParts causing stack exhaustion - https://github.com/advisories/GHSA-6j4f-fj2g-mc7p
+No fix available
+node_modules/brace-expansion
+  minimatch  
+  Depends on vulnerable versions of brace-expansion
+  node_modules/@typescript-eslint/eslint-plugin/node_modules/minimatch
+  node_modules/@typescript-eslint/parser/node_modules/minimatch
+  node_modules/@typescript-eslint/type-utils/node_modules/minimatch
+  node_modules/@typescript-eslint/typescript-estree/node_modules/minimatch
+  node_modules/minimatch
+    @eslint/config-array  
+    Depends on vulnerable versions of minimatch
+    node_modules/@eslint/config-array
+      eslint  
+      Depends on vulnerable versions of @eslint-community/eslint-utils
+      Depends on vulnerable versions of @eslint/config-array
+      Depends on vulnerable versions of @eslint/eslintrc
+      Depends on vulnerable versions of minimatch
+      node_modules/eslint
+        @eslint-community/eslint-utils  
+        Depends on vulnerable versions of eslint
+        node_modules/@eslint-community/eslint-utils
+          @typescript-eslint/utils  
+          Depends on vulnerable versions of @eslint-community/eslint-utils
+          Depends on vulnerable versions of @typescript-eslint/typescript-estree
+          Depends on vulnerable versions of eslint
+          node_modules/@typescript-eslint/eslint-plugin/node_modules/@typescript-eslint/utils
+          node_modules/@typescript-eslint/type-utils/node_modules/@typescript-eslint/utils
+          node_modules/@typescript-eslint/utils
+            @typescript-eslint/eslint-plugin  
+            Depends on vulnerable versions of @typescript-eslint/parser
+            Depends on vulnerable versions of @typescript-eslint/type-utils
+            Depends on vulnerable versions of @typescript-eslint/utils
+            Depends on vulnerable versions of eslint
+            node_modules/@typescript-eslint/eslint-plugin
+            node_modules/typescript-eslint/node_modules/@typescript-eslint/eslint-plugin
+              typescript-eslint  
+              Depends on vulnerable versions of @typescript-eslint/eslint-plugin
+              Depends on vulnerable versions of @typescript-eslint/parser
+              Depends on vulnerable versions of @typescript-eslint/utils
+              Depends on vulnerable versions of eslint
+              node_modules/typescript-eslint
+            @typescript-eslint/type-utils  
+            Depends on vulnerable versions of @typescript-eslint/typescript-estree
+            Depends on vulnerable versions of @typescript-eslint/utils
+            Depends on vulnerable versions of eslint
+            node_modules/@typescript-eslint/type-utils
+            node_modules/typescript-eslint/node_modules/@typescript-eslint/type-utils
+        @typescript-eslint/parser  
+        Depends on vulnerable versions of @typescript-eslint/typescript-estree
+        Depends on vulnerable versions of eslint
+        node_modules/@typescript-eslint/parser
+        node_modules/typescript-eslint/node_modules/@typescript-eslint/parser
+        eslint-config-prettier  
+        Depends on vulnerable versions of eslint
+        node_modules/eslint-config-prettier
+          eslint-plugin-prettier  
+          Depends on vulnerable versions of eslint
+          Depends on vulnerable versions of eslint-config-prettier
+          node_modules/eslint-plugin-prettier
+        eslint-import-resolver-typescript  
+        Depends on vulnerable versions of eslint
+        Depends on vulnerable versions of eslint-plugin-import
+        node_modules/eslint-import-resolver-typescript
+        eslint-plugin-import  
+        Depends on vulnerable versions of eslint
+        Depends on vulnerable versions of minimatch
+        node_modules/eslint-plugin-import
+        eslint-plugin-jsx-a11y  
+        Depends on vulnerable versions of eslint
+        Depends on vulnerable versions of minimatch
+        node_modules/eslint-plugin-jsx-a11y
+        eslint-plugin-react  
+        Depends on vulnerable versions of eslint
+        Depends on vulnerable versions of minimatch
+        node_modules/eslint-plugin-react
+        eslint-plugin-react-hooks  
+        Depends on vulnerable versions of eslint
+        node_modules/eslint-plugin-react-hooks
+        eslint-plugin-react-refresh  
+        Depends on vulnerable versions of eslint
+        node_modules/eslint-plugin-react-refresh
+    @eslint/eslintrc  
+    Depends on vulnerable versions of minimatch
+    node_modules/@eslint/eslintrc
+    @typescript-eslint/typescript-estree  
+    Depends on vulnerable versions of fast-glob
+    Depends on vulnerable versions of minimatch
+    node_modules/@typescript-eslint/eslint-plugin/node_modules/@typescript-eslint/typescript-estree
+    node_modules/@typescript-eslint/parser/node_modules/@typescript-eslint/typescript-estree
+    node_modules/@typescript-eslint/type-utils/node_modules/@typescript-eslint/typescript-estree
+    node_modules/@typescript-eslint/typescript-estree
+    glob  
+    Depends on vulnerable versions of minimatch
+    node_modules/glob
+      @jest/reporters  
+      Depends on vulnerable versions of @jest/console
+      Depends on vulnerable versions of @jest/test-result
+      Depends on vulnerable versions of @jest/transform
+      Depends on vulnerable versions of glob
+      Depends on vulnerable versions of jest-message-util
+      Depends on vulnerable versions of jest-util
+      Depends on vulnerable versions of jest-worker
+      node_modules/@jest/reporters
+        @jest/core  
+        Depends on vulnerable versions of @jest/console
+        Depends on vulnerable versions of @jest/reporters
+        Depends on vulnerable versions of @jest/test-result
+        Depends on vulnerable versions of @jest/transform
+        Depends on vulnerable versions of jest-changed-files
+        Depends on vulnerable versions of jest-config
+        Depends on vulnerable versions of jest-haste-map
+        Depends on vulnerable versions of jest-message-util
+        Depends on vulnerable versions of jest-resolve
+        Depends on vulnerable versions of jest-resolve-dependencies
+        Depends on vulnerable versions of jest-runner
+        Depends on vulnerable versions of jest-runtime
+        Depends on vulnerable versions of jest-snapshot
+        Depends on vulnerable versions of jest-util
+        Depends on vulnerable versions of jest-watcher
+        Depends on vulnerable versions of micromatch
+        node_modules/@jest/core
+          jest  
+          Depends on vulnerable versions of @jest/core
+          Depends on vulnerable versions of jest-cli
+          node_modules/jest
+            ts-jest  
+            Depends on vulnerable versions of @jest/transform
+            Depends on vulnerable versions of babel-jest
+            Depends on vulnerable versions of jest
+            Depends on vulnerable versions of jest-util
+            node_modules/ts-jest
+          jest-cli  
+          Depends on vulnerable versions of @jest/core
+          Depends on vulnerable versions of @jest/test-result
+          Depends on vulnerable versions of create-jest
+          Depends on vulnerable versions of jest-config
+          Depends on vulnerable versions of jest-util
+          node_modules/jest-cli
+      jest-config  
+      Depends on vulnerable versions of @jest/test-sequencer
+      Depends on vulnerable versions of babel-jest
+      Depends on vulnerable versions of deepmerge
+      Depends on vulnerable versions of glob
+      Depends on vulnerable versions of jest-circus
+      Depends on vulnerable versions of jest-environment-node
+      Depends on vulnerable versions of jest-resolve
+      Depends on vulnerable versions of jest-runner
+      Depends on vulnerable versions of jest-util
+      Depends on vulnerable versions of micromatch
+      node_modules/jest-config
+        create-jest  
+        Depends on vulnerable versions of jest-config
+        Depends on vulnerable versions of jest-util
+        node_modules/create-jest
+      jest-runtime  
+      Depends on vulnerable versions of @jest/environment
+      Depends on vulnerable versions of @jest/fake-timers
+      Depends on vulnerable versions of @jest/globals
+      Depends on vulnerable versions of @jest/test-result
+      Depends on vulnerable versions of @jest/transform
+      Depends on vulnerable versions of glob
+      Depends on vulnerable versions of jest-haste-map
+      Depends on vulnerable versions of jest-message-util
+      Depends on vulnerable versions of jest-mock
+      Depends on vulnerable versions of jest-resolve
+      Depends on vulnerable versions of jest-snapshot
+      Depends on vulnerable versions of jest-util
+      node_modules/jest-runtime
+        jest-circus  
+        Depends on vulnerable versions of @jest/environment
+        Depends on vulnerable versions of @jest/expect
+        Depends on vulnerable versions of @jest/test-result
+        Depends on vulnerable versions of jest-each
+        Depends on vulnerable versions of jest-message-util
+        Depends on vulnerable versions of jest-runtime
+        Depends on vulnerable versions of jest-snapshot
+        Depends on vulnerable versions of jest-util
+        node_modules/jest-circus
+        jest-runner  
+        Depends on vulnerable versions of @jest/console
+        Depends on vulnerable versions of @jest/environment
+        Depends on vulnerable versions of @jest/test-result
+        Depends on vulnerable versions of @jest/transform
+        Depends on vulnerable versions of jest-environment-node
+        Depends on vulnerable versions of jest-haste-map
+        Depends on vulnerable versions of jest-message-util
+        Depends on vulnerable versions of jest-resolve
+        Depends on vulnerable versions of jest-runtime
+        Depends on vulnerable versions of jest-util
+        Depends on vulnerable versions of jest-watcher
+        Depends on vulnerable versions of jest-worker
+        node_modules/jest-runner
+      test-exclude  
+      Depends on vulnerable versions of glob
+      Depends on vulnerable versions of minimatch
+      node_modules/test-exclude
+        babel-plugin-istanbul  
+        Depends on vulnerable versions of test-exclude
+        node_modules/babel-plugin-istanbul
+          @jest/transform  
+          Depends on vulnerable versions of babel-plugin-istanbul
+          Depends on vulnerable versions of jest-haste-map
+          Depends on vulnerable versions of jest-util
+          Depends on vulnerable versions of micromatch
+          node_modules/@jest/transform
+            babel-jest  
+            Depends on vulnerable versions of @jest/transform
+            Depends on vulnerable versions of babel-plugin-istanbul
+            node_modules/babel-jest
+            jest-snapshot  
+            Depends on vulnerable versions of @jest/transform
+            Depends on vulnerable versions of expect
+            Depends on vulnerable versions of jest-message-util
+            Depends on vulnerable versions of jest-util
+            node_modules/jest-snapshot
+              @jest/expect  
+              Depends on vulnerable versions of expect
+              Depends on vulnerable versions of jest-snapshot
+              node_modules/@jest/expect
+                @jest/globals  
+                Depends on vulnerable versions of @jest/environment
+                Depends on vulnerable versions of @jest/expect
+                Depends on vulnerable versions of jest-mock
+                node_modules/@jest/globals
+              jest-resolve-dependencies  
+              Depends on vulnerable versions of jest-snapshot
+              node_modules/jest-resolve-dependencies
+
+deepmerge  
+deepmerge mergeObject() allows prototype poisoning of returned objects - https://github.com/advisories/GHSA-gcqx-w48m-w2h4
+No fix available
+node_modules/deepmerge
+
+
+picomatch  
+Severity: high
+Picomatch: Method Injection in POSIX Character Classes causes incorrect Glob Matching - https://github.com/advisories/GHSA-3v7f-55p6-f55p
+Picomatch has a ReDoS vulnerability via extglob quantifiers - https://github.com/advisories/GHSA-c2c7-rcm5-vvqj
+No fix available
+node_modules/picomatch
+  anymatch  
+  Depends on vulnerable versions of picomatch
+  node_modules/anymatch
+    jest-haste-map  
+    Depends on vulnerable versions of anymatch
+    Depends on vulnerable versions of jest-util
+    Depends on vulnerable versions of jest-worker
+    Depends on vulnerable versions of micromatch
+    node_modules/jest-haste-map
+      @jest/test-sequencer  
+      Depends on vulnerable versions of @jest/test-result
+      Depends on vulnerable versions of jest-haste-map
+      node_modules/@jest/test-sequencer
+      jest-resolve  
+      Depends on vulnerable versions of jest-haste-map
+      Depends on vulnerable versions of jest-pnp-resolver
+      Depends on vulnerable versions of jest-util
+      node_modules/jest-resolve
+        jest-pnp-resolver  
+        Depends on vulnerable versions of jest-resolve
+        node_modules/jest-pnp-resolver
+  jest-util  
+  Depends on vulnerable versions of picomatch
+  node_modules/jest-util
+    @jest/console  
+    Depends on vulnerable versions of jest-message-util
+    Depends on vulnerable versions of jest-util
+    node_modules/@jest/console
+      @jest/test-result  
+      Depends on vulnerable versions of @jest/console
+      node_modules/@jest/test-result
+        jest-watcher  
+        Depends on vulnerable versions of @jest/test-result
+        Depends on vulnerable versions of jest-util
+        node_modules/jest-watcher
+    @jest/fake-timers  
+    Depends on vulnerable versions of jest-message-util
+    Depends on vulnerable versions of jest-mock
+    Depends on vulnerable versions of jest-util
+    node_modules/@jest/fake-timers
+      @jest/environment  
+      Depends on vulnerable versions of @jest/fake-timers
+      Depends on vulnerable versions of jest-mock
+      node_modules/@jest/environment
+        jest-environment-jsdom  
+        Depends on vulnerable versions of @jest/environment
+        Depends on vulnerable versions of @jest/fake-timers
+        Depends on vulnerable versions of jest-mock
+        Depends on vulnerable versions of jest-util
+        node_modules/jest-environment-jsdom
+        jest-environment-node  
+        Depends on vulnerable versions of @jest/environment
+        Depends on vulnerable versions of @jest/fake-timers
+        Depends on vulnerable versions of jest-mock
+        Depends on vulnerable versions of jest-util
+        node_modules/jest-environment-node
+    expect  
+    Depends on vulnerable versions of jest-message-util
+    Depends on vulnerable versions of jest-util
+    node_modules/expect
+      @types/jest  
+      Depends on vulnerable versions of expect
+      node_modules/@types/jest
+    jest-changed-files  
+    Depends on vulnerable versions of jest-util
+    node_modules/jest-changed-files
+    jest-each  
+    Depends on vulnerable versions of jest-util
+    node_modules/jest-each
+    jest-mock  
+    Depends on vulnerable versions of jest-util
+    node_modules/jest-mock
+    jest-worker  
+    Depends on vulnerable versions of jest-util
+    node_modules/jest-worker
+  micromatch  
+  Depends on vulnerable versions of picomatch
+  node_modules/micromatch
+    fast-glob  
+    Depends on vulnerable versions of micromatch
+    node_modules/fast-glob
+    jest-message-util  
+    Depends on vulnerable versions of micromatch
+    node_modules/jest-message-util
+    lint-staged  
+    Depends on vulnerable versions of micromatch
+    node_modules/lint-staged
+
+playwright  
+Severity: high
+Playwright downloads and installs browsers without verifying the authenticity of the SSL certificate - https://github.com/advisories/GHSA-7mvr-c777-76hp
+No fix available
+node_modules/playwright
+  @playwright/test  
+  Depends on vulnerable versions of playwright
+  node_modules/@playwright/test
+
+66 vulnerabilities (2 low, 60 moderate, 4 high)
+
+Some issues need review, and may require choosing
+a different dependency.

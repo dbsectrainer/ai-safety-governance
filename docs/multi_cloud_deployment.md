@@ -1,5 +1,7 @@
 # Multi-Cloud Deployment Guide
 
+> **Implementation status (2026-11-01):** The local SQLite path and Docker Compose stack are verified. Kubernetes/AWS/Azure/GCP instructions in this document are **reference material and were not executed**; the manifests contain placeholders and were not applied to a cluster. See the [verification report](evidence/verification-report.md).
+
 This guide provides instructions for deploying the AI Safety & Governance platform on AWS, Azure, and Google Cloud Platform (GCP).
 
 ## Prerequisites

@@ -8,8 +8,6 @@ import {
   Paper,
   Typography,
   useTheme,
-  Fade,
-  Slide,
 } from "@mui/material";
 import {
   Security as SecurityIcon,
@@ -96,9 +94,8 @@ const Landing = () => {
           <Container maxWidth="lg">
             <Grid container spacing={4} alignItems="center">
               <Grid item xs={12} md={6}>
-                <Fade in timeout={1000}>
-                  <Box>
-                    <Typography
+                <Box>
+                  <Typography
                       variant="h1"
                       sx={{ fontSize: { xs: "2.5rem", md: "3.5rem" }, mb: 2 }}
                     >
@@ -144,12 +141,10 @@ const Landing = () => {
                       </Button>
                     </Box>
                   </Box>
-                </Fade>
               </Grid>
               <Grid item xs={12} md={6}>
-                <Slide direction="left" in timeout={1000}>
-                  <Box>
-                    <LazyLoadImage
+                <Box>
+                  <LazyLoadImage
                       src="/ai-governance.svg"
                       alt="AI Governance Platform Interface showing monitoring dashboard and safety controls"
                       effect="blur"
@@ -160,9 +155,8 @@ const Landing = () => {
                         display: "block",
                         margin: "auto",
                       }}
-                    />
-                  </Box>
-                </Slide>
+                  />
+                </Box>
               </Grid>
             </Grid>
           </Container>
@@ -183,9 +177,8 @@ const Landing = () => {
             <Grid container spacing={4}>
               {features.map((feature, index) => (
                 <Grid item xs={12} sm={6} md={4} key={index}>
-                  <Fade in timeout={1000 + index * 200}>
-                    <Paper
-                      elevation={2}
+                  <Paper
+                    elevation={2}
                       sx={{
                         p: 3,
                         height: "100%",
@@ -218,9 +211,8 @@ const Landing = () => {
                       </Typography>
                       <Typography variant="body1" color="text.secondary">
                         {feature.description}
-                      </Typography>
-                    </Paper>
-                  </Fade>
+                    </Typography>
+                  </Paper>
                 </Grid>
               ))}
             </Grid>
@@ -236,9 +228,8 @@ const Landing = () => {
           }}
         >
           <Container maxWidth="md">
-            <Fade in timeout={1000}>
-              <Paper
-                elevation={3}
+            <Paper
+              elevation={3}
                 sx={{
                   p: 4,
                   textAlign: "center",
@@ -272,9 +263,8 @@ const Landing = () => {
                   }}
                 >
                   Start Free Trial
-                </Button>
-              </Paper>
-            </Fade>
+              </Button>
+            </Paper>
           </Container>
         </Box>
       </Box>

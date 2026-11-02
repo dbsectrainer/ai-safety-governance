@@ -128,7 +128,9 @@ const Monitoring = () => {
     setIsRefreshing(false);
   };
 
-  const thresholds = { cpu: 80, memory: 80, storage: 80, network: 80 };
+  // Network is relative activity rather than link saturation, so it is not a
+  // health threshold. CPU, memory and disk are.
+  const thresholds = { cpu: 80, memory: 80, storage: 80 };
   const isHealthy = Object.entries(thresholds).every(
     ([key, threshold]) => systemMetrics[key as keyof SystemMetrics] < threshold,
   );

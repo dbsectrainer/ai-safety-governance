@@ -2,6 +2,42 @@
 
 All notable changes to the AI Safety & Governance project will be documented in this file.
 
+## [2.2.0] - 2026-11-01
+
+### Fixed
+
+- Local startup no longer requires PostgreSQL; `DATABASE_URL`, `POSTGRES_*`, and SQLite fallback are supported.
+- Alembic schema drift (`name`, `version_metadata`, `version_id`, `users.full_name`, new settings/sample tables) corrected for SQLite and PostgreSQL.
+- Authentication bypass in `/auth/refresh-token` fixed; password is re-verified.
+- Superusers now receive all required API scopes; `/users/me` and login return roles; protected routes no longer crash on missing roles.
+- Registration validates username/password and ignores client-supplied privilege fields.
+- Docker Compose no longer references a missing secrets env file or a nonexistent start script; PostgreSQL driver explicitly uses psycopg2; multi-worker admin/role seeding races handled.
+- Monitoring, dashboard, security, settings, and compliance-check APIs added and wired to the UI (replacing mock data).
+- Frontend TypeScript, ESLint, Jest Watchman, layout overflow, logout, and dead-link defects fixed.
+- Landing page no longer hides the hero/features behind entrance animations before they complete; a first-paint E2E regression test guards it.
+- Fresh SQLite databases no longer race schema initialization when multiple Gunicorn workers start.
+- Production dependency audit reduced to zero vulnerabilities after non-breaking updates.
+- Prometheus target corrected; Docker stack verified healthy.
+- Kubernetes manifests statically corrected for the actual port/probes and removed obsolete APIs.
+
+### Added
+
+- 27 API/integration tests and 14 Playwright end-to-end tests.
+- Real user-management, compliance-run/export, monitoring, security-posture, and persisted-settings workflows.
+- `.github/workflows/ci.yml`, `.env.example`, MIT `LICENSE`, production preview smoke script, and audit evidence/report.
+- Default RBAC roles and administrator bootstrap CLI.
+
+### Changed
+
+- Local backend port standardized to 8000 (macOS AirPlay conflicts on 5000); Docker backend remains 5000 internally and 5002 on the host.
+- README, usage, architecture, deployment, and CLAUDE guidance now reflect only verified functionality and documented limitations.
+
+### Known limitations
+
+- Compliance automation is configuration-level GDPR/HIPAA/CCPA only; EO 14110/OMB M-24-10/NIST are design references.
+- Kubernetes deployment is unverified; experimental ML/security modules are not wired.
+- No rate limiting, token revocation, CSP, or enforced MFA; JWTs are stored in localStorage.
+
 ## [2.1.0] - 2024-02-15
 
 ### Added

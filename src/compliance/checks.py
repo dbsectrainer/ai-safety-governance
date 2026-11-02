@@ -23,11 +23,7 @@ def build_configuration_rules(config: Dict[str, Any]) -> List[ComplianceRule]:
     def gdpr_breach_notification() -> bool:
         notification_emails = config.get("notification_emails") or []
         window = _threshold(config, "gdpr", "data_breach_notification")
-        return (
-            bool(notification_emails)
-            and isinstance(window, (int, float))
-            and window <= 72
-        )
+        return bool(notification_emails) and isinstance(window, (int, float)) and window <= 72
 
     def hipaa_breach_reporting() -> bool:
         window = _threshold(config, "hipaa", "breach_reporting")

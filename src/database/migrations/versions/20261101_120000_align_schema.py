@@ -24,23 +24,17 @@ depends_on = None
 
 def upgrade():
     with op.batch_alter_table("users") as batch_op:
-        batch_op.add_column(
-            sa.Column("full_name", sa.String(length=100), nullable=True)
-        )
+        batch_op.add_column(sa.Column("full_name", sa.String(length=100), nullable=True))
 
-    with op.batch_alter_table("model_versions", recreate="always") as batch_op:
-        batch_op.alter_column(
-            "model_name", new_column_name="name", existing_type=sa.String()
-        )
+    with op.batch_alter_table("model_versions") as batch_op:
+        batch_op.alter_column("model_name", new_column_name="name", existing_type=sa.String())
         batch_op.alter_column(
             "model_metadata",
             new_column_name="version_metadata",
             existing_type=sa.JSON(),
         )
 
-    op.create_index(
-        "uq_model_version", "model_versions", ["name", "version"], unique=True
-    )
+    op.create_index("uq_model_version", "model_versions", ["name", "version"], unique=True)
 
     with op.batch_alter_table("monitoring_logs") as batch_op:
         batch_op.alter_column(
@@ -49,12 +43,8 @@ def upgrade():
             existing_type=sa.Integer(),
             nullable=False,
         )
-        batch_op.create_index(
-            "ix_monitoring_logs_metric_name", ["metric_name"], unique=False
-        )
-        batch_op.create_index(
-            "ix_monitoring_logs_timestamp", ["timestamp"], unique=False
-        )
+        batch_op.create_index("ix_monitoring_logs_metric_name", ["metric_name"], unique=False)
+        batch_op.create_index("ix_monitoring_logs_timestamp", ["timestamp"], unique=False)
 
     with op.batch_alter_table("audit_logs") as batch_op:
         batch_op.create_index("ix_audit_logs_timestamp", ["timestamp"], unique=False)
@@ -72,9 +62,7 @@ def upgrade():
         sa.Column("timestamp", sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        "ix_system_metric_samples_id", "system_metric_samples", ["id"], unique=False
-    )
+    op.create_index("ix_system_metric_samples_id", "system_metric_samples", ["id"], unique=False)
     op.create_index(
         "ix_system_metric_samples_resource",
         "system_metric_samples",
@@ -102,12 +90,8 @@ def upgrade():
 def downgrade():
     op.drop_table("system_settings")
 
-    op.drop_index(
-        "ix_system_metric_samples_timestamp", table_name="system_metric_samples"
-    )
-    op.drop_index(
-        "ix_system_metric_samples_resource", table_name="system_metric_samples"
-    )
+    op.drop_index("ix_system_metric_samples_timestamp", table_name="system_metric_samples")
+    op.drop_index("ix_system_metric_samples_resource", table_name="system_metric_samples")
     op.drop_index("ix_system_metric_samples_id", table_name="system_metric_samples")
     op.drop_table("system_metric_samples")
 
@@ -135,9 +119,7 @@ def downgrade():
             new_column_name="model_metadata",
             existing_type=sa.JSON(),
         )
-        batch_op.alter_column(
-            "name", new_column_name="model_name", existing_type=sa.String()
-        )
+        batch_op.alter_column("name", new_column_name="model_name", existing_type=sa.String())
 
     with op.batch_alter_table("users") as batch_op:
         batch_op.drop_column("full_name")

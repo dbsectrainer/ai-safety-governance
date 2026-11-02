@@ -1,305 +1,197 @@
 # Usage Guide
 
-This guide provides detailed instructions for using the AI Safety & Governance platform's features and capabilities.
+This guide describes the functionality that is actually implemented and verified in this repository. For installation and verification evidence, see the [README](../README.md) and the [verification report](evidence/verification-report.md).
 
-## Access and Authentication
+## Access URLs
 
-### User Authentication
+| Environment | Frontend | API | Docs |
+| --- | --- | --- | --- |
+| Local development | <http://127.0.0.1:5173> | <http://127.0.0.1:8000> | <http://127.0.0.1:8000/docs> |
+| Docker Compose | <http://localhost:5173> | <http://localhost:5002> | <http://localhost:5002/docs> |
+| Production preview | <http://127.0.0.1:4173> | proxied through `/api` to 8000 | — |
 
-1. Access the platform through the secure endpoint:
+Local development uses port 8000 to avoid the macOS AirPlay Receiver on port 5000. The Docker backend listens on port 5000 inside the container and is published as 5002.
 
-```
-https://ai-safety-governance.example.com
-```
+## Accounts and roles
 
-2. Authenticate using your organization credentials:
-
-- SSO authentication (recommended)
-- Multi-factor authentication required
-- Session timeout after 30 minutes of inactivity
-
-### Role-Based Access
-
-- Admin: Full system access and configuration
-- Security Officer: Access to security and compliance features
-- Data Scientist: Model monitoring and explainability features
-- Analyst: Read-only access to dashboards and reports
-
-## Model Monitoring
-
-### Performance Monitoring
-
-1. Access the monitoring dashboard:
-
-```
-https://ai-safety-governance.example.com/monitoring
-```
-
-2. View real-time metrics:
-
-- Model accuracy
-- Latency statistics
-- Throughput rates
-- Error rates
-
-3. Configure alerts:
-
-- Set performance thresholds
-- Define alert channels
-- Configure notification rules
-
-### Drift Detection
-
-1. Access drift monitoring:
-
-```
-https://ai-safety-governance.example.com/monitoring/drift
-```
-
-2. Monitor data drift:
-
-- Feature distribution changes
-- Prediction drift patterns
-- Data quality metrics
-
-3. Configure drift detection:
-
-- Set sensitivity thresholds
-- Define baseline datasets
-- Configure retraining triggers
-
-## Security Features
-
-### Threat Detection
-
-1. Access security dashboard:
-
-```
-https://ai-safety-governance.example.com/security
-```
-
-2. Monitor security events:
-
-- Real-time threat detection
-- Security incident logs
-- Vulnerability reports
-
-3. Configure security policies:
-
-- Set security rules
-- Define blocked patterns
-- Configure response actions
-
-### Privacy Protection
-
-1. Access privacy settings:
-
-```
-https://ai-safety-governance.example.com/privacy
-```
-
-2. Configure privacy rules:
-
-- Data anonymization settings
-- PII detection rules
-- Encryption requirements
-
-3. Monitor compliance:
-
-- Privacy compliance status
-- Data handling reports
-- Audit logs
-
-## Model Explainability
-
-### Feature Importance
-
-1. Access explainability dashboard:
-
-```
-https://ai-safety-governance.example.com/explain
-```
-
-2. Generate explanations:
-
-- SHAP value analysis
-- LIME explanations
-- Feature importance rankings
-
-3. Configure explanation settings:
-
-- Set explanation methods
-- Define feature groups
-- Configure visualization options
-
-### Decision Path Analysis
-
-1. View decision paths:
-
-- Tree-based explanations
-- Decision flow diagrams
-- Path importance scores
-
-2. Configure analysis:
-
-- Set path depth
-- Define key decision points
-- Configure visualization style
-
-## Compliance Management
-
-### Compliance Monitoring
-
-1. Access compliance dashboard:
-
-```
-https://ai-safety-governance.example.com/compliance
-```
-
-2. Monitor compliance status:
-
-- GDPR compliance
-- HIPAA compliance
-- CCPA compliance
-
-3. Generate compliance reports:
-
-- Compliance status reports
-- Audit trail reports
-- Incident reports
-
-### Audit Logging
-
-1. Access audit logs:
-
-```
-https://ai-safety-governance.example.com/audit
-```
-
-2. View audit trails:
-
-- User actions
-- System changes
-- Security events
-
-3. Configure logging:
-
-- Set retention periods
-- Define log levels
-- Configure log exports
-
-## Monitoring and Alerts
-
-### Metrics Dashboard
-
-1. Access metrics:
-
-```
-https://ai-safety-governance.example.com/metrics
-```
-
-2. View system metrics:
-
-- Resource utilization
-- Performance metrics
-- Security metrics
-
-3. Configure dashboards:
-
-- Create custom views
-- Set refresh intervals
-- Configure data sources
-
-### Alert Management
-
-1. Access alert configuration:
-
-```
-https://ai-safety-governance.example.com/alerts
-```
-
-2. Configure alerts:
-
-- Set alert conditions
-- Define notification channels
-- Configure alert severity
-
-3. Manage alert responses:
-
-- Define response procedures
-- Set escalation paths
-- Configure automated actions
-
-## API Integration
-
-### API Authentication
-
-1. Generate API keys:
-
-```
-https://ai-safety-governance.example.com/api/keys
-```
-
-2. Configure API access:
-
-- Set scope permissions
-- Define rate limits
-- Configure IP restrictions
-
-### API Usage
-
-1. Model monitoring endpoint:
+- Self-registration creates an active, non-superuser account.
+- An administrator can be created with the `ADMIN_*` environment variables or the CLI:
 
 ```bash
-curl -X POST https://ai-safety-governance.example.com/api/v1/monitor \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"model_id": "model-123", "metrics": {...}}'
+ADMIN_EMAIL=admin@example.com \
+ADMIN_PASSWORD='<a-strong-password>' \
+ADMIN_USERNAME=admin \
+python -m src.scripts.seed_admin
 ```
 
-2. Security scanning endpoint:
+- Passwords require at least 8 characters, uppercase, lowercase, a number, and a special character.
+- The four seeded RBAC roles are `admin`, `compliance-officer`, `security-officer`, and `user`.
+- Superusers receive all API scopes. Regular users receive the `user` scope plus any role permission keys.
+- There is currently no role-assignment screen; superuser status can be changed by an administrator on the Users page.
+
+## Pages
+
+### Landing (`/`)
+
+Public overview of the platform with calls to register or sign in. Responsive at mobile and desktop widths.
+
+### Login / Register (`/login`, `/register`)
+
+- Email + password login against the FastAPI OAuth2 password flow.
+- Registration creates a non-superuser account.
+- Successful login redirects to the dashboard (or the originally requested protected page).
+- Sign out is available from the account menu in the header and removes the stored token.
+
+### Dashboard (`/dashboard`)
+
+Shows aggregate data from the database:
+
+- active users and active model versions;
+- latest compliance score;
+- host CPU/memory/disk-based health label;
+- cumulative users/models over the last 24 hours;
+- recent audit activity (all users for administrators; own activity for regular users).
+
+### Users (`/users`, admin only)
+
+Administrators can:
+
+- list users;
+- create a user with a role (User/Admin) and active status;
+- edit username, email, full name, role, active status, or reset the password;
+- deactivate/reactivate users;
+- delete users (with confirmation).
+
+The backend prevents deleting/demoting the currently signed-in administrator.
+
+### Monitoring (`/monitoring`)
+
+- Current CPU, memory, disk, and relative network activity from the host.
+- Persisted resource samples charted over time (a new sample is recorded by the monitoring endpoints).
+- Active model count, accuracy, average latency, and error rate derived from model monitoring logs.
+- Per-model performance chart for registered model versions.
+- Alerts derived from non-compliant/needs-review compliance records and unhealthy models.
+
+`network` is relative host network activity, not a measurement of link saturation.
+
+### Compliance (`/compliance`, admin/compliance scope)
+
+- “Run Checks” executes the configuration checks in `src/compliance/checks.py`.
+- Results are stored as compliance records and written to `compliance_logs/` as timestamped JSON reports.
+- The summary shows the latest record per regulation and an overall score.
+- “Export Report” downloads the currently displayed records as JSON.
+- Recent audit activity includes compliance and administrative audit entries.
+
+**Important:** these are configuration-level checks against values in `config/compliance_config.json`. They do not collect evidence, certify compliance, or constitute legal advice. EO 14110, OMB M-24-10, and NIST AI RMF are design references only.
+
+### Security (`/security`, admin/security scope)
+
+Displays observable controls and recent audit events:
+
+- RBAC roles configured;
+- non-placeholder JWT secret strength;
+- restricted CORS origins;
+- at least one active administrator;
+- access-token lifetime ≤ 60 minutes;
+- audit-log table availability.
+
+The report can be downloaded as JSON. This page reports observable application configuration; it does not perform a full vulnerability assessment.
+
+### Configuration (`/config`, admin only)
+
+Persists non-secret settings in the database:
+
+- general: platform name, environment, debug flag, data retention, max concurrent models;
+- security: password policy label, session timeout, IP whitelist, MFA flag, audit logging;
+- integrations: AWS region, monitoring service;
+- notifications: email/Slack digest flags and alert threshold.
+
+Webhooks, API tokens, and credentials are intentionally **not** accepted or stored here. The MFA, IP-whitelist, and notification flags are configuration values only; they are not enforced or sent.
+
+## Model registry and monitoring API
+
+There is no model-creation page. Use the API:
 
 ```bash
-curl -X POST https://ai-safety-governance.example.com/api/v1/scan \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"scan_type": "security", "target": "..."}'
+TOKEN=$(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/token \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'username=admin@example.com&password=<password>' \
+  | python -c 'import sys,json; print(json.load(sys.stdin)["access_token"])')
+
+# Register a model version
+curl -X POST http://127.0.0.1:8000/api/v1/models/versions \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"risk-classifier","version":"1.0.0","version_metadata":{"framework":"sklearn"},"status":"deployed"}'
+
+# Record a metric (use the returned version id)
+curl -X POST http://127.0.0.1:8000/api/v1/models/monitoring \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"version_id":1,"metric_name":"accuracy","metric_value":{"value":0.94}}'
 ```
+
+Registered versions and metrics appear on the Monitoring page. This is a log/registry, not an inference service.
+
+## Compliance workflow
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/compliance/checks/run \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -H "Authorization: Bearer $TOKEN" \
+  http://127.0.0.1:8000/api/v1/compliance/summary
+```
+
+Outputs:
+
+- records in the `compliance_records` table;
+- audit entries in `audit_logs`;
+- JSON reports and audit logs under `compliance_logs/` (or `COMPLIANCE_AUDIT_DIR`).
+
+The checked thresholds are:
+
+| Framework | Configuration requirement |
+| --- | --- |
+| GDPR | breach notification ≤ 72 hours and notification contacts present |
+| HIPAA | breach reporting ≤ 60 days and 100% access-logging coverage declared |
+| CCPA | data-deletion response ≤ 45 days and opt-out mechanism declared |
+
+Edit `config/compliance_config.json` to match your own controls; re-run checks afterwards.
+
+## Monitoring and observability
+
+- `GET /health` — process liveness (no database access).
+- `GET /ready` — database connectivity (503 when unavailable).
+- `GET /metrics` — a liveness gauge in Prometheus exposition format.
+- Prometheus/Grafana in Docker Compose verify scraping and dashboard availability; the app does not currently export request, latency, or model metrics beyond the liveness gauge.
+- Docker Compose: Prometheus <http://localhost:9090>, Grafana <http://localhost:3000> (`admin`/`admin` for local development only).
 
 ## Troubleshooting
 
-### Common Issues
+| Symptom | Cause / resolution |
+| --- | --- |
+| Frontend loads but API calls fail | Backend not running, wrong port, or `VITE_API_PROXY_TARGET` points elsewhere. Local default is `http://127.0.0.1:8000`. |
+| Login works but admin pages show Access Denied | The account is not a superuser and lacks the required role. Use the seeded administrator or promote the user as an admin. |
+| `port is already allocated` in Docker | Another local service owns 5173/5002/9090/3000. Stop it or remap the Compose ports. |
+| macOS: API on port 5000 behaves strangely | AirPlay Receiver may own 5000. Use 8000 locally or 5002 through Docker. |
+| `alembic upgrade head` fails on an old DB | The new schema-alignment migration expects the original initial revision. Back up data and follow the migration error; the provided Docker flow starts from a fresh PostgreSQL volume. |
+| Settings changes do not enforce MFA/IP rules | Only persistence is implemented; enforcement is a documented limitation. |
+| Compliance checks show 100% but you need regulatory evidence | The checks validate configuration only. Collect and review supporting evidence separately. |
 
-1. Authentication issues:
+## Resetting local development data
 
-- Check SSO configuration
-- Verify MFA setup
-- Check role assignments
+SQLite data is untracked and safe to recreate:
 
-2. Performance issues:
+```bash
+# Stop the backend first.
+rm -f ai_safety_governance.db
+python -m uvicorn src.main:app --reload --port 8000
+```
 
-- Check resource utilization
-- Verify network connectivity
-- Check system logs
+For Docker, remove the PostgreSQL volume explicitly (this deletes Docker-local data):
 
-3. Alert issues:
-
-- Verify alert configurations
-- Check notification channels
-- Verify alert conditions
-
-### Support
-
-For technical support:
-
-1. Internal support:
-
-- Contact security team for security issues
-- Contact DevOps for infrastructure issues
-- Contact data science team for model issues
-
-2. External support:
-
-- Open GitHub issues for bugs
-- Contact vendor support for third-party issues
-- Consult documentation for guidance
+```bash
+docker compose down -v
+docker compose up --build
+```

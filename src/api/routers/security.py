@@ -1,7 +1,7 @@
 """Security posture API backed by configuration and audit data."""
 
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, Security
@@ -13,9 +13,31 @@ from ..security import (
     is_default_secret_key,
 )
 from ...database import get_db
+from ...utils.time import utcnow
 from ...database.models import AuditLog, Role, User
 
 router = APIRouter()
+
+EVENT_MESSAGES = {
+    ("run_checks", "compliance_check"): "Ran compliance checks",
+    ("create", "compliance_record"): "Created compliance record",
+    ("update", "compliance_record"): "Updated compliance record",
+    ("delete", "compliance_record"): "Deleted compliance record",
+    ("create", "model_version"): "Registered model version",
+    ("update", "model_version"): "Updated model version",
+    ("delete", "model_version"): "Deleted model version",
+    ("create", "user"): "Created user",
+    ("update", "user"): "Updated user",
+    ("delete", "user"): "Deleted user",
+    ("update", "settings"): "Updated platform settings",
+}
+
+
+def _event_message(action: str, resource_type: str) -> str:
+    known = EVENT_MESSAGES.get((action, resource_type))
+    if known:
+        return known
+    return f"{action.replace('_', ' ').title()} {resource_type.replace('_', ' ')}"
 
 
 def _cors_is_restricted() -> bool:
@@ -38,9 +60,7 @@ async def get_security_summary(
     """Report observable security controls and recent audit events."""
     checks: List[Dict[str, Any]] = []
 
-    def add_check(
-        name: str, passed: bool, description: str, severity: str = "medium"
-    ) -> None:
+    def add_check(name: str, passed: bool, description: str, severity: str = "medium") -> None:
         checks.append(
             {
                 "name": name,
@@ -50,10 +70,17 @@ async def get_security_summary(
             }
         )
 
+    roles = db.query(Role).count()
+    add_check(
+        "rbac_roles",
+        roles > 0,
+        "At least one RBAC role is configured.",
+        "medium",
+    )
     add_check(
         "secret_key",
         not is_default_secret_key(),
-        "A non-default SECRET_KEY is configured for JWT signing.",
+        "A non-placeholder SECRET_KEY of at least 32 characters is configured.",
         "high",
     )
     add_check(
@@ -63,9 +90,7 @@ async def get_security_summary(
         "medium",
     )
     admin_count = (
-        db.query(User)
-        .filter(User.is_superuser.is_(True), User.is_active.is_(True))
-        .count()
+        db.query(User).filter(User.is_superuser.is_(True), User.is_active.is_(True)).count()
     )
     add_check(
         "admin_account",
@@ -94,7 +119,7 @@ async def get_security_summary(
     passed = sum(1 for check in checks if check["passed"])
     score = round((passed / len(checks)) * 100) if checks else 0
 
-    cutoff = datetime.utcnow() - timedelta(hours=24)
+    cutoff = utcnow() - timedelta(hours=24)
     recent_events = (
         db.query(AuditLog)
         .filter(AuditLog.timestamp >= cutoff)
@@ -106,10 +131,7 @@ async def get_security_summary(
         {
             "id": str(log.id),
             "type": "warning" if log.action in {"delete", "deactivate"} else "info",
-            "message": (
-                f"{log.action.replace('_', ' ').title()} "
-                f"{log.resource_type.replace('_', ' ')}"
-            ),
+            "message": _event_message(log.action, log.resource_type),
             "timestamp": log.timestamp,
         }
         for log in recent_events
@@ -136,7 +158,6 @@ async def get_security_summary(
         ]
 
     active_users = db.query(User).filter(User.is_active.is_(True)).count()
-    roles = db.query(Role).count()
 
     return {
         "score": score,
@@ -149,5 +170,5 @@ async def get_security_summary(
         },
         "events": events,
         "recommendations": recommendations,
-        "generated_at": datetime.utcnow(),
+        "generated_at": utcnow(),
     }

@@ -66,3 +66,22 @@ compliance_logs/compliance_report_*.json
 
 # OS
 .DS_Store
+
+# Local runtime data and generated artifacts
+*.db
+.venv/
+.e2e/
+.docker-config/
+.npm-cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+src/frontend/coverage/
+src/frontend/dist/
+docs/evidence/test-results/playwright-artifacts/
+compliance_logs/*.json
+compliance_logs/*.log
+!compliance_logs/.gitkeep
+*.db.init.lock

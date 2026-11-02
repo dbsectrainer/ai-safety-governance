@@ -47,8 +47,12 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 
 def is_default_secret_key() -> bool:
-    """Whether the application is using the insecure development secret."""
-    return SECRET_KEY == DEFAULT_SECRET_KEY
+    """Whether the application is using an insecure or placeholder secret."""
+    return (
+        SECRET_KEY == DEFAULT_SECRET_KEY
+        or len(SECRET_KEY) < 32
+        or SECRET_KEY.startswith("replace-with")
+    )
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

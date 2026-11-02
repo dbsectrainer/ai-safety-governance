@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T00:58:34.553Z",
+  "generated_at": "2026-11-02T01:37:19.650Z",
   "summary": {
     "score": 100,
     "total_regulations": 3,
@@ -8,52 +8,52 @@
       "non_compliant": 0,
       "needs_review": 0
     },
-    "last_run": "2026-11-02T00:58:33.585195",
+    "last_run": "2026-11-02T01:37:18.650150",
     "latest": [
       {
-        "regulation_type": "California Consumer Privacy Act",
         "status": "compliant",
-        "created_at": "2026-11-02T00:58:33.585195",
-        "next_review_date": "2026-12-02T00:58:33.584432",
+        "created_at": "2026-11-02T01:37:18.650150",
+        "regulation_type": "California Consumer Privacy Act",
+        "next_review_date": "2026-12-02T01:37:18.649623",
         "details": {
           "description": "CCPA configuration: data-deletion response <= 45 days and opt-out mechanism declared",
-          "rule_id": "3548895c-2a44-471e-82b1-b38f22ff902f",
-          "checked_at": "2026-11-01T19:58:33.584148",
+          "rule_id": "4d8c6a69-28e0-430c-a87c-3dafa726c7ca",
+          "checked_at": "2026-11-01T20:37:18.649387",
           "source": "configuration_check",
           "error": null
         },
         "id": 6,
-        "updated_at": "2026-11-02T00:58:33.585195"
+        "updated_at": "2026-11-02T01:37:18.650151"
       },
       {
-        "regulation_type": "General Data Protection Regulation",
         "status": "compliant",
-        "created_at": "2026-11-02T00:58:33.585189",
-        "next_review_date": "2026-12-02T00:58:33.584432",
+        "created_at": "2026-11-02T01:37:18.650145",
+        "regulation_type": "General Data Protection Regulation",
+        "next_review_date": "2026-12-02T01:37:18.649623",
         "details": {
           "description": "GDPR configuration: breach notification window <= 72 hours and compliance escalation contacts configured",
-          "rule_id": "203edb0d-5d11-4cc2-8ebf-b6c1d7a904f6",
-          "checked_at": "2026-11-01T19:58:33.584148",
+          "rule_id": "a1a66e54-862b-429a-b121-cfaaba053e27",
+          "checked_at": "2026-11-01T20:37:18.649387",
           "source": "configuration_check",
           "error": null
         },
         "id": 4,
-        "updated_at": "2026-11-02T00:58:33.585192"
+        "updated_at": "2026-11-02T01:37:18.650147"
       },
       {
-        "regulation_type": "Health Insurance Portability and Accountability Act",
         "status": "compliant",
-        "created_at": "2026-11-02T00:58:33.585193",
-        "next_review_date": "2026-12-02T00:58:33.584432",
+        "created_at": "2026-11-02T01:37:18.650148",
+        "regulation_type": "Health Insurance Portability and Accountability Act",
+        "next_review_date": "2026-12-02T01:37:18.649623",
         "details": {
           "description": "HIPAA configuration: breach reporting <= 60 days and 100% access-logging coverage declared",
-          "rule_id": "14841134-7b95-4e94-ac02-3bb634228c60",
-          "checked_at": "2026-11-01T19:58:33.584148",
+          "rule_id": "76001033-c5b1-4682-a4e6-9dac8dc4db73",
+          "checked_at": "2026-11-01T20:37:18.649387",
           "source": "configuration_check",
           "error": null
         },
         "id": 5,
-        "updated_at": "2026-11-02T00:58:33.585194"
+        "updated_at": "2026-11-02T01:37:18.650149"
       }
     ]
   },
@@ -63,90 +63,90 @@
       "status": "compliant",
       "details": {
         "description": "CCPA configuration: data-deletion response <= 45 days and opt-out mechanism declared",
-        "rule_id": "3548895c-2a44-471e-82b1-b38f22ff902f",
-        "checked_at": "2026-11-01T19:58:33.584148",
+        "rule_id": "4d8c6a69-28e0-430c-a87c-3dafa726c7ca",
+        "checked_at": "2026-11-01T20:37:18.649387",
         "source": "configuration_check",
         "error": null
       },
-      "next_review_date": "2026-12-02T00:58:33.584432",
+      "next_review_date": "2026-12-02T01:37:18.649623",
       "id": 6,
-      "created_at": "2026-11-02T00:58:33.585195",
-      "updated_at": "2026-11-02T00:58:33.585195"
+      "created_at": "2026-11-02T01:37:18.650150",
+      "updated_at": "2026-11-02T01:37:18.650151"
     },
     {
       "regulation_type": "Health Insurance Portability and Accountability Act",
       "status": "compliant",
       "details": {
         "description": "HIPAA configuration: breach reporting <= 60 days and 100% access-logging coverage declared",
-        "rule_id": "14841134-7b95-4e94-ac02-3bb634228c60",
-        "checked_at": "2026-11-01T19:58:33.584148",
+        "rule_id": "76001033-c5b1-4682-a4e6-9dac8dc4db73",
+        "checked_at": "2026-11-01T20:37:18.649387",
         "source": "configuration_check",
         "error": null
       },
-      "next_review_date": "2026-12-02T00:58:33.584432",
+      "next_review_date": "2026-12-02T01:37:18.649623",
       "id": 5,
-      "created_at": "2026-11-02T00:58:33.585193",
-      "updated_at": "2026-11-02T00:58:33.585194"
+      "created_at": "2026-11-02T01:37:18.650148",
+      "updated_at": "2026-11-02T01:37:18.650149"
     },
     {
       "regulation_type": "General Data Protection Regulation",
       "status": "compliant",
       "details": {
         "description": "GDPR configuration: breach notification window <= 72 hours and compliance escalation contacts configured",
-        "rule_id": "203edb0d-5d11-4cc2-8ebf-b6c1d7a904f6",
-        "checked_at": "2026-11-01T19:58:33.584148",
+        "rule_id": "a1a66e54-862b-429a-b121-cfaaba053e27",
+        "checked_at": "2026-11-01T20:37:18.649387",
         "source": "configuration_check",
         "error": null
       },
-      "next_review_date": "2026-12-02T00:58:33.584432",
+      "next_review_date": "2026-12-02T01:37:18.649623",
       "id": 4,
-      "created_at": "2026-11-02T00:58:33.585189",
-      "updated_at": "2026-11-02T00:58:33.585192"
+      "created_at": "2026-11-02T01:37:18.650145",
+      "updated_at": "2026-11-02T01:37:18.650147"
     },
     {
       "regulation_type": "California Consumer Privacy Act",
       "status": "compliant",
       "details": {
         "description": "CCPA configuration: data-deletion response <= 45 days and opt-out mechanism declared",
-        "rule_id": "7d241311-797d-4878-b792-0a43230f2c0e",
-        "checked_at": "2026-11-01T19:58:26.297854",
+        "rule_id": "045c6dd3-c84a-470f-87a6-eaf30920864a",
+        "checked_at": "2026-11-01T20:37:10.560816",
         "source": "configuration_check",
         "error": null
       },
-      "next_review_date": "2026-12-02T00:58:26.298126",
+      "next_review_date": "2026-12-02T01:37:10.561053",
       "id": 3,
-      "created_at": "2026-11-02T00:58:26.298919",
-      "updated_at": "2026-11-02T00:58:26.298920"
+      "created_at": "2026-11-02T01:37:10.561994",
+      "updated_at": "2026-11-02T01:37:10.561995"
     },
     {
       "regulation_type": "Health Insurance Portability and Accountability Act",
       "status": "compliant",
       "details": {
         "description": "HIPAA configuration: breach reporting <= 60 days and 100% access-logging coverage declared",
-        "rule_id": "3358f110-743b-4869-ba60-07cc5016e036",
-        "checked_at": "2026-11-01T19:58:26.297854",
+        "rule_id": "b995dcdc-1e43-4f35-a64f-34ba6cbd8c72",
+        "checked_at": "2026-11-01T20:37:10.560816",
         "source": "configuration_check",
         "error": null
       },
-      "next_review_date": "2026-12-02T00:58:26.298126",
+      "next_review_date": "2026-12-02T01:37:10.561053",
       "id": 2,
-      "created_at": "2026-11-02T00:58:26.298918",
-      "updated_at": "2026-11-02T00:58:26.298918"
+      "created_at": "2026-11-02T01:37:10.561990",
+      "updated_at": "2026-11-02T01:37:10.561993"
     },
     {
       "regulation_type": "General Data Protection Regulation",
       "status": "compliant",
       "details": {
         "description": "GDPR configuration: breach notification window <= 72 hours and compliance escalation contacts configured",
-        "rule_id": "0205d08a-e16a-47ff-bd03-e1bd4510ffb9",
-        "checked_at": "2026-11-01T19:58:26.297854",
+        "rule_id": "7662d84f-602f-484f-a8ed-b0b40efdad5e",
+        "checked_at": "2026-11-01T20:37:10.560816",
         "source": "configuration_check",
         "error": null
       },
-      "next_review_date": "2026-12-02T00:58:26.298126",
+      "next_review_date": "2026-12-02T01:37:10.561053",
       "id": 1,
-      "created_at": "2026-11-02T00:58:26.298916",
-      "updated_at": "2026-11-02T00:58:26.298917"
+      "created_at": "2026-11-02T01:37:10.561967",
+      "updated_at": "2026-11-02T01:37:10.561972"
     }
   ]
 }

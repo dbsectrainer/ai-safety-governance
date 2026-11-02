@@ -20,6 +20,7 @@ from .api.routers import (
     users,
 )
 from .database import engine, init_db
+from .database.bootstrap import ensure_default_roles
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ def _cors_origins() -> list[str]:
 async def lifespan(_app: FastAPI):
     """Initialise the schema and optional bootstrap administrator."""
     init_db()
+    ensure_default_roles()
     try:
         from .scripts.seed_admin import ensure_admin_from_env
 
@@ -85,9 +87,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     response.headers.setdefault("X-XSS-Protection", "1; mode=block")
-    response.headers.setdefault(
-        "Permissions-Policy", "geolocation=(), microphone=(), camera=()"
-    )
+    response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
     return response
 
 
@@ -159,6 +159,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "src.main:app",
         host=os.getenv("HOST", "0.0.0.0"),
-        port=int(os.getenv("PORT", "5000")),
+        port=int(os.getenv("PORT", "8000")),
         reload=os.getenv("RELOAD", "false").lower() == "true",
     )

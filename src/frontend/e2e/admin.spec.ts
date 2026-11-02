@@ -111,7 +111,7 @@ test("administrator can run compliance checks and export a report", async ({
   await expect(
     page.getByText("California Consumer Privacy Act", { exact: true }),
   ).toBeVisible();
-  await expect(page.getByText("Recent Compliance Activity")).toBeVisible();
+  await expect(page.getByText("Recent Audit Activity")).toBeVisible();
 
   await capture(page, "compliance-checks.png");
 

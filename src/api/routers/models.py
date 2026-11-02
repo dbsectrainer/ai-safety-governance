@@ -44,9 +44,7 @@ def _add_audit(
     )
 
 
-@router.post(
-    "/versions", response_model=VersionInDB, status_code=status.HTTP_201_CREATED
-)
+@router.post("/versions", response_model=VersionInDB, status_code=status.HTTP_201_CREATED)
 async def create_model_version(
     model_version: VersionCreate,
     current_user: User = Security(get_current_active_user, scopes=["models"]),
@@ -158,18 +156,14 @@ async def update_model_version(
         )
 
 
-@router.post(
-    "/monitoring", response_model=MonitoringLogInDB, status_code=status.HTTP_201_CREATED
-)
+@router.post("/monitoring", response_model=MonitoringLogInDB, status_code=status.HTTP_201_CREATED)
 async def create_monitoring_log(
     log_entry: MonitoringLogCreate,
     current_user: User = Security(get_current_active_user, scopes=["models"]),
     db: Session = Depends(get_db),
 ) -> Any:
     """Record a monitoring metric for a model version."""
-    model_version = (
-        db.query(ModelVersion).filter(ModelVersion.id == log_entry.version_id).first()
-    )
+    model_version = db.query(ModelVersion).filter(ModelVersion.id == log_entry.version_id).first()
     if not model_version:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

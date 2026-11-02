@@ -1,0 +1,55 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.7, pytest-9.2.0, pluggy-1.7.0
+rootdir: /Users/newtechlab/Documents/GitHub/ai-safety-governance
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: platformdirs-4.14.3, cov-7.1.0, anyio-4.16.0
+collected 32 items
+
+tests/api/test_auth.py ............                                      [ 37%]
+tests/api/test_platform.py .......                                       [ 59%]
+tests/api/test_users.py ........                                         [ 84%]
+tests/compliance/test_regulatory_alignment.py ...../Users/newtechlab/Documents/GitHub/ai-safety-governance/.venv/lib/python3.12/site-packages/coverage/inorout.py:558: CoverageWarning: Module src/main.py was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.17.0/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
+                      [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/newtechlab/Documents/GitHub/ai-safety-governance/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/newtechlab/Documents/GitHub/ai-safety-governance/.venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.12.7-final-0 _______________
+
+Name                                                                         Stmts   Miss  Cover   Missing
+----------------------------------------------------------------------------------------------------------
+src/api/__init__.py                                                              0      0   100%
+src/api/routers/auth.py                                                         55      6    89%   91, 110-113, 139
+src/api/routers/compliance.py                                                  126     20    84%   142-145, 205-208, 244, 257, 271-274, 299, 319, 335-338
+src/api/routers/dashboard.py                                                    50      5    90%   75-80
+src/api/routers/models.py                                                       88     21    76%   84-87, 123, 136, 150-153, 168, 180-183, 198, 217, 234-237
+src/api/routers/monitoring.py                                                  153     39    75%   48, 81-90, 121, 135, 140, 142, 144, 174, 198-207, 259-264, 286-297, 314-315, 326-327
+src/api/routers/security.py                                                     45      1    98%   40
+src/api/routers/settings.py                                                     74     12    84%   76, 84, 89, 112, 118, 145-147, 169-172
+src/api/routers/users.py                                                       114     31    73%   38-39, 45-46, 57, 66-69, 83, 88, 120-123, 164, 167-168, 174-175, 186-187, 213-216, 231, 255-258
+src/api/schemas.py                                                             136      5    96%   41, 59-61, 67
+src/api/security.py                                                             77     12    84%   112, 115, 122, 141, 150, 157, 160-168
+src/api/serializers.py                                                           4      0   100%
+src/compliance/__init__.py                                                       0      0   100%
+src/compliance/checks.py                                                        21      1    95%   17
+src/compliance/regulatory_alignment.py                                          95     11    88%   118-120, 214-231, 235
+src/database/__init__.py                                                        85     27    68%   47-63, 73, 98-99, 109-120, 145, 153-154, 159-162
+src/database/bootstrap.py                                                       31      9    71%   57-64, 67
+src/database/migrations/env.py                                                  33      6    82%   15, 38-48, 76
+src/database/migrations/versions/20241117_071740_initial_database_setup.py      38     30    21%   21-101, 121-135
+src/database/migrations/versions/20261101_120000_align_schema.py                46     38    17%   26-79, 91-125
+src/database/models.py                                                          96      3    97%   54-56
+src/utils/__init__.py                                                            0      0   100%
+src/utils/time.py                                                                3      0   100%
+----------------------------------------------------------------------------------------------------------
+TOTAL                                                                         1370    277    80%
+======================= 32 passed, 2 warnings in 12.66s ========================

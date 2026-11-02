@@ -1,0 +1,42 @@
+(node:45916) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[WebServer] INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+[WebServer] INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade  -> be9906a7d2c3, Initial database setup
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade be9906a7d2c3 -> 7a1c9f2d4b6e, Align schema with the SQLAlchemy models
+[WebServer] INFO:     Started server process [45917]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:5001 (Press CTRL+C to quit)
+[WebServer] (node:45967) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 14 tests using 1 worker
+
+(node:45974) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:45974) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:45974) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › e2e/admin.spec.ts:5:1 › administrator dashboard shows live metrics, growth and activity (4.6s)
+  ✓   2 [chromium] › e2e/admin.spec.ts:36:1 › administrator can create, edit, deactivate and delete a user (3.9s)
+  ✓   3 [chromium] › e2e/admin.spec.ts:100:1 › administrator can run compliance checks and export a report (2.8s)
+  ✓   4 [chromium] › e2e/admin.spec.ts:140:1 › monitoring page displays live host and model metrics (2.5s)
+  ✓   5 [chromium] › e2e/admin.spec.ts:158:1 › security page displays observable control checks (2.3s)
+  ✓   6 [chromium] › e2e/admin.spec.ts:174:1 › administrator settings persist after a reload (2.6s)
+  ✓   7 [chromium] › e2e/auth.spec.ts:3:1 › a new user can register, sign in, and view the dashboard (3.1s)
+  ✓   8 [chromium] › e2e/auth.spec.ts:40:1 › an administrator can sign out (1.5s)
+  ✓   9 [chromium] › e2e/auth.spec.ts:55:1 › a regular user is denied admin pages but can use the dashboard (3.5s)
+  ✓  10 [chromium] › e2e/public.spec.ts:3:1 › landing page renders and remains usable on desktop and mobile (2.7s)
+  ✓  11 [chromium] › e2e/public.spec.ts:43:1 › login page is reachable from the landing page (1.3s)
+  ✓  12 [chromium] › e2e/public.spec.ts:59:1 › unauthenticated dashboard access redirects to login (462ms)
+  ✓  13 [chromium] › e2e/public.spec.ts:65:1 › landing content is visible immediately without waiting for entrance animations (499ms)
+  ✓  14 [chromium] › e2e/responsive.spec.ts:3:1 › mobile navigation opens, routes, and stays within the viewport (4.0s)
+
+  14 passed (49.0s)
+
+To open last HTML report run:
+
+  npx playwright show-report ../../docs/evidence/test-results/playwright-report
+
+E2E_EXIT:0

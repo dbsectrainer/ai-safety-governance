@@ -1,6 +1,6 @@
 """Dashboard summary API backed by real database aggregates."""
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, Security
@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from ..security import get_current_active_user
 from ...database import get_db
+from ...utils.time import utcnow
 from ...database.models import AuditLog, ComplianceRecord, ModelVersion, User
 from .monitoring import _read_system_metrics
 
@@ -15,9 +16,7 @@ router = APIRouter()
 
 
 def _compliance_snapshot(db: Session) -> Dict[str, Any]:
-    records = (
-        db.query(ComplianceRecord).order_by(ComplianceRecord.created_at.desc()).all()
-    )
+    records = db.query(ComplianceRecord).order_by(ComplianceRecord.created_at.desc()).all()
     latest: Dict[str, ComplianceRecord] = {}
     for record in records:
         latest.setdefault(record.regulation_type, record)
@@ -30,9 +29,7 @@ def _compliance_snapshot(db: Session) -> Dict[str, Any]:
     for record in latest.values():
         counts[record.status] = counts.get(record.status, 0) + 1
         weighted += (
-            100
-            if record.status == "compliant"
-            else 50 if record.status == "needs_review" else 0
+            100 if record.status == "compliant" else 50 if record.status == "needs_review" else 0
         )
     return {
         "score": round(weighted / len(latest)),
@@ -43,7 +40,7 @@ def _compliance_snapshot(db: Session) -> Dict[str, Any]:
 
 def _performance_series(db: Session) -> List[Dict[str, Any]]:
     """Cumulative user/model counts in 2-hour buckets over the last day."""
-    now = datetime.utcnow()
+    now = utcnow()
     series = []
     for index in range(12, -1, -1):
         bucket = now - timedelta(hours=index * 2)
@@ -51,9 +48,7 @@ def _performance_series(db: Session) -> List[Dict[str, Any]]:
             {
                 "timestamp": int(bucket.timestamp() * 1000),
                 "users": db.query(User).filter(User.created_at <= bucket).count(),
-                "models": db.query(ModelVersion)
-                .filter(ModelVersion.created_at <= bucket)
-                .count(),
+                "models": db.query(ModelVersion).filter(ModelVersion.created_at <= bucket).count(),
             }
         )
     return series

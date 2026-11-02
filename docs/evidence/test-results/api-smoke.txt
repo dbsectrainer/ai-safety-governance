@@ -1,0 +1,17 @@
+# API smoke test against final local Gunicorn (port 8000)
+
+GET /health: 200
+GET /ready: 200
+GET /docs: 200
+GET /openapi.json: 200 paths=28
+POST /api/v1/auth/token: 200
+GET /api/v1/users/me: 200
+GET /api/v1/users/: 200
+GET /api/v1/dashboard/summary: 200
+GET /api/v1/monitoring/system: 200
+GET /api/v1/monitoring/models/metrics: 200
+GET /api/v1/compliance/summary: 200
+GET /api/v1/security/summary: 200
+GET /api/v1/settings: 200
+POST /api/v1/compliance/checks/run: 200 score=100
+POST /api/v1/auth/refresh-token (wrong password): 401

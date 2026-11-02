@@ -1,0 +1,8 @@
+{
+  "title": "AI Safety Governance Platform - Ensure Responsible AI Development",
+  "heading": "AI Safety Governance Platform",
+  "dashboardHeading": "Dashboard",
+  "url": "http://127.0.0.1:4173/dashboard",
+  "consoleErrors": [],
+  "apiFailures": []
+}

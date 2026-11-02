@@ -1,0 +1,211 @@
+
+> frontend@0.0.0 test:coverage
+> jest --coverage --runInBand
+
+ts-jest[ts-jest-transformer] (WARN) Define `ts-jest` config under `globals` is deprecated. Please do
+transform: {
+    <transform_regex>: ['ts-jest', { /* ts-jest config goes here in Jest */ }],
+},
+See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/presets#advanced
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in /Users/newtechlab/Documents/GitHub/ai-safety-governance/src/frontend/tsconfig.test.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+PASS src/components/Monitoring/__tests__/ResourceUtilizationCard.test.tsx
+  ● Console
+
+    console.warn
+      The width(0) and height(0) of chart should be greater than 0,
+             please check the style of container, or the props width(100%) and height(100%),
+             or add a minWidth(0) or minHeight(undefined) or use aspect(2) to control the
+             height and width.
+
+      30 |
+      31 | const renderWithTheme = (component: React.ReactElement) => {
+    > 32 |   return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
+         |                ^
+      33 | };
+      34 |
+      35 | describe("ResourceUtilizationCard", () => {
+
+      at warn (node_modules/recharts/lib/util/LogUtils.js:22:17)
+      at node_modules/recharts/lib/component/ResponsiveContainer.js:136:24
+      at updateMemo (node_modules/react-dom/cjs/react-dom.development.js:16427:19)
+      at Object.useMemo (node_modules/react-dom/cjs/react-dom.development.js:17067:16)
+      at useMemo (node_modules/react/cjs/react.development.js:1650:21)
+      at node_modules/recharts/lib/component/ResponsiveContainer.js:111:41
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+      at updateForwardRef (node_modules/react-dom/cjs/react-dom.development.js:19245:20)
+      at beginWork (node_modules/react-dom/cjs/react-dom.development.js:21675:16)
+      at beginWork$1 (node_modules/react-dom/cjs/react-dom.development.js:27465:14)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom.development.js:26599:12)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom.development.js:26505:5)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom.development.js:26473:7)
+      at performConcurrentWorkOnRoot (node_modules/react-dom/cjs/react-dom.development.js:25777:74)
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:188:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:287:10)
+      at renderWithTheme (src/components/Monitoring/__tests__/ResourceUtilizationCard.test.tsx:32:16)
+      at Object.<anonymous> (src/components/Monitoring/__tests__/ResourceUtilizationCard.test.tsx:37:5)
+
+    console.warn
+      The width(0) and height(0) of chart should be greater than 0,
+             please check the style of container, or the props width(100%) and height(100%),
+             or add a minWidth(0) or minHeight(undefined) or use aspect(2) to control the
+             height and width.
+
+      30 |
+      31 | const renderWithTheme = (component: React.ReactElement) => {
+    > 32 |   return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
+         |                ^
+      33 | };
+      34 |
+      35 | describe("ResourceUtilizationCard", () => {
+
+      at warn (node_modules/recharts/lib/util/LogUtils.js:22:17)
+      at node_modules/recharts/lib/component/ResponsiveContainer.js:136:24
+      at updateMemo (node_modules/react-dom/cjs/react-dom.development.js:16427:19)
+      at Object.useMemo (node_modules/react-dom/cjs/react-dom.development.js:17067:16)
+      at useMemo (node_modules/react/cjs/react.development.js:1650:21)
+      at node_modules/recharts/lib/component/ResponsiveContainer.js:111:41
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+      at updateForwardRef (node_modules/react-dom/cjs/react-dom.development.js:19245:20)
+      at beginWork (node_modules/react-dom/cjs/react-dom.development.js:21675:16)
+      at beginWork$1 (node_modules/react-dom/cjs/react-dom.development.js:27465:14)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom.development.js:26599:12)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom.development.js:26505:5)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom.development.js:26473:7)
+      at performConcurrentWorkOnRoot (node_modules/react-dom/cjs/react-dom.development.js:25777:74)
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:188:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:287:10)
+      at renderWithTheme (src/components/Monitoring/__tests__/ResourceUtilizationCard.test.tsx:32:16)
+      at Object.<anonymous> (src/components/Monitoring/__tests__/ResourceUtilizationCard.test.tsx:78:5)
+
+    console.warn
+      The width(0) and height(0) of chart should be greater than 0,
+             please check the style of container, or the props width(100%) and height(100%),
+             or add a minWidth(0) or minHeight(undefined) or use aspect(2) to control the
+             height and width.
+
+      30 |
+      31 | const renderWithTheme = (component: React.ReactElement) => {
+    > 32 |   return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
+         |                ^
+      33 | };
+      34 |
+      35 | describe("ResourceUtilizationCard", () => {
+
+      at warn (node_modules/recharts/lib/util/LogUtils.js:22:17)
+      at node_modules/recharts/lib/component/ResponsiveContainer.js:136:24
+      at updateMemo (node_modules/react-dom/cjs/react-dom.development.js:16427:19)
+      at Object.useMemo (node_modules/react-dom/cjs/react-dom.development.js:17067:16)
+      at useMemo (node_modules/react/cjs/react.development.js:1650:21)
+      at node_modules/recharts/lib/component/ResponsiveContainer.js:111:41
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+      at updateForwardRef (node_modules/react-dom/cjs/react-dom.development.js:19245:20)
+      at beginWork (node_modules/react-dom/cjs/react-dom.development.js:21675:16)
+      at beginWork$1 (node_modules/react-dom/cjs/react-dom.development.js:27465:14)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom.development.js:26599:12)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom.development.js:26505:5)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom.development.js:26473:7)
+      at performConcurrentWorkOnRoot (node_modules/react-dom/cjs/react-dom.development.js:25777:74)
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:188:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:287:10)
+      at renderWithTheme (src/components/Monitoring/__tests__/ResourceUtilizationCard.test.tsx:32:16)
+      at Object.<anonymous> (src/components/Monitoring/__tests__/ResourceUtilizationCard.test.tsx:132:5)
+
+PASS src/components/Monitoring/__tests__/ModelPerformanceCard.test.tsx
+  ● Console
+
+    console.warn
+      The width(0) and height(0) of chart should be greater than 0,
+             please check the style of container, or the props width(100%) and height(100%),
+             or add a minWidth(0) or minHeight(undefined) or use aspect(2) to control the
+             height and width.
+
+      35 |
+      36 | const renderWithTheme = (component: React.ReactElement) => {
+    > 37 |   return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
+         |                ^
+      38 | };
+      39 |
+      40 | describe("ModelPerformanceCard", () => {
+
+      at warn (node_modules/recharts/lib/util/LogUtils.js:22:17)
+      at node_modules/recharts/lib/component/ResponsiveContainer.js:136:24
+      at updateMemo (node_modules/react-dom/cjs/react-dom.development.js:16427:19)
+      at Object.useMemo (node_modules/react-dom/cjs/react-dom.development.js:17067:16)
+      at useMemo (node_modules/react/cjs/react.development.js:1650:21)
+      at node_modules/recharts/lib/component/ResponsiveContainer.js:111:41
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+      at updateForwardRef (node_modules/react-dom/cjs/react-dom.development.js:19245:20)
+      at beginWork (node_modules/react-dom/cjs/react-dom.development.js:21675:16)
+      at beginWork$1 (node_modules/react-dom/cjs/react-dom.development.js:27465:14)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom.development.js:26599:12)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom.development.js:26505:5)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom.development.js:26473:7)
+      at performConcurrentWorkOnRoot (node_modules/react-dom/cjs/react-dom.development.js:25777:74)
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:188:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:287:10)
+      at renderWithTheme (src/components/Monitoring/__tests__/ModelPerformanceCard.test.tsx:37:16)
+      at Object.<anonymous> (src/components/Monitoring/__tests__/ModelPerformanceCard.test.tsx:47:5)
+
+    console.warn
+      The width(0) and height(0) of chart should be greater than 0,
+             please check the style of container, or the props width(100%) and height(100%),
+             or add a minWidth(0) or minHeight(undefined) or use aspect(2) to control the
+             height and width.
+
+      35 |
+      36 | const renderWithTheme = (component: React.ReactElement) => {
+    > 37 |   return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
+         |                ^
+      38 | };
+      39 |
+      40 | describe("ModelPerformanceCard", () => {
+
+      at warn (node_modules/recharts/lib/util/LogUtils.js:22:17)
+      at node_modules/recharts/lib/component/ResponsiveContainer.js:136:24
+      at updateMemo (node_modules/react-dom/cjs/react-dom.development.js:16427:19)
+      at Object.useMemo (node_modules/react-dom/cjs/react-dom.development.js:17067:16)
+      at useMemo (node_modules/react/cjs/react.development.js:1650:21)
+      at node_modules/recharts/lib/component/ResponsiveContainer.js:111:41
+      at renderWithHooks (node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+      at updateForwardRef (node_modules/react-dom/cjs/react-dom.development.js:19245:20)
+      at beginWork (node_modules/react-dom/cjs/react-dom.development.js:21675:16)
+      at beginWork$1 (node_modules/react-dom/cjs/react-dom.development.js:27465:14)
+      at performUnitOfWork (node_modules/react-dom/cjs/react-dom.development.js:26599:12)
+      at workLoopSync (node_modules/react-dom/cjs/react-dom.development.js:26505:5)
+      at renderRootSync (node_modules/react-dom/cjs/react-dom.development.js:26473:7)
+      at performConcurrentWorkOnRoot (node_modules/react-dom/cjs/react-dom.development.js:25777:74)
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:188:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:287:10)
+      at renderWithTheme (src/components/Monitoring/__tests__/ModelPerformanceCard.test.tsx:37:16)
+      at Object.<anonymous> (src/components/Monitoring/__tests__/ModelPerformanceCard.test.tsx:76:5)
+
+-----------------------------|---------|----------|---------|---------|-------------------
+File                         | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-----------------------------|---------|----------|---------|---------|-------------------
+All files                    |      74 |    38.88 |   64.28 |   72.34 |                   
+ ModelPerformanceCard.tsx    |   72.72 |    33.33 |   66.66 |   71.42 | 35-37,108-134     
+ ResourceUtilizationCard.tsx |      75 |    46.66 |    62.5 |   73.07 | 57,132-163        
+-----------------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 2 passed, 2 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        1.168 s, estimated 2 s
+Ran all test suites.

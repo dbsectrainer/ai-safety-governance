@@ -1,0 +1,19 @@
+WARNING:pip_audit._cache:Failed to write to cache directory, performance may be degraded: [Errno 2] No such file or directory: '/Users/newtechlab/Library/Caches/pip-audit/e/5/7/4/d/tmpnmie0_11'
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+WARNING:cachecontrol.controller:Cache entry deserialization failed, entry ignored
+Found 3 known vulnerabilities in 2 packages
+Name        Version ID              Fix Versions
+----------- ------- --------------- ------------
+python-jose 3.5.0   PYSEC-2026-4298
+ecdsa       0.19.2  PYSEC-2026-1325
+ecdsa       0.19.2  PYSEC-2026-1325

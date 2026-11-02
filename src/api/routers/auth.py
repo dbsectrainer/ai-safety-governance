@@ -30,11 +30,7 @@ router = APIRouter()
 
 def _find_user(db: Session, identifier: str) -> Optional[User]:
     """Find a user by email or username (login accepts both)."""
-    return (
-        db.query(User)
-        .filter(or_(User.email == identifier, User.username == identifier))
-        .first()
-    )
+    return db.query(User).filter(or_(User.email == identifier, User.username == identifier)).first()
 
 
 def _token_response(user: User) -> dict:

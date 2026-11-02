@@ -1,5 +1,7 @@
 # Security Policy
 
+> **Implementation status (2026-11-01):** This policy describes the target security posture, including controls that are not yet implemented. The verified running controls are JWT authentication, bcrypt password hashing, scope-based RBAC, password-verified refresh, explicit CORS, baseline security headers, and audit logging. Server-side rate limiting, token revocation, enforced MFA, and CSP are **not** implemented. See the [verification report](evidence/verification-report.md) and README security notes for the exact verified scope.
+
 ## Overview
 
 This security policy outlines the comprehensive security measures implemented in the AI Safety & Governance platform, ensuring protection of AI models, data, and infrastructure while maintaining compliance with industry standards and regulations.

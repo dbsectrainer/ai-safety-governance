@@ -20,3 +20,6 @@ ai_safety_governance.db
 config/secrets.env
 compliance_logs/*.log
 compliance_logs/*.json
+.e2e
+.pytest_cache
+.mypy_cache

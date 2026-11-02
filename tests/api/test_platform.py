@@ -197,3 +197,5 @@ def test_security_summary(client, admin_headers):
     assert body["checks"]
     assert body["recommendations"]
     assert body["metrics"]["security_score"] == body["score"]
+    assert body["metrics"]["access_policies"] >= 4
+    assert any(check["name"] == "rbac_roles" and check["passed"] for check in body["checks"])

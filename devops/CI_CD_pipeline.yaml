@@ -1,3 +1,7 @@
+# REFERENCE PIPELINE — NOT EXECUTED BY GITHUB ACTIONS.
+# The authoritative, executable CI workflow is .github/workflows/ci.yml.
+# This file is retained as an architecture reference; some commands and test
+# paths below target modules that are not part of the verified application.
 name: AI Safety & Governance CI/CD
 
 on:

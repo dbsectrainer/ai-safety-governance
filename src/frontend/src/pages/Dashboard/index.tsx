@@ -41,6 +41,7 @@ import {
 import { dashboardService } from "../../services/dashboard";
 import type { DashboardSummary } from "../../services/dashboard";
 import { getErrorMessage } from "../../services/api";
+import { formatAuditAction } from "../../utils/format";
 
 interface DashboardMetric {
   id: string;
@@ -357,7 +358,7 @@ const Dashboard = () => {
                             )}
                           </ListItemIcon>
                           <ListItemText
-                            primary={`${log.action.replace("_", " ")} ${log.resource_type.replace("_", " ")}`}
+                            primary={formatAuditAction(log.action, log.resource_type)}
                             secondary={format(
                               new Date(log.timestamp),
                               "MMM d, yyyy HH:mm",

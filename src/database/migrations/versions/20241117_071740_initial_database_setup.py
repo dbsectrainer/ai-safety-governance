@@ -29,9 +29,7 @@ def upgrade():
         sa.Column("next_review_date", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_compliance_records_id"), "compliance_records", ["id"], unique=False
-    )
+    op.create_index(op.f("ix_compliance_records_id"), "compliance_records", ["id"], unique=False)
     op.create_table(
         "model_versions",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -43,9 +41,7 @@ def upgrade():
         sa.Column("status", sa.String(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_model_versions_id"), "model_versions", ["id"], unique=False
-    )
+    op.create_index(op.f("ix_model_versions_id"), "model_versions", ["id"], unique=False)
     op.create_table(
         "roles",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -101,9 +97,7 @@ def upgrade():
         ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_monitoring_logs_id"), "monitoring_logs", ["id"], unique=False
-    )
+    op.create_index(op.f("ix_monitoring_logs_id"), "monitoring_logs", ["id"], unique=False)
     op.create_table(
         "user_roles",
         sa.Column("user_id", sa.Integer(), nullable=False),

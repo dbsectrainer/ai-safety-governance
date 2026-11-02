@@ -7,7 +7,7 @@ metadata:
     app: ai-safety-governance
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "9090"
+    prometheus.io/port: "5000"
 spec:
   type: ClusterIP
   ports:
@@ -16,7 +16,7 @@ spec:
       protocol: TCP
       name: http
     - port: 9090
-      targetPort: metrics
+      targetPort: http
       protocol: TCP
       name: metrics
   selector:
@@ -102,12 +102,6 @@ metadata:
       more_set_headers "X-Frame-Options: DENY";
       more_set_headers "X-Content-Type-Options: nosniff";
       more_set_headers "X-XSS-Protection: 1; mode=block";
-    nginx.ingress.kubernetes.io/server-snippet: |
-      location / {
-        deny all;
-        auth_request /auth;
-        error_page 401 = /login;
-      }
 spec:
   tls:
     - hosts:
@@ -124,48 +118,3 @@ spec:
                 name: ai-safety-governance
                 port:
                   name: http
-          - path: /metrics
-            pathType: Prefix
-            backend:
-              service:
-                name: ai-safety-governance
-                port:
-                  name: metrics
----
-apiVersion: policy/v1
-kind: PodSecurityPolicy
-metadata:
-  name: ai-safety-governance-psp
-  annotations:
-    seccomp.security.alpha.kubernetes.io/allowedProfileNames: "runtime/default"
-    seccomp.security.alpha.kubernetes.io/defaultProfileName: "runtime/default"
-spec:
-  privileged: false
-  allowPrivilegeEscalation: false
-  requiredDropCapabilities:
-    - ALL
-  volumes:
-    - "configMap"
-    - "emptyDir"
-    - "projected"
-    - "secret"
-    - "downwardAPI"
-  hostNetwork: false
-  hostIPC: false
-  hostPID: false
-  runAsUser:
-    rule: "MustRunAsNonRoot"
-  seLinux:
-    rule: "RunAsAny"
-  supplementalGroups:
-    rule: "MustRunAs"
-    ranges:
-      - min: 1
-        max: 65535
-  fsGroup:
-    rule: "MustRunAs"
-    ranges:
-      - min: 1
-        max: 65535
-  readOnlyRootFilesystem: true
-  allowedHostPaths: []

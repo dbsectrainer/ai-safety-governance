@@ -1,169 +1,150 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for agents working in this repository.
 
-## Project Overview
+## Project overview
 
-This is an AI Safety & Governance platform that provides comprehensive tools for responsible AI development, monitoring, and compliance. The platform implements a microservices architecture with FastAPI backend, React/TypeScript frontend, and includes advanced monitoring, security, and compliance features.
+A full-stack AI governance reference application:
 
-## Development Commands
+- **Backend:** Python 3.12, FastAPI, SQLAlchemy 2.x, Alembic, JWT/bcrypt.
+- **Frontend:** React 18, TypeScript, Vite, Material UI, React Router, Axios.
+- **Database:** SQLite for local development/tests; PostgreSQL 15 in Docker.
+- **Verification:** pytest (32 tests), Jest (8 tests), Playwright (14 E2E tests), production build/preview smoke, Docker Compose smoke.
 
-### Backend (Python/FastAPI)
+The running application is a monolith with containerized services, not a microservice mesh. The original broader modules under `src/model_monitoring/`, `src/security/`, `src/documentation_generator/`, `src/gitops/`, `src/chaos_engineering/`, and `src/management_interface/` are prototypes not wired into the API. Do not describe them as active features.
 
-- **Start development environment**: `docker-compose up --build`
-- **Run backend only**: `cd src && python main.py`
-- **Database migrations**: `alembic upgrade head`
-- **Run tests**: `pytest`
-- **Lint**: `flake8 src/`
-- **Format**: `black src/`
-- **Type checking**: `mypy src/`
+The latest audit evidence is in `docs/evidence/verification-report.md`.
 
-### Frontend (React/TypeScript)
+## Commands
 
-- **Development server**: `cd src/frontend && npm run dev`
-- **Build**: `cd src/frontend && npm run build`
-- **Test**: `cd src/frontend && npm test`
-- **Test with coverage**: `cd src/frontend && npm run test:coverage`
-- **Lint**: `cd src/frontend && npm run lint`
-- **Lint fix**: `cd src/frontend && npm run lint:fix`
-- **Format**: `cd src/frontend && npm run format`
+### Backend (from the repository root)
 
-### Docker & Deployment
+```bash
+# One-time setup
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 
-- **Full development stack**: `docker-compose up --build`
-- **Kubernetes deployment**: `kubectl apply -f kubernetes/`
-- **Production build**: Build using Dockerfile in project root
+# Start local API (SQLite by default, port 8000)
+python -m uvicorn src.main:app --reload --port 8000
 
-## Architecture Overview
+# Or start via the package entry point
+python -m src
 
-### Core Services
+# Apply migrations
+alembic upgrade head
 
-- **Backend API** (FastAPI): REST API with authentication, compliance, and model management
-- **Frontend** (React/TypeScript): Web interface with Material-UI components
-- **Database** (PostgreSQL): Primary data storage with Alembic migrations
-- **Monitoring** (Prometheus/Grafana): Metrics collection and visualization
+# Tests
+pytest tests/ -q
+pytest tests/ --cov=src/api --cov=src/database --cov=src/main.py \
+  --cov=src/compliance --cov=src/utils --cov-report=term-missing
 
-### Key Modules
+# Lint/format for the verified API/core scope
+flake8 src/api src/database src/main.py src/scripts src/utils \
+  src/compliance/checks.py src/compliance/regulatory_alignment.py
+black --check src/api src/database src/main.py src/scripts src/utils \
+  src/compliance/checks.py src/compliance/regulatory_alignment.py
 
-- **Model Monitoring** (`src/model_monitoring/`): A/B testing, fairness monitoring, drift detection
-- **Security** (`src/security/`): Threat detection, privacy protection, differential privacy
-- **Compliance** (`src/compliance/`): Regulatory alignment and compliance frameworks
-- **Documentation Generator** (`src/documentation_generator/`): Automated documentation generation
-- **GitOps** (`src/gitops/`): Infrastructure deployment management
-- **Chaos Engineering** (`src/chaos_engineering/`): Resilience testing
+# Bootstrap an administrator
+ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='<strong-password>' \
+ADMIN_USERNAME=admin python -m src.scripts.seed_admin
+```
 
-### Database
+- Local port **8000** is intentional; macOS AirPlay commonly owns 5000.
+- `DB_AUTO_INIT=true` creates/stamps a fresh schema and upgrades versioned databases at startup.
+- Docker uses `DB_AUTO_INIT=false` because `src/start.sh` runs migrations first.
 
-- Uses SQLAlchemy ORM with Alembic for migrations
-- Database models in `src/database/models.py`
-- Connection configuration supports PostgreSQL
+### Frontend (from `src/frontend`)
 
-### API Structure
+```bash
+npm ci
+npm run dev          # http://127.0.0.1:5173
+npm run typecheck    # tsc -b
+npm run lint         # ESLint 9 flat config, zero warnings
+npm test             # Jest
+npm run test:coverage
+npm run build        # tsc -b && vite build
+npm run format       # Prettier (does not typecheck)
+npm run e2e          # Playwright; starts isolated backend on 5001
+```
 
-- All API routes prefixed with `/api/v1/`
-- Authentication endpoints: `/api/v1/auth/`
-- User management: `/api/v1/users/`
-- Compliance: `/api/v1/compliance/`
-- Model management: `/api/v1/models/`
-- Health check: `/health`
+- `VITE_API_PROXY_TARGET` controls the dev/preview proxy target (default `http://127.0.0.1:8000`).
+- `VITE_API_URL` should normally stay empty so requests use the same-origin `/api` proxy.
+- Playwright uses the installed Chrome channel locally; `CI=true` switches to bundled Chromium.
+- E2E writes screenshots to `docs/evidence/screenshots` and reports to `docs/evidence/test-results`.
 
-### Frontend Architecture
+### Docker
 
-- Vite build system with TypeScript
-- Material-UI for components
-- React Router for navigation
-- Axios for API communication
-- Jest for testing with Testing Library
-- Protected routes with authentication
+```bash
+cp .env.example .env   # set SECRET_KEY and ADMIN_*; never commit .env
+docker compose up --build
+```
 
-## Configuration Files
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5002 (container port 5000; host port 5002)
+- PostgreSQL: internal only (not published)
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000 (`admin`/`admin` development default)
 
-### Backend Configuration
+The Compose stack was verified healthy (backend, frontend, db, prometheus, grafana).
 
-- `requirements.txt`: Python dependencies
-- `alembic.ini`: Database migration configuration
-- `config/`: JSON configuration files for AWS, compliance, and documentation
-- Environment variables loaded from `config/secrets.env`
+## Architecture
 
-### Frontend Configuration
+### Backend layout
 
-- `src/frontend/package.json`: Node.js dependencies and scripts
-- `src/frontend/vite.config.ts`: Vite build configuration
-- `src/frontend/tsconfig.json`: TypeScript configuration
-- ESLint and Prettier configurations for code quality
+- `src/main.py` — FastAPI app, lifespan init/migrations/seed, CORS, security headers, health/readiness/metrics.
+- `src/api/routers/` — `auth`, `users`, `models`, `monitoring`, `compliance`, `dashboard`, `security`, `settings`.
+- `src/api/security.py` — JWT, passlib/bcrypt, scopes, current-user/role checks.
+- `src/database/__init__.py` — URL resolution (`DATABASE_URL` → `POSTGRES_*` → SQLite), engine/session, `init_db`.
+- `src/database/models.py` — users, roles, user_roles, audit_logs, model_versions, monitoring_logs, compliance_records, system_metric_samples, system_settings.
+- `src/database/bootstrap.py` — idempotent default roles (`admin`, `compliance-officer`, `security-officer`, `user`), safe under multiple workers.
+- `src/database/migrations/` — Alembic revisions; the second migration aligns legacy columns.
+- `src/compliance/` — regulatory enum/rule engine + configuration checks used by `/compliance/checks/run`.
 
-### Docker Configuration
+### Frontend layout
 
-- `Dockerfile`: Multi-stage build for production
-- `docker-compose.yml`: Development environment with all services
-- `src/frontend/Dockerfile.dev`: Frontend development container
+- `src/frontend/src/pages/` — Landing, Auth, Dashboard, Users, Monitoring, Compliance, Security, Config.
+- `src/frontend/src/services/` — shared Axios client and per-domain API clients.
+- `src/frontend/src/components/ProtectedRoute.tsx` — session validation and role gates.
+- `src/frontend/src/components/Layout/` — responsive shell, header/account menu/logout.
+- `src/frontend/e2e/` — Playwright fixtures, helpers, and specs.
 
-## Development Workflow
+### Auth and scopes
 
-### Local Development
+Scopes: `user`, `admin`, `models`, `compliance`, `security`.
 
-1. Ensure Docker and Docker Compose are installed
-2. Run `docker-compose up --build` to start all services
-3. Backend available at `http://localhost:5002`
-4. Frontend available at `http://localhost:5173`
-5. Grafana dashboard at `http://localhost:3000` (admin/admin)
-6. Prometheus at `http://localhost:9090`
+- Superusers get all scopes.
+- Regular users get `user` plus their role permission keys.
+- Self-registration never creates a superuser.
+- `/auth/refresh-token` must verify the password; do not reintroduce the old bypass.
+- There is no role-assignment UI; admin status is edited on the Users page.
 
-### Database Setup
+### Data / migrations
 
-- PostgreSQL runs in Docker container
-- Migrations handled by Alembic
-- Database initialization occurs automatically via `src/start.sh`
+- SQLite is for local development and tests; PostgreSQL for Docker/production.
+- The model-version uniqueness is a **unique index** (`uq_model_version`), not a constraint.
+- PostgreSQL URLs use the explicit `postgresql+psycopg2://` driver.
+- Fresh local DB: app creates/stamps the head. Existing DB: Alembic upgrade.
+- Do not commit `ai_safety_governance.db`, coverage output, Playwright artifacts, compliance reports, or `.env`.
 
-### Testing
+## Conventions
 
-- Backend: Use `pytest` for Python tests
-- Frontend: Use `npm test` for React component tests
-- Coverage reports available for frontend with `npm run test:coverage`
+- Keep API routes under `/api/v1` (health/docs/metrics remain at root).
+- Use Pydantic schemas for request/response validation; never return `hashed_password`.
+- Return generic user-facing errors; log the exception server-side.
+- Use `src/utils/time.utcnow()` for naive UTC timestamps to avoid the deprecated `datetime.utcnow`.
+- Add regression tests for auth/authorization changes and API workflow changes.
+- Frontend: keep API calls in `src/services`, handle loading/error/empty states, and add aria labels to icon-only controls.
+- Update `docs/evidence/verification-report.md` and relevant docs when behavior changes.
+- Never fabricate screenshots, test results, or verification claims.
 
-### Code Quality
+## Known limitations (do not silently “fix” by overclaiming)
 
-- Backend: Black formatting, Flake8 linting, MyPy type checking
-- Frontend: ESLint, Prettier, TypeScript strict mode
-- Pre-commit hooks configured via Husky and lint-staged
-
-## Key Implementation Details
-
-### Security Features
-
-- JWT-based authentication
-- CORS configuration for cross-origin requests
-- Differential privacy implementation
-- Threat detection and prevention
-- Secret management system
-
-### Monitoring & Observability
-
-- Prometheus metrics collection
-- Grafana visualization
-- Model performance monitoring
-- Fairness and bias detection
-- Predictive monitoring with rollback capabilities
-
-### Compliance Framework
-
-- GDPR and CCPA compliance tools
-- Regulatory alignment tracking
-- Audit trail generation
-- Privacy-preserving techniques
-
-### Infrastructure
-
-- Kubernetes deployment configurations
-- GitOps with FluxCD integration
-- Service mesh (Istio) configuration
-- Chaos engineering capabilities
-- Multi-cloud deployment support
-
-## Important Notes
-
-- The platform focuses on defensive security and responsible AI practices
-- All model monitoring includes fairness and bias detection
-- Privacy protection is built into core functionality
-- Infrastructure is designed for high availability and disaster recovery
-- Compliance frameworks are integrated throughout the system
+- Compliance checks are configuration-level GDPR/HIPAA/CCPA checks, not legal certification. EO 14110/OMB M-24-10/NIST are design references only.
+- No rate limiting, token denylist/rotation, CSP, or enforced MFA.
+- JWTs are stored in `localStorage`.
+- Settings flags for MFA/IP whitelist/notifications are not enforced and no notification sender exists.
+- Monitoring `network` is relative activity, not link saturation.
+- `/metrics` exposes only a liveness gauge.
+- Kubernetes manifests are static-reviewed but unverified; placeholders and cluster-specific egress/secrets are required.
+- Experimental modules require optional heavy dependencies and are not part of the running app.

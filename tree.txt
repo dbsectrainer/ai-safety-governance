@@ -1,28 +1,26 @@
 .
-├── CHANGELOG.md
-├── DEPLOYMENT.md
-├── Dockerfile
-├── README.md
-├── ai_safety_governance.db
-├── alembic.ini
 ├── compliance_logs
-│   └── compliance_report_20241112_195248.json
 ├── config
 │   ├── aws_config.json
 │   ├── compliance_config.json
 │   └── documentation_config.json
 ├── devops
-│   ├── CI_CD_pipeline.yaml
 │   ├── logging
 │   │   └── cloudwatch_config.json
-│   └── monitoring
-│       ├── prometheus_aws.yaml
-│       ├── prometheus_azure.yaml
-│       ├── prometheus_config.yaml
-│       ├── prometheus_gcp.yaml
-│       └── prometheus_local.yaml
-├── docker-compose.yml
+│   ├── monitoring
+│   │   ├── prometheus_aws.yaml
+│   │   ├── prometheus_azure.yaml
+│   │   ├── prometheus_config.yaml
+│   │   ├── prometheus_gcp.yaml
+│   │   └── prometheus_local.yaml
+│   └── CI_CD_pipeline.yaml
 ├── docs
+│   ├── evidence
+│   │   ├── build-results
+│   │   ├── screenshots
+│   │   ├── test-results
+│   │   ├── README.md
+│   │   └── verification-report.md
 │   ├── architecture.md
 │   ├── multi_cloud_deployment.md
 │   ├── security_policy.md
@@ -30,37 +28,31 @@
 ├── kubernetes
 │   ├── chaos
 │   │   └── chaos-mesh.yaml
-│   ├── deployment.yaml
 │   ├── flux
 │   │   └── gotk-components.yaml
 │   ├── service-mesh
 │   │   └── istio-config.yaml
+│   ├── deployment.yaml
 │   └── service.yaml
-├── requirements.txt
-├── roadmap.md
+├── scripts
+│   └── start-e2e-backend.sh
 ├── src
-│   ├── __init__.py
 │   ├── api
-│   │   ├── __init__.py
 │   │   ├── routers
-│   │   │   ├── auth.py
-│   │   │   ├── compliance.py
-│   │   │   ├── models.py
-│   │   │   └── users.py
+│   │   ├── __init__.py
 │   │   ├── schemas.py
-│   │   └── security.py
+│   │   ├── security.py
+│   │   └── serializers.py
 │   ├── chaos_engineering
 │   │   └── chaos_manager.py
 │   ├── compliance
 │   │   ├── __init__.py
+│   │   ├── checks.py
 │   │   └── regulatory_alignment.py
 │   ├── database
-│   │   ├── __init__.py
 │   │   ├── migrations
-│   │   │   ├── env.py
-│   │   │   ├── script.py.mako
-│   │   │   └── versions
-│   │   │       └── 20241117_071740_initial_database_setup.py
+│   │   ├── __init__.py
+│   │   ├── bootstrap.py
 │   │   └── models.py
 │   ├── documentation_generator
 │   │   ├── __init__.py
@@ -69,61 +61,26 @@
 │   │   ├── documentation_workflow.py
 │   │   └── markdown_generator.py
 │   ├── frontend
+│   │   ├── __mocks__
+│   │   ├── e2e
+│   │   ├── public
+│   │   ├── scripts
+│   │   ├── src
 │   │   ├── Dockerfile.dev
 │   │   ├── README.md
 │   │   ├── eslint.config.js
 │   │   ├── index.html
+│   │   ├── jest.config.js
 │   │   ├── package-lock.json
 │   │   ├── package.json
-│   │   ├── public
-│   │   │   ├── ai-governance.svg
-│   │   │   └── vite.svg
-│   │   ├── src
-│   │   │   ├── App.css
-│   │   │   ├── App.tsx
-│   │   │   ├── assets
-│   │   │   │   └── react.svg
-│   │   │   ├── components
-│   │   │   │   ├── Layout
-│   │   │   │   │   ├── Header.tsx
-│   │   │   │   │   ├── Sidebar.tsx
-│   │   │   │   │   └── index.tsx
-│   │   │   │   └── ProtectedRoute.tsx
-│   │   │   ├── config
-│   │   │   │   └── security.ts
-│   │   │   ├── index.css
-│   │   │   ├── main.tsx
-│   │   │   ├── pages
-│   │   │   │   ├── Auth
-│   │   │   │   │   ├── Login.tsx
-│   │   │   │   │   ├── Register.tsx
-│   │   │   │   │   └── Unauthorized.tsx
-│   │   │   │   ├── Compliance
-│   │   │   │   │   └── index.tsx
-│   │   │   │   ├── Config
-│   │   │   │   │   └── index.tsx
-│   │   │   │   ├── Dashboard
-│   │   │   │   │   └── index.tsx
-│   │   │   │   ├── Landing
-│   │   │   │   │   └── index.tsx
-│   │   │   │   ├── Monitoring
-│   │   │   │   │   └── index.tsx
-│   │   │   │   ├── Security
-│   │   │   │   │   └── index.tsx
-│   │   │   │   └── Users
-│   │   │   │       └── index.tsx
-│   │   │   ├── routes
-│   │   │   │   └── index.tsx
-│   │   │   ├── services
-│   │   │   │   └── auth.ts
-│   │   │   └── vite-env.d.ts
+│   │   ├── playwright.config.ts
 │   │   ├── tsconfig.app.json
 │   │   ├── tsconfig.json
 │   │   ├── tsconfig.node.json
+│   │   ├── tsconfig.test.json
 │   │   └── vite.config.ts
 │   ├── gitops
 │   │   └── deployment_manager.py
-│   ├── main.py
 │   ├── management_interface
 │   │   ├── configuration_manager.py
 │   │   ├── dashboard.py
@@ -135,6 +92,9 @@
 │   │   ├── monitoring.py
 │   │   ├── predictive_monitoring.py
 │   │   └── rollback_manager.py
+│   ├── scripts
+│   │   ├── __init__.py
+│   │   └── seed_admin.py
 │   ├── security
 │   │   ├── advanced_privacy.py
 │   │   ├── compliance_framework.py
@@ -142,10 +102,36 @@
 │   │   ├── privacy_guard.py
 │   │   ├── secret_manager.py
 │   │   └── threat_detection.py
+│   ├── utils
+│   │   ├── __init__.py
+│   │   └── time.py
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── main.py
 │   └── start.sh
 ├── tests
-│   └── compliance
-│       └── test_regulatory_alignment.py
+│   ├── api
+│   │   ├── __init__.py
+│   │   ├── test_auth.py
+│   │   ├── test_platform.py
+│   │   └── test_users.py
+│   ├── compliance
+│   │   ├── __init__.py
+│   │   └── test_regulatory_alignment.py
+│   ├── __init__.py
+│   └── conftest.py
+├── CHANGELOG.md
+├── CLAUDE.md
+├── DEPLOYMENT.md
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── alembic.ini
+├── docker-compose.yml
+├── pyproject.toml
+├── pytest.ini
+├── requirements.txt
+├── roadmap.md
 └── tree.txt
 
-44 directories, 105 files
+39 directories, 96 files

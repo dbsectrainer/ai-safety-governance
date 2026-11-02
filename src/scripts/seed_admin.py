@@ -13,9 +13,11 @@ import getpass
 import logging
 import os
 import sys
+import time
 from typing import Optional
 
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 
 from ..api.schemas import PASSWORD_PATTERN
 from ..api.security import get_password_hash
@@ -40,39 +42,47 @@ def seed_admin(
         )
 
     username = username or email.split("@")[0][:16]
-    db = SessionLocal()
-    try:
-        user = (
-            db.query(User)
-            .filter(or_(User.email == email, User.username == username))
-            .first()
-        )
-        if user:
-            if update_password:
-                user.hashed_password = get_password_hash(password)
-                db.commit()
-                logger.info("Updated password for administrator %s", user.email)
-            else:
-                logger.info(
-                    "Administrator %s already exists; leaving it unchanged", user.email
-                )
-            return user
+    hashed_password = get_password_hash(password)
 
-        user = User(
-            username=username,
-            email=email,
-            full_name=full_name,
-            hashed_password=get_password_hash(password),
-            is_active=True,
-            is_superuser=True,
-        )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        logger.info("Created administrator %s", user.email)
-        return user
-    finally:
-        db.close()
+    # Multiple Gunicorn workers start at once in Docker. Use a short retry loop
+    # so concurrent bootstrap attempts converge instead of raising a unique
+    # constraint error in one worker.
+    for attempt in range(5):
+        db = SessionLocal()
+        try:
+            user = (
+                db.query(User).filter(or_(User.email == email, User.username == username)).first()
+            )
+            if user:
+                if update_password:
+                    user.hashed_password = hashed_password
+                    db.commit()
+                    logger.info("Updated password for administrator %s", user.email)
+                else:
+                    logger.info("Administrator %s already exists; leaving it unchanged", user.email)
+                return user
+
+            user = User(
+                username=username,
+                email=email,
+                full_name=full_name,
+                hashed_password=hashed_password,
+                is_active=True,
+                is_superuser=True,
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            logger.info("Created administrator %s", user.email)
+            return user
+        except IntegrityError:
+            db.rollback()
+            logger.info("Administrator bootstrap raced another worker; retrying")
+            time.sleep(0.2 * (attempt + 1))
+        finally:
+            db.close()
+
+    raise RuntimeError("Could not bootstrap the administrator account after retries")
 
 
 def ensure_admin_from_env() -> Optional[User]:
@@ -94,9 +104,7 @@ def ensure_admin_from_env() -> Optional[User]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Create an AI Safety Governance administrator"
-    )
+    parser = argparse.ArgumentParser(description="Create an AI Safety Governance administrator")
     parser.add_argument("--email", default=os.getenv("ADMIN_EMAIL"))
     parser.add_argument("--password", default=os.getenv("ADMIN_PASSWORD"))
     parser.add_argument("--username", default=os.getenv("ADMIN_USERNAME"))

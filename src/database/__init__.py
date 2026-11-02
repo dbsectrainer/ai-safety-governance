@@ -12,10 +12,16 @@ The application supports two deployment modes:
 
 import logging
 import os
+from contextlib import contextmanager
 from pathlib import Path
 
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import declarative_base, sessionmaker
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - Windows local development
+    fcntl = None
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +58,7 @@ def get_database_url() -> str:
         host = os.getenv("POSTGRES_HOST", "localhost")
         port = os.getenv("POSTGRES_PORT", "5432")
         db = os.getenv("POSTGRES_DB", "ai_safety_governance")
-        return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+        return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}"
 
     return f"sqlite:///{DEFAULT_SQLITE_PATH}"
 
@@ -79,15 +85,47 @@ engine = create_engine(DATABASE_URL, future=True, **_engine_options(DATABASE_URL
 # Create sessionmaker
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, future=True)
 
+# A multi-worker start (Gunicorn) must not race schema creation/stamping.
+# SQLite uses a file lock; PostgreSQL uses a session advisory lock.
+_INIT_LOCK_PATH = DEFAULT_SQLITE_PATH.with_name(DEFAULT_SQLITE_PATH.name + ".init.lock")
+_POSTGRES_INIT_LOCK_KEY = 728194621
+
+
+@contextmanager
+def _database_init_lock():
+    if DATABASE_URL.startswith("sqlite"):
+        if fcntl is None or DATABASE_URL.endswith(":memory:"):
+            yield
+            return
+        _INIT_LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with open(_INIT_LOCK_PATH, "w", encoding="utf-8") as lock_file:
+            fcntl.flock(lock_file, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(lock_file, fcntl.LOCK_UN)
+        return
+
+    if DATABASE_URL.startswith("postgresql"):
+        with engine.connect() as connection:
+            connection.execute(text(f"SELECT pg_advisory_lock({_POSTGRES_INIT_LOCK_KEY})"))
+            connection.commit()
+            try:
+                yield
+            finally:
+                connection.execute(text(f"SELECT pg_advisory_unlock({_POSTGRES_INIT_LOCK_KEY})"))
+                connection.commit()
+        return
+
+    yield
+
 
 def _alembic_config():
     """Build an Alembic config that points at the project migrations."""
     from alembic.config import Config
 
     config = Config(str(PROJECT_ROOT / "alembic.ini"))
-    config.set_main_option(
-        "script_location", str(PROJECT_ROOT / "src" / "database" / "migrations")
-    )
+    config.set_main_option("script_location", str(PROJECT_ROOT / "src" / "database" / "migrations"))
     config.set_main_option("sqlalchemy.url", DATABASE_URL)
     return config
 
@@ -115,18 +153,19 @@ def init_db(create_tables: bool = True) -> None:
         logger.info("DB_AUTO_INIT disabled; skipping database schema initialisation")
         return
 
-    inspector = inspect(engine)
-    if "alembic_version" in inspector.get_table_names():
-        from alembic import command
+    with _database_init_lock():
+        inspector = inspect(engine)
+        if "alembic_version" in inspector.get_table_names():
+            from alembic import command
 
-        command.upgrade(_alembic_config(), "head")
-        logger.info("Applied pending database migrations")
-    else:
-        Base.metadata.create_all(bind=engine)
-        from alembic import command
+            command.upgrade(_alembic_config(), "head")
+            logger.info("Applied pending database migrations")
+        else:
+            Base.metadata.create_all(bind=engine)
+            from alembic import command
 
-        command.stamp(_alembic_config(), "head")
-        logger.info("Created database schema and stamped Alembic head")
+            command.stamp(_alembic_config(), "head")
+            logger.info("Created database schema and stamped Alembic head")
 
 
 def get_db():

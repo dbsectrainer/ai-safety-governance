@@ -32,6 +32,7 @@ import type {
   ComplianceSummary,
 } from "../../services/compliance";
 import { getErrorMessage } from "../../services/api";
+import { formatAuditAction } from "../../utils/format";
 
 const statusLabel = (status: string) => {
   switch (status) {
@@ -391,7 +392,7 @@ const Compliance = () => {
             <Fade in timeout={400}>
               <Paper sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Recent Compliance Activity
+                  Recent Audit Activity
                 </Typography>
                 {activities.length === 0 ? (
                   <Typography variant="body2" color="text.secondary">
@@ -402,8 +403,7 @@ const Compliance = () => {
                     <Box key={activity.id}>
                       <Box sx={{ py: 1 }}>
                         <Typography variant="body2" color="text.primary">
-                          {activity.action.replace("_", " ")} ·{" "}
-                          {activity.resource_type.replace("_", " ")}
+                          {formatAuditAction(activity.action, activity.resource_type)}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           {format(

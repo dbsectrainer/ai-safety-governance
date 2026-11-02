@@ -5,7 +5,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Create non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN groupadd -r appuser && useradd -r -u 1000 -g appuser appuser
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

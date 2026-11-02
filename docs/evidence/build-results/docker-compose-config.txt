@@ -1,0 +1,128 @@
+name: ai-safety-governance
+services:
+  backend:
+    environment:
+      ADMIN_EMAIL: ""
+      ADMIN_PASSWORD: ""
+      ADMIN_USERNAME: ""
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/ai_safety_governance
+      DB_AUTO_INIT: "false"
+      SECRET_KEY: dev-only-change-this-secret
+      WEB_CONCURRENCY: "2"
+    networks:
+      default: null
+    volumes:
+      - type: bind
+        source: /Users/newtechlab/Documents/GitHub/ai-safety-governance/src
+        target: /app/src
+        bind: {}
+      - type: bind
+        source: /Users/newtechlab/Documents/GitHub/ai-safety-governance/config
+        target: /app/config
+        read_only: true
+        bind: {}
+    build:
+      context: /Users/newtechlab/Documents/GitHub/ai-safety-governance
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+        required: true
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -fsS
+        - http://localhost:5000/health
+      timeout: 5s
+      interval: 15s
+      retries: 5
+      start_period: 20s
+    ports:
+      - mode: ingress
+        target: 5000
+        published: "5002"
+        protocol: tcp
+  db:
+    environment:
+      POSTGRES_DB: ai_safety_governance
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    image: postgres:15
+    networks:
+      default: null
+    volumes:
+      - type: volume
+        source: postgres_data
+        target: /var/lib/postgresql/data
+        volume: {}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres -d ai_safety_governance
+      timeout: 5s
+      interval: 5s
+      retries: 10
+  frontend:
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:5000
+      VITE_API_URL: ""
+    networks:
+      default: null
+    volumes:
+      - type: bind
+        source: /Users/newtechlab/Documents/GitHub/ai-safety-governance/src/frontend
+        target: /app
+        bind: {}
+      - type: volume
+        target: /app/node_modules
+        volume: {}
+    build:
+      context: /Users/newtechlab/Documents/GitHub/ai-safety-governance/src/frontend
+      dockerfile: Dockerfile.dev
+    depends_on:
+      backend:
+        condition: service_healthy
+        required: true
+    ports:
+      - mode: ingress
+        target: 5173
+        published: "5173"
+        protocol: tcp
+  grafana:
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: admin
+    image: grafana/grafana
+    networks:
+      default: null
+    depends_on:
+      prometheus:
+        condition: service_started
+        required: true
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3000"
+        protocol: tcp
+  prometheus:
+    image: prom/prometheus:latest
+    networks:
+      default: null
+    volumes:
+      - type: bind
+        source: /Users/newtechlab/Documents/GitHub/ai-safety-governance/devops/monitoring/prometheus_local.yaml
+        target: /etc/prometheus/prometheus.yml
+        bind: {}
+    ports:
+      - mode: ingress
+        target: 9090
+        published: "9090"
+        protocol: tcp
+networks:
+  default:
+    name: ai-safety-governance_default
+volumes:
+  postgres_data:
+    name: ai-safety-governance_postgres_data

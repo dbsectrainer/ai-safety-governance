@@ -9,9 +9,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{3,16}$")
-PASSWORD_PATTERN = re.compile(
-    r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,128}$"
-)
+PASSWORD_PATTERN = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,128}$")
 
 
 # User Schemas
@@ -59,9 +57,7 @@ class UserUpdate(BaseModel):
     @classmethod
     def validate_username(cls, value: Optional[str]) -> Optional[str]:
         if value is not None and not USERNAME_PATTERN.match(value):
-            raise ValueError(
-                "Username must be 3-16 characters using letters, numbers, _ or -"
-            )
+            raise ValueError("Username must be 3-16 characters using letters, numbers, _ or -")
         return value
 
     @field_validator("password")

@@ -1,0 +1,6 @@
+CONTAINER                           REPOSITORY                      TAG                 PLATFORM            IMAGE ID            SIZE                CREATED
+ai-safety-governance-backend-1      ai-safety-governance-backend    latest              linux/arm64         e3ebf8cc6ee7        501MB               34 seconds ago
+ai-safety-governance-db-1           postgres                        15                  linux/arm64/v8      40e8c839f86c        649MB               5 days ago
+ai-safety-governance-frontend-1     ai-safety-governance-frontend   latest              linux/arm64         358b58545096        1.01GB              34 seconds ago
+ai-safety-governance-grafana-1      grafana/grafana                 latest              linux/arm64         488984b716c0        1.87GB              6 days ago
+ai-safety-governance-prometheus-1   prom/prometheus                 latest              linux/arm64         fa3302279710        357MB               11 days ago

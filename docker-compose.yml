@@ -24,7 +24,7 @@ services:
       - ./src:/app/src
       - ./config:/app/config:ro
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ai_safety_governance
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/ai_safety_governance
       - SECRET_KEY=${SECRET_KEY:-dev-only-change-this-secret}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       - ADMIN_EMAIL=${ADMIN_EMAIL:-}
@@ -44,8 +44,9 @@ services:
 
   db:
     image: postgres:15
-    ports:
-      - "5432:5432"
+    # The database is reachable to other services on the Compose network.
+    # The host port is intentionally not published to avoid clashing with a
+    # local PostgreSQL instance.
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres

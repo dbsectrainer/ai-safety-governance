@@ -195,9 +195,7 @@ class RegulatoryAlignmentSystem:
         :param results: Compliance check results
         :return: Path to generated report
         """
-        report_filename = (
-            f"compliance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        )
+        report_filename = f"compliance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         report_path = os.path.join(self.audit_trail.output_dir, report_filename)
 
         with open(report_path, "w") as f:

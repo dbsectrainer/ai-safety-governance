@@ -4,7 +4,7 @@ Compliance router for handling compliance-related endpoints.
 
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -22,6 +22,7 @@ from ..security import get_current_active_user
 from ...compliance.checks import build_configuration_rules
 from ...compliance.regulatory_alignment import RegulatoryAlignmentSystem
 from ...database import PROJECT_ROOT, get_db
+from ...utils.time import utcnow
 from ...database.models import AuditLog, ComplianceRecord, User
 
 logger = logging.getLogger(__name__)
@@ -34,9 +35,7 @@ CONFIG_PATH = Path(
         str(PROJECT_ROOT / "config" / "compliance_config.json"),
     )
 )
-AUDIT_DIR = Path(
-    os.getenv("COMPLIANCE_AUDIT_DIR", str(PROJECT_ROOT / "compliance_logs"))
-)
+AUDIT_DIR = Path(os.getenv("COMPLIANCE_AUDIT_DIR", str(PROJECT_ROOT / "compliance_logs")))
 
 STATUS_MAP = {
     "COMPLIANT": "compliant",
@@ -46,9 +45,7 @@ STATUS_MAP = {
 }
 
 
-def _audit(
-    db: Session, user: User, action: str, record_id: Any, details: Dict[str, Any]
-) -> None:
+def _audit(db: Session, user: User, action: str, record_id: Any, details: Dict[str, Any]) -> None:
     db.add(
         AuditLog(
             user_id=user.id,
@@ -61,9 +58,7 @@ def _audit(
 
 
 def _latest_records(db: Session) -> List[ComplianceRecord]:
-    records = (
-        db.query(ComplianceRecord).order_by(ComplianceRecord.created_at.desc()).all()
-    )
+    records = db.query(ComplianceRecord).order_by(ComplianceRecord.created_at.desc()).all()
     latest: Dict[str, ComplianceRecord] = {}
     for record in records:
         latest.setdefault(record.regulation_type, record)
@@ -92,7 +87,7 @@ async def run_compliance_checks(
         results = system.run_compliance_checks()
         report_path = system.generate_compliance_report(results)
         review_days = int(system.config.get("check_frequency_days", 30))
-        next_review = datetime.utcnow() + timedelta(days=review_days)
+        next_review = utcnow() + timedelta(days=review_days)
 
         created = []
         for item in results["rules_status"]:
@@ -167,11 +162,7 @@ async def get_compliance_summary(
     score = 0
     if latest:
         weighted = sum(
-            (
-                100
-                if record.status == "compliant"
-                else 50 if record.status == "needs_review" else 0
-            )
+            (100 if record.status == "compliant" else 50 if record.status == "needs_review" else 0)
             for record in latest
         )
         score = round(weighted / len(latest))
@@ -184,15 +175,12 @@ async def get_compliance_summary(
         "status_counts": counts,
         "last_run": last_run,
         "latest": [
-            jsonable_encoder(record)
-            for record in sorted(latest, key=lambda r: r.regulation_type)
+            jsonable_encoder(record) for record in sorted(latest, key=lambda r: r.regulation_type)
         ],
     }
 
 
-@router.post(
-    "/records", response_model=ComplianceRecordInDB, status_code=status.HTTP_201_CREATED
-)
+@router.post("/records", response_model=ComplianceRecordInDB, status_code=status.HTTP_201_CREATED)
 async def create_compliance_record(
     record: ComplianceRecordCreate,
     current_user: User = Security(get_current_active_user, scopes=["compliance"]),
@@ -297,18 +285,10 @@ async def list_audit_logs(
     db: Session = Depends(get_db),
 ) -> Any:
     """List audit logs, newest first."""
-    return (
-        db.query(AuditLog)
-        .order_by(AuditLog.timestamp.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    return db.query(AuditLog).order_by(AuditLog.timestamp.desc()).offset(skip).limit(limit).all()
 
 
-@router.get(
-    "/audit-logs/{resource_type}/{resource_id}", response_model=List[AuditLogInDB]
-)
+@router.get("/audit-logs/{resource_type}/{resource_id}", response_model=List[AuditLogInDB])
 async def get_resource_audit_logs(
     resource_type: str,
     resource_id: str,

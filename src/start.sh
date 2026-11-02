@@ -40,6 +40,7 @@ exec gunicorn \
   --workers "${WEB_CONCURRENCY:-2}" \
   --worker-class uvicorn.workers.UvicornWorker \
   --timeout 60 \
+  --no-control-socket \
   --graceful-timeout 30 \
   --access-logfile - \
   --error-logfile - \

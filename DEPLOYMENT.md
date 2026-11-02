@@ -1,8 +1,55 @@
 # Deployment Guide
 
-This guide provides comprehensive instructions for deploying the AI Safety & Governance platform in production environments.
+This guide provides deployment guidance for the AI Safety & Governance platform. The **verified deployment path** is the Docker Compose stack described below. The AWS/Kubernetes/FluxCD/Istio/Chaos Mesh sections are reference material for a future production deployment; they were **not executed** during the audit, contain `${...}` placeholders that must be substituted, and require cluster-specific secrets, database egress, image pull credentials, and ingress configuration.
 
-## Prerequisites
+See [`docs/evidence/verification-report.md`](docs/evidence/verification-report.md) for the exact evidence and remaining limitations.
+
+## Verified local and Docker deployment
+
+### Local (SQLite, no external services)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+export ADMIN_EMAIL=admin@example.com
+export ADMIN_PASSWORD='<a-strong-password>'
+python -m uvicorn src.main:app --reload --port 8000
+# In another terminal:
+cd src/frontend && npm ci && npm run dev
+```
+
+### Docker Compose (verified)
+
+```bash
+cp .env.example .env
+# Set SECRET_KEY (32+ random characters), ADMIN_EMAIL, ADMIN_PASSWORD in .env.
+# Do not commit .env.
+docker compose up --build -d
+```
+
+Verified services and endpoints:
+
+| Service | Endpoint | Verification |
+| --- | --- | --- |
+| Frontend | <http://localhost:5173> | Served; `/api` proxy login succeeded |
+| Backend | <http://localhost:5002> | `/health` and `/ready` 200; migrations at head |
+| PostgreSQL | internal `db:5432` | Healthy; schema and seeded roles verified |
+| Prometheus | <http://localhost:9090> | Both scrape targets `up` |
+| Grafana | <http://localhost:3000> | `/api/health` database ok (dev login `admin`/`admin`) |
+
+```bash
+docker compose ps
+docker compose logs -f backend
+docker compose down          # keep data volume
+docker compose down -v       # destructive: deletes local PostgreSQL data
+```
+
+The Compose stack uses development defaults for the PostgreSQL password and Grafana credentials. Replace them and `SECRET_KEY` for any shared or production environment.
+
+## Reference production infrastructure (not verified)
+
 
 ### Infrastructure Requirements
 
