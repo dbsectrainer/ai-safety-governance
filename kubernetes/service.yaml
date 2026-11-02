@@ -11,14 +11,14 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 8080
-    targetPort: http
-    protocol: TCP
-    name: http
-  - port: 9090
-    targetPort: metrics
-    protocol: TCP
-    name: metrics
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 9090
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
   selector:
     app: ai-safety-governance
 ---
@@ -36,12 +36,12 @@ metadata:
   name: ai-safety-governance-role
   namespace: ai-safety
 rules:
-- apiGroups: [""]
-  resources: ["configmaps", "secrets"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -49,9 +49,9 @@ metadata:
   name: ai-safety-governance-role-binding
   namespace: ai-safety
 subjects:
-- kind: ServiceAccount
-  name: ai-safety-service-account
-  namespace: ai-safety
+  - kind: ServiceAccount
+    name: ai-safety-service-account
+    namespace: ai-safety
 roleRef:
   kind: Role
   name: ai-safety-governance-role
@@ -68,7 +68,7 @@ spec:
   renewBefore: 360h # 15 days
   subject:
     organizations:
-    - AI Safety Governance
+      - AI Safety Governance
   commonName: ai-safety-governance.example.com
   isCA: false
   privateKey:
@@ -76,11 +76,11 @@ spec:
     encoding: PKCS1
     size: 2048
   usages:
-  - server auth
-  - client auth
+    - server auth
+    - client auth
   dnsNames:
-  - ai-safety-governance.example.com
-  - ai-safety-governance.ai-safety.svc.cluster.local
+    - ai-safety-governance.example.com
+    - ai-safety-governance.ai-safety.svc.cluster.local
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
@@ -110,60 +110,60 @@ metadata:
       }
 spec:
   tls:
-  - hosts:
-    - ai-safety-governance.example.com
-    secretName: ai-safety-tls
+    - hosts:
+        - ai-safety-governance.example.com
+      secretName: ai-safety-tls
   rules:
-  - host: ai-safety-governance.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: ai-safety-governance
-            port:
-              name: http
-      - path: /metrics
-        pathType: Prefix
-        backend:
-          service:
-            name: ai-safety-governance
-            port:
-              name: metrics
+    - host: ai-safety-governance.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ai-safety-governance
+                port:
+                  name: http
+          - path: /metrics
+            pathType: Prefix
+            backend:
+              service:
+                name: ai-safety-governance
+                port:
+                  name: metrics
 ---
 apiVersion: policy/v1
 kind: PodSecurityPolicy
 metadata:
   name: ai-safety-governance-psp
   annotations:
-    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
-    seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: "runtime/default"
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: "runtime/default"
 spec:
   privileged: false
   allowPrivilegeEscalation: false
   requiredDropCapabilities:
     - ALL
   volumes:
-    - 'configMap'
-    - 'emptyDir'
-    - 'projected'
-    - 'secret'
-    - 'downwardAPI'
+    - "configMap"
+    - "emptyDir"
+    - "projected"
+    - "secret"
+    - "downwardAPI"
   hostNetwork: false
   hostIPC: false
   hostPID: false
   runAsUser:
-    rule: 'MustRunAsNonRoot'
+    rule: "MustRunAsNonRoot"
   seLinux:
-    rule: 'RunAsAny'
+    rule: "RunAsAny"
   supplementalGroups:
-    rule: 'MustRunAs'
+    rule: "MustRunAs"
     ranges:
       - min: 1
         max: 65535
   fsGroup:
-    rule: 'MustRunAs'
+    rule: "MustRunAs"
     ranges:
       - min: 1
         max: 65535

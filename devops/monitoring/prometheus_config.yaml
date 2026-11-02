@@ -2,7 +2,7 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    monitor: 'ai-safety-governance'
+    monitor: "ai-safety-governance"
 
 rule_files:
   - /etc/prometheus/rules/*.rules.yaml
@@ -11,10 +11,10 @@ alerting:
   alertmanagers:
     - static_configs:
         - targets:
-          - alertmanager:9093
+            - alertmanager:9093
 
 scrape_configs:
-  - job_name: 'kubernetes-apiservers'
+  - job_name: "kubernetes-apiservers"
     kubernetes_sd_configs:
       - role: endpoints
     scheme: https
@@ -22,11 +22,16 @@ scrape_configs:
       ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
     bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
     relabel_configs:
-      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+      - source_labels:
+          [
+            __meta_kubernetes_namespace,
+            __meta_kubernetes_service_name,
+            __meta_kubernetes_endpoint_port_name,
+          ]
         action: keep
         regex: default;kubernetes;https
 
-  - job_name: 'kubernetes-nodes'
+  - job_name: "kubernetes-nodes"
     scheme: https
     tls_config:
       ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
@@ -37,7 +42,7 @@ scrape_configs:
       - action: labelmap
         regex: __meta_kubernetes_node_label_(.+)
 
-  - job_name: 'kubernetes-pods'
+  - job_name: "kubernetes-pods"
     kubernetes_sd_configs:
       - role: pod
     relabel_configs:
@@ -48,7 +53,8 @@ scrape_configs:
         action: replace
         target_label: __metrics_path__
         regex: (.+)
-      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+      - source_labels:
+          [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
         action: replace
         regex: ([^:]+)(?::\d+)?;(\d+)
         replacement: $1:$2
@@ -62,8 +68,8 @@ scrape_configs:
         action: replace
         target_label: kubernetes_pod_name
 
-  - job_name: 'ai-safety-governance'
-    metrics_path: '/metrics'
+  - job_name: "ai-safety-governance"
+    metrics_path: "/metrics"
     kubernetes_sd_configs:
       - role: service
         namespaces:
@@ -78,7 +84,7 @@ scrape_configs:
       - source_labels: [__meta_kubernetes_service_name]
         target_label: service
 
-  - job_name: 'node-exporter'
+  - job_name: "node-exporter"
     kubernetes_sd_configs:
       - role: endpoints
     relabel_configs:
@@ -86,7 +92,7 @@ scrape_configs:
         regex: node-exporter
         action: keep
 
-  - job_name: 'kube-state-metrics'
+  - job_name: "kube-state-metrics"
     kubernetes_sd_configs:
       - role: service
     relabel_configs:
@@ -101,10 +107,10 @@ recording_rules:
       rules:
         - record: ai_safety:model_accuracy:avg_5m
           expr: avg_over_time(model_accuracy[5m])
-        
+
         - record: ai_safety:model_latency:p95_5m
           expr: histogram_quantile(0.95, sum(rate(model_latency_seconds_bucket[5m])) by (le))
-        
+
         - record: ai_safety:drift_score:max_1h
           expr: max_over_time(model_drift_score[1h])
 

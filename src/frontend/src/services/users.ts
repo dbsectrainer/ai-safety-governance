@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export interface ApiUser {
   id: number;
@@ -32,12 +32,12 @@ export interface UpdateUserPayload {
 
 class UsersService {
   async listUsers(): Promise<ApiUser[]> {
-    const response = await api.get<ApiUser[]>('/users/');
+    const response = await api.get<ApiUser[]>("/users/");
     return response.data;
   }
 
   async createUser(payload: CreateUserPayload): Promise<ApiUser> {
-    const response = await api.post<ApiUser>('/users/', payload);
+    const response = await api.post<ApiUser>("/users/", payload);
     return response.data;
   }
 

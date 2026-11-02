@@ -1,16 +1,19 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { CircularProgress, Box } from '@mui/material';
-import { useState, useEffect } from 'react';
-import { authService } from '../services/auth';
-import type { AuthUser } from '../config/security';
-import { isAdministrator } from '../config/security';
+import { Navigate, useLocation } from "react-router-dom";
+import { CircularProgress, Box } from "@mui/material";
+import { useState, useEffect } from "react";
+import { authService } from "../services/auth";
+import type { AuthUser } from "../config/security";
+import { isAdministrator } from "../config/security";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRoles?: string[];
 }
 
-const ProtectedRoute = ({ children, requiredRoles = [] }: ProtectedRouteProps) => {
+const ProtectedRoute = ({
+  children,
+  requiredRoles = [],
+}: ProtectedRouteProps) => {
   const [authState, setAuthState] = useState<{
     isLoading: boolean;
     isAuthenticated: boolean;
@@ -29,7 +32,11 @@ const ProtectedRoute = ({ children, requiredRoles = [] }: ProtectedRouteProps) =
     const validateAuth = async () => {
       if (!authService.isAuthenticated()) {
         if (!cancelled) {
-          setAuthState({ isLoading: false, isAuthenticated: false, user: null });
+          setAuthState({
+            isLoading: false,
+            isAuthenticated: false,
+            user: null,
+          });
         }
         return;
       }
@@ -40,7 +47,7 @@ const ProtectedRoute = ({ children, requiredRoles = [] }: ProtectedRouteProps) =
       }
 
       if (!user) {
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
       }
       setAuthState({
         isLoading: false,
@@ -76,7 +83,7 @@ const ProtectedRoute = ({ children, requiredRoles = [] }: ProtectedRouteProps) =
 
   if (requiredRoles.length > 0) {
     const hasRequiredRole = requiredRoles.some((role) => {
-      if (role === 'admin') {
+      if (role === "admin") {
         return isAdministrator(authState.user);
       }
       return Boolean(authState.user?.roles?.includes(role));

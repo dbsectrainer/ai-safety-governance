@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export interface DashboardActivity {
   id: string;
@@ -38,7 +38,7 @@ export interface DashboardSummary {
 
 class DashboardService {
   async getSummary(): Promise<DashboardSummary> {
-    const response = await api.get<DashboardSummary>('/dashboard/summary');
+    const response = await api.get<DashboardSummary>("/dashboard/summary");
     return response.data;
   }
 }

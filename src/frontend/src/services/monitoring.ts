@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export interface MetricData {
   timestamp: number;
@@ -31,46 +31,50 @@ export interface ModelPerformance {
     throughput: number;
     errorRate: number;
   };
-  status: 'healthy' | 'degraded' | 'error';
+  status: "healthy" | "degraded" | "error";
   lastUpdated: string;
 }
 
 export interface MonitoringAlert {
   id: string;
   type: string;
-  severity: 'low' | 'medium' | 'high';
+  severity: "low" | "medium" | "high";
   message: string;
   timestamp: string;
 }
 
 class MonitoringService {
   async getSystemMetrics(): Promise<SystemMetrics> {
-    const response = await api.get<SystemMetrics>('/monitoring/system');
+    const response = await api.get<SystemMetrics>("/monitoring/system");
     return response.data;
   }
 
   async getModelMetrics(): Promise<ModelMetrics> {
-    const response = await api.get<ModelMetrics>('/monitoring/models/metrics');
+    const response = await api.get<ModelMetrics>("/monitoring/models/metrics");
     return response.data;
   }
 
   async getPerformanceData(): Promise<MetricData[]> {
-    const response = await api.get<MetricData[]>('/monitoring/performance');
+    const response = await api.get<MetricData[]>("/monitoring/performance");
     return response.data;
   }
 
   async getModelPerformance(): Promise<ModelPerformance[]> {
-    const response = await api.get<ModelPerformance[]>('/monitoring/models/performance');
+    const response = await api.get<ModelPerformance[]>(
+      "/monitoring/models/performance",
+    );
     return response.data;
   }
 
   async getResourceUtilization(resource: string): Promise<MetricData[]> {
-    const response = await api.get<MetricData[]>(`/monitoring/resources/${resource}`);
+    const response = await api.get<MetricData[]>(
+      `/monitoring/resources/${resource}`,
+    );
     return response.data;
   }
 
   async getAlerts(): Promise<MonitoringAlert[]> {
-    const response = await api.get<MonitoringAlert[]>('/monitoring/alerts');
+    const response = await api.get<MonitoringAlert[]>("/monitoring/alerts");
     return response.data;
   }
 }

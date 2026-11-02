@@ -43,11 +43,11 @@ spec:
     matchLabels:
       app: ai-safety-governance
   endpoints:
-  - port: metrics
-    interval: 15s
+    - port: metrics
+      interval: 15s
   namespaceSelector:
     matchNames:
-    - default
+      - default
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -58,19 +58,19 @@ metadata:
     team: ai-safety
 spec:
   groups:
-  - name: gcp.rules
-    rules:
-    - alert: GCPNodeMemoryPressure
-      expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        description: "Node {{ $labels.instance }} has less than 10% available memory"
-    - alert: GCPPodOOMKilled
-      expr: kube_pod_container_status_terminated_reason{reason="OOMKilled"} == 1
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        description: "Container {{ $labels.container }} in pod {{ $labels.pod }} was OOM killed"
+    - name: gcp.rules
+      rules:
+        - alert: GCPNodeMemoryPressure
+          expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            description: "Node {{ $labels.instance }} has less than 10% available memory"
+        - alert: GCPPodOOMKilled
+          expr: kube_pod_container_status_terminated_reason{reason="OOMKilled"} == 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} was OOM killed"

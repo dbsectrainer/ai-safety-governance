@@ -1,6 +1,6 @@
-import api, { getErrorMessage } from './api';
-import type { AuthState, AuthUser } from '../config/security';
-import { validationPatterns } from '../config/security';
+import api, { getErrorMessage } from "./api";
+import type { AuthState, AuthUser } from "../config/security";
+import { validationPatterns } from "../config/security";
 
 interface LoginCredentials {
   email: string;
@@ -32,26 +32,28 @@ class AuthService {
 
   async login(credentials: LoginCredentials): Promise<AuthState> {
     if (!this.validateEmail(credentials.email)) {
-      throw new Error('Invalid email format');
+      throw new Error("Invalid email format");
     }
     if (!this.validatePassword(credentials.password)) {
       throw new Error(
-        'Password must be at least 8 characters and include uppercase, lowercase, number and special character',
+        "Password must be at least 8 characters and include uppercase, lowercase, number and special character",
       );
     }
 
     try {
       const formData = new FormData();
-      formData.append('username', credentials.email);
-      formData.append('password', credentials.password);
+      formData.append("username", credentials.email);
+      formData.append("password", credentials.password);
 
-      const response = await api.post<LoginResponse>('/auth/token', formData);
+      const response = await api.post<LoginResponse>("/auth/token", formData);
       const { access_token } = response.data;
-      localStorage.setItem('token', access_token);
+      localStorage.setItem("token", access_token);
 
       const user = response.data.user ?? (await this.getCurrentUser());
       if (!user) {
-        throw new Error('Login succeeded but the user profile could not be loaded');
+        throw new Error(
+          "Login succeeded but the user profile could not be loaded",
+        );
       }
       this.userCache = { token: access_token, user };
 
@@ -61,29 +63,31 @@ class AuthService {
         token: access_token,
       };
     } catch (error) {
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
       throw new Error(getErrorMessage(error));
     }
   }
 
   async register(data: RegisterData): Promise<void> {
     if (!this.validateEmail(data.email)) {
-      throw new Error('Invalid email format');
+      throw new Error("Invalid email format");
     }
     if (!this.validatePassword(data.password)) {
       throw new Error(
-        'Password must be at least 8 characters and include uppercase, lowercase, number and special character',
+        "Password must be at least 8 characters and include uppercase, lowercase, number and special character",
       );
     }
     if (!validationPatterns.username.test(data.username)) {
-      throw new Error('Username must be 3-16 characters using letters, numbers, _ or -');
+      throw new Error(
+        "Username must be 3-16 characters using letters, numbers, _ or -",
+      );
     }
     if (data.full_name && !validationPatterns.name.test(data.full_name)) {
-      throw new Error('Full name must be 2-100 characters');
+      throw new Error("Full name must be 2-100 characters");
     }
 
     try {
-      await api.post('/auth/register', {
+      await api.post("/auth/register", {
         username: data.username,
         email: data.email,
         password: data.password,
@@ -96,19 +100,19 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      await api.post('/auth/logout');
+      await api.post("/auth/logout");
     } catch (error) {
       // Logout is client-side; an unavailable API must not trap the user.
-      console.warn('Logout request failed:', getErrorMessage(error));
+      console.warn("Logout request failed:", getErrorMessage(error));
     } finally {
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
       this.userCache = null;
       this.userRequest = null;
     }
   }
 
   async getCurrentUser(): Promise<AuthUser | null> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
       this.userCache = null;
       return null;
@@ -119,7 +123,7 @@ class AuthService {
     if (!this.userRequest) {
       this.userRequest = (async () => {
         try {
-          const response = await api.get<AuthUser>('/users/me');
+          const response = await api.get<AuthUser>("/users/me");
           return response.data;
         } catch {
           return null;
@@ -134,7 +138,7 @@ class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return Boolean(localStorage.getItem('token'));
+    return Boolean(localStorage.getItem("token"));
   }
 
   async hasRole(role: string): Promise<boolean> {

@@ -85,14 +85,14 @@ The platform provides continuous visibility into deployed AI model behavior, ena
 
 Automated compliance checks run on a configurable schedule and produce structured JSON reports suitable for regulatory audit submissions. The system supports multi-framework enforcement in parallel.
 
-| Framework | Scope | Auto-Remediation |
-| --- | --- | --- |
-| EO 14110 | Federal AI safety and trustworthy use | Yes |
-| OMB M-24-10 | Federal agency AI governance | Yes |
-| GDPR | Data consent, breach notification (72h) | Yes |
-| CCPA | Consumer rights, data deletion (45 days) | Yes |
-| HIPAA | Patient data protection, breach reporting | Yes |
-| NIST AI RMF | AI risk management lifecycle | Configurable |
+| Framework   | Scope                                     | Auto-Remediation |
+| ----------- | ----------------------------------------- | ---------------- |
+| EO 14110    | Federal AI safety and trustworthy use     | Yes              |
+| OMB M-24-10 | Federal agency AI governance              | Yes              |
+| GDPR        | Data consent, breach notification (72h)   | Yes              |
+| CCPA        | Consumer rights, data deletion (45 days)  | Yes              |
+| HIPAA       | Patient data protection, breach reporting | Yes              |
+| NIST AI RMF | AI risk management lifecycle              | Configurable     |
 
 - Compliance configuration in `config/compliance_config.json`
 - Audit logs written to `compliance_logs/` as timestamped JSON files
@@ -279,16 +279,16 @@ ai-safety-governance/
 
 ## BE EASY ENTERPRISES Federal Portfolio
 
-| Showcase Project | Repository | Description |
-| --- | --- | --- |
-| **Secure RAG Pipeline** | [Secure-Generative-AI-Platform-on-AWS](https://github.com/dbsectrainer/Secure-Generative-AI-Platform-on-AWS) | AWS Bedrock + RAG with FedRAMP High alignment |
-| **DevSecOps CI/CD** | [dod-cybersec-ops-framework](https://github.com/dbsectrainer/dod-cybersec-ops-framework) | DoD 8570 / NIST RMF aligned pipeline |
-| **Zero Trust Architecture** | [AEGIS](https://github.com/dbsectrainer/AEGIS) | FedRAMP High + NIST 800-207 Zero Trust |
-| **FedRAMP Control Automation** | [nist_800_53_scanner](https://github.com/dbsectrainer/nist_800_53_scanner) | NIST 800-53 Rev 5 compliance scanner |
-| **Federal AI Governance** | **[ai-safety-governance](https://github.com/dbsectrainer/ai-safety-governance)** | **This repo** |
-| **CMMC 2.0 Dashboard** | [integrated-cyber-risk-compliance](https://github.com/dbsectrainer/integrated-cyber-risk-compliance) | CMMC 2.0 readiness assessment |
-| **FedRAMP 30-Day Guide** | [cloud-security-best-practices](https://github.com/dbsectrainer/cloud-security-best-practices) | Day-by-day FedRAMP implementation roadmap |
-| **Agentic AI Workflow** | [federal-doc-triage-agent](https://github.com/dbsectrainer/federal-doc-triage-agent) | Production-ready LangGraph + Bedrock triage agent |
+| Showcase Project               | Repository                                                                                                   | Description                                       |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| **Secure RAG Pipeline**        | [Secure-Generative-AI-Platform-on-AWS](https://github.com/dbsectrainer/Secure-Generative-AI-Platform-on-AWS) | AWS Bedrock + RAG with FedRAMP High alignment     |
+| **DevSecOps CI/CD**            | [dod-cybersec-ops-framework](https://github.com/dbsectrainer/dod-cybersec-ops-framework)                     | DoD 8570 / NIST RMF aligned pipeline              |
+| **Zero Trust Architecture**    | [AEGIS](https://github.com/dbsectrainer/AEGIS)                                                               | FedRAMP High + NIST 800-207 Zero Trust            |
+| **FedRAMP Control Automation** | [nist_800_53_scanner](https://github.com/dbsectrainer/nist_800_53_scanner)                                   | NIST 800-53 Rev 5 compliance scanner              |
+| **Federal AI Governance**      | **[ai-safety-governance](https://github.com/dbsectrainer/ai-safety-governance)**                             | **This repo**                                     |
+| **CMMC 2.0 Dashboard**         | [integrated-cyber-risk-compliance](https://github.com/dbsectrainer/integrated-cyber-risk-compliance)         | CMMC 2.0 readiness assessment                     |
+| **FedRAMP 30-Day Guide**       | [cloud-security-best-practices](https://github.com/dbsectrainer/cloud-security-best-practices)               | Day-by-day FedRAMP implementation roadmap         |
+| **Agentic AI Workflow**        | [federal-doc-triage-agent](https://github.com/dbsectrainer/federal-doc-triage-agent)                         | Production-ready LangGraph + Bedrock triage agent |
 
 ---
 

@@ -33,4 +33,4 @@ export const initialAuthState: AuthState = {
 
 /** Whether the user should be treated as an administrator in the UI. */
 export const isAdministrator = (user: AuthUser | null): boolean =>
-  Boolean(user?.is_superuser || user?.roles?.includes('admin'));
+  Boolean(user?.is_superuser || user?.roles?.includes("admin"));

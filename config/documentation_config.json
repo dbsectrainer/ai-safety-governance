@@ -1,11 +1,11 @@
 {
-    "version_tracking": true,
-    "complexity_threshold": {
-        "warning_level": 10,
-        "critical_level": 20
-    },
-    "code_smell_detection": true,
-    "generate_html": true,
-    "generate_markdown": true,
-    "include_complexity_report": true
+  "version_tracking": true,
+  "complexity_threshold": {
+    "warning_level": 10,
+    "critical_level": 20
+  },
+  "code_smell_detection": true,
+  "generate_html": true,
+  "generate_markdown": true,
+  "include_complexity_report": true
 }

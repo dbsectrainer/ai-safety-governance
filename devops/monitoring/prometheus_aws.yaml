@@ -43,8 +43,8 @@ spec:
     matchLabels:
       app: ai-safety-governance
   endpoints:
-  - port: metrics
-    interval: 15s
+    - port: metrics
+      interval: 15s
   namespaceSelector:
     matchNames:
-    - default
+      - default

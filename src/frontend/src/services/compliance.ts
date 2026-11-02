@@ -1,9 +1,9 @@
-import api from './api';
+import api from "./api";
 
 export interface ComplianceRecord {
   id: number;
   regulation_type: string;
-  status: 'compliant' | 'non_compliant' | 'needs_review' | string;
+  status: "compliant" | "non_compliant" | "needs_review" | string;
   details: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
@@ -42,22 +42,24 @@ export interface AuditLogEntry {
 
 class ComplianceService {
   async getSummary(): Promise<ComplianceSummary> {
-    const response = await api.get<ComplianceSummary>('/compliance/summary');
+    const response = await api.get<ComplianceSummary>("/compliance/summary");
     return response.data;
   }
 
   async getRecords(): Promise<ComplianceRecord[]> {
-    const response = await api.get<ComplianceRecord[]>('/compliance/records');
+    const response = await api.get<ComplianceRecord[]>("/compliance/records");
     return response.data;
   }
 
   async runChecks(): Promise<ComplianceRunResult> {
-    const response = await api.post<ComplianceRunResult>('/compliance/checks/run');
+    const response = await api.post<ComplianceRunResult>(
+      "/compliance/checks/run",
+    );
     return response.data;
   }
 
   async getAuditLogs(): Promise<AuditLogEntry[]> {
-    const response = await api.get<AuditLogEntry[]>('/compliance/audit-logs');
+    const response = await api.get<AuditLogEntry[]>("/compliance/audit-logs");
     return response.data;
   }
 }

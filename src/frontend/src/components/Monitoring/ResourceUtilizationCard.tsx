@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Box,
   Paper,
@@ -8,7 +8,7 @@ import {
   CircularProgress,
   Tooltip,
   useTheme,
-} from '@mui/material';
+} from "@mui/material";
 import {
   LineChart,
   Line,
@@ -17,9 +17,9 @@ import {
   CartesianGrid,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
-} from 'recharts';
-import { format } from 'date-fns';
-import { MetricData, SystemMetrics } from '../../services/monitoring';
+} from "recharts";
+import { format } from "date-fns";
+import { MetricData, SystemMetrics } from "../../services/monitoring";
 
 interface ResourceUtilizationCardProps {
   currentMetrics: SystemMetrics;
@@ -30,9 +30,9 @@ interface ResourceUtilizationCardProps {
 }
 
 const getUtilizationColor = (value: number) => {
-  if (value >= 90) return 'error';
-  if (value >= 70) return 'warning';
-  return 'success';
+  if (value >= 90) return "error";
+  if (value >= 70) return "warning";
+  return "success";
 };
 
 const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
@@ -43,10 +43,10 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
   const theme = useTheme();
 
   const resources = [
-    { key: 'cpu', label: 'CPU Usage' },
-    { key: 'memory', label: 'MEMORY Usage' },
-    { key: 'storage', label: 'STORAGE Usage' },
-    { key: 'network', label: 'NETWORK Usage' },
+    { key: "cpu", label: "CPU Usage" },
+    { key: "memory", label: "MEMORY Usage" },
+    { key: "storage", label: "STORAGE Usage" },
+    { key: "network", label: "NETWORK Usage" },
   ];
 
   const hasHistory = Object.values(historicalData).some(
@@ -55,8 +55,19 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
 
   if (isLoading) {
     return (
-      <Paper sx={{ p: 3, minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress role="status" aria-label="Loading resource utilization" />
+      <Paper
+        sx={{
+          p: 3,
+          minHeight: 400,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress
+          role="status"
+          aria-label="Loading resource utilization"
+        />
       </Paper>
     );
   }
@@ -65,10 +76,10 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
     <Paper
       sx={{
         p: 3,
-        height: '100%',
-        transition: 'transform 0.2s',
-        '&:hover': {
-          transform: 'translateY(-4px)',
+        height: "100%",
+        transition: "transform 0.2s",
+        "&:hover": {
+          transform: "translateY(-4px)",
         },
       }}
     >
@@ -87,8 +98,8 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
               <Box key={key} sx={{ mb: 2 }}>
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
+                    display: "flex",
+                    justifyContent: "space-between",
                     mb: 1,
                   }}
                 >
@@ -99,12 +110,14 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
                     {currentMetrics[key as keyof SystemMetrics]}%
                   </Typography>
                 </Box>
-                <Tooltip title={`${currentMetrics[key as keyof SystemMetrics]}% utilized`}>
+                <Tooltip
+                  title={`${currentMetrics[key as keyof SystemMetrics]}% utilized`}
+                >
                   <LinearProgress
                     variant="determinate"
                     value={currentMetrics[key as keyof SystemMetrics]}
                     color={getUtilizationColor(
-                      currentMetrics[key as keyof SystemMetrics]
+                      currentMetrics[key as keyof SystemMetrics],
                     )}
                     aria-label={`${currentMetrics[key as keyof SystemMetrics]}% utilized`}
                     sx={{ height: 8, borderRadius: 4 }}
@@ -120,17 +133,22 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
           <Box sx={{ height: 300 }} data-testid="resource-utilization-chart">
             {!hasHistory && (
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                No historical samples yet. A new sample is recorded every 30 seconds.
+                No historical samples yet. A new sample is recorded every 30
+                seconds.
               </Typography>
             )}
-            <ResponsiveContainer width="100%" height={hasHistory ? '100%' : 0} aspect={2}>
+            <ResponsiveContainer
+              width="100%"
+              height={hasHistory ? "100%" : 0}
+              aspect={2}
+            >
               <LineChart margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="timestamp"
-                  tickFormatter={(timestamp) => format(timestamp, 'HH:mm')}
+                  tickFormatter={(timestamp) => format(timestamp, "HH:mm")}
                   type="number"
-                  domain={['dataMin', 'dataMax']}
+                  domain={["dataMin", "dataMax"]}
                 />
                 <YAxis />
                 <RechartsTooltip
@@ -139,12 +157,13 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
                       return (
                         <Paper sx={{ p: 1 }}>
                           <Typography variant="body2" sx={{ mb: 1 }}>
-                            {format(label as number, 'HH:mm')}
+                            {format(label as number, "HH:mm")}
                           </Typography>
                           {payload.map((entry) => {
-                            const value = typeof entry.value === 'number' 
-                              ? entry.value.toFixed(2) 
-                              : entry.value;
+                            const value =
+                              typeof entry.value === "number"
+                                ? entry.value.toFixed(2)
+                                : entry.value;
                             return (
                               <Typography
                                 key={entry.name}
@@ -168,13 +187,12 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
                     type="monotone"
                     dataKey="value"
                     name={label}
-                    stroke={theme.palette[
-                      ['primary', 'secondary', 'error', 'warning'][index] as
-                        | 'primary'
-                        | 'secondary'
-                        | 'error'
-                        | 'warning'
-                    ].main}
+                    stroke={
+                      theme.palette[
+                        ["primary", "secondary", "error", "warning"][index] as
+                          "primary" | "secondary" | "error" | "warning"
+                      ].main
+                    }
                     dot={false}
                   />
                 ))}

@@ -2,9 +2,9 @@ name: AI Safety & Governance CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
   AWS_REGION: us-west-2
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -64,9 +64,9 @@ jobs:
       - name: Run Dependency Check
         uses: dependency-check/Dependency-Check@main
         with:
-          project: 'AI Safety & Governance'
-          path: '.'
-          format: 'HTML'
+          project: "AI Safety & Governance"
+          path: "."
+          format: "HTML"
 
       - name: Run Container Scan
         uses: azure/container-scan@v0
@@ -82,7 +82,7 @@ jobs:
   compliance-test:
     name: Compliance Testing
     runs-on: ubuntu-24.04
-    needs: 
+    needs:
       - security-scan
       - documentation-workflow
     steps:
@@ -91,7 +91,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install Dependencies
         run: |
@@ -121,7 +121,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install Dependencies
         run: |
@@ -156,10 +156,10 @@ jobs:
         uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: ${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-          format: 'table'
-          exit-code: '1'
+          format: "table"
+          exit-code: "1"
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+          severity: "CRITICAL,HIGH"
 
   deploy-staging:
     name: Deploy to Staging

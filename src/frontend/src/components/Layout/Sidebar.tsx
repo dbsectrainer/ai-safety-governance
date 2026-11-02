@@ -9,7 +9,7 @@ import {
   ListItemText,
   Typography,
   useTheme,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Assessment as AssessmentIcon,
   Dashboard as DashboardIcon,
@@ -18,12 +18,12 @@ import {
   People as PeopleIcon,
   Security as SecurityIcon,
   Settings as SettingsIcon,
-} from '@mui/icons-material';
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { authService } from '../../services/auth';
-import type { AuthUser } from '../../config/security';
-import { isAdministrator } from '../../config/security';
+} from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { authService } from "../../services/auth";
+import type { AuthUser } from "../../config/security";
+import { isAdministrator } from "../../config/security";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -34,27 +34,37 @@ interface SidebarProps {
 const DRAWER_WIDTH = 240;
 
 const menuItems = [
-  { text: 'Home', icon: <HomeIcon />, path: '/', roles: [] as string[] },
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', roles: [] as string[] },
-  { text: 'Users', icon: <PeopleIcon />, path: '/users', roles: ['admin'] },
+  { text: "Home", icon: <HomeIcon />, path: "/", roles: [] as string[] },
   {
-    text: 'Configuration',
+    text: "Dashboard",
+    icon: <DashboardIcon />,
+    path: "/dashboard",
+    roles: [] as string[],
+  },
+  { text: "Users", icon: <PeopleIcon />, path: "/users", roles: ["admin"] },
+  {
+    text: "Configuration",
     icon: <SettingsIcon />,
-    path: '/config',
-    roles: ['admin'],
+    path: "/config",
+    roles: ["admin"],
   },
-  { text: 'Monitoring', icon: <AssessmentIcon />, path: '/monitoring', roles: [] as string[] },
   {
-    text: 'Compliance',
+    text: "Monitoring",
+    icon: <AssessmentIcon />,
+    path: "/monitoring",
+    roles: [] as string[],
+  },
+  {
+    text: "Compliance",
     icon: <GavelIcon />,
-    path: '/compliance',
-    roles: ['admin', 'compliance-officer'],
+    path: "/compliance",
+    roles: ["admin", "compliance-officer"],
   },
   {
-    text: 'Security',
+    text: "Security",
     icon: <SecurityIcon />,
-    path: '/security',
-    roles: ['admin', 'security-officer'],
+    path: "/security",
+    roles: ["admin", "security-officer"],
   },
 ];
 
@@ -100,12 +110,19 @@ const Sidebar = ({ isOpen, isMobile, onClose }: SidebarProps) => {
   };
 
   const drawer = (
-    <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box
+      sx={{
+        overflow: "auto",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+      }}
+    >
       <Box
         sx={{
           height: 64,
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
           px: 2,
         }}
       >
@@ -123,9 +140,9 @@ const Sidebar = ({ isOpen, isMobile, onClose }: SidebarProps) => {
                 selected={location.pathname === item.path}
                 onClick={() => handleNavigation(item.path)}
                 sx={{
-                  '&.Mui-selected': {
+                  "&.Mui-selected": {
                     backgroundColor: `${theme.palette.primary.light}20`,
-                    '&:hover': {
+                    "&:hover": {
                       backgroundColor: `${theme.palette.primary.light}30`,
                     },
                   },
@@ -134,7 +151,9 @@ const Sidebar = ({ isOpen, isMobile, onClose }: SidebarProps) => {
                 <ListItemIcon
                   sx={{
                     color:
-                      location.pathname === item.path ? theme.palette.primary.main : 'inherit',
+                      location.pathname === item.path
+                        ? theme.palette.primary.main
+                        : "inherit",
                   }}
                 >
                   {item.icon}
@@ -143,7 +162,9 @@ const Sidebar = ({ isOpen, isMobile, onClose }: SidebarProps) => {
                   primary={item.text}
                   sx={{
                     color:
-                      location.pathname === item.path ? theme.palette.primary.main : 'inherit',
+                      location.pathname === item.path
+                        ? theme.palette.primary.main
+                        : "inherit",
                   }}
                 />
               </ListItemButton>
@@ -155,18 +176,18 @@ const Sidebar = ({ isOpen, isMobile, onClose }: SidebarProps) => {
 
   return (
     <Drawer
-      variant={isMobile ? 'temporary' : 'permanent'}
+      variant={isMobile ? "temporary" : "permanent"}
       sx={{
         width: isMobile ? 0 : isOpen ? DRAWER_WIDTH : 0,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
+        "& .MuiDrawer-paper": {
           width: DRAWER_WIDTH,
-          boxSizing: 'border-box',
+          boxSizing: "border-box",
           borderRight: `1px solid ${theme.palette.divider}`,
           ...(!isMobile &&
             !isOpen && {
               width: 0,
-              visibility: 'hidden',
+              visibility: "hidden",
             }),
         },
       }}

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Box, useMediaQuery, useTheme } from '@mui/material';
-import Sidebar from './Sidebar';
-import Header from './Header';
+import { useEffect, useState } from "react";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar
         isOpen={isSidebarOpen}
         isMobile={isMobile}
@@ -33,9 +33,9 @@ const Layout = ({ children }: LayoutProps) => {
           flexGrow: 1,
           minWidth: 0,
           bgcolor: theme.palette.background.default,
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
         }}
       >
         <Header onMenuClick={toggleSidebar} />

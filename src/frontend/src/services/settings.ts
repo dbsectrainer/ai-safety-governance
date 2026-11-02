@@ -1,8 +1,8 @@
-import api from './api';
+import api from "./api";
 
 export interface GeneralSettings {
   platform_name: string;
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
   debug_mode: boolean;
   data_retention_days: number;
   max_concurrent_models: number;
@@ -11,7 +11,7 @@ export interface GeneralSettings {
 export interface PlatformSecuritySettings {
   mfa_enabled: boolean;
   session_timeout: number;
-  password_policy: 'basic' | 'medium' | 'strong';
+  password_policy: "basic" | "medium" | "strong";
   ip_whitelist: string;
   audit_logging: boolean;
 }
@@ -19,14 +19,14 @@ export interface PlatformSecuritySettings {
 export interface NotificationSettings {
   email_notifications: boolean;
   slack_notifications: boolean;
-  alert_threshold: 'low' | 'medium' | 'high';
+  alert_threshold: "low" | "medium" | "high";
   daily_digest: boolean;
   maintenance_alerts: boolean;
 }
 
 export interface IntegrationSettings {
   aws_region: string;
-  monitoring_service: 'cloudwatch' | 'datadog' | 'prometheus';
+  monitoring_service: "cloudwatch" | "datadog" | "prometheus";
 }
 
 export interface PlatformSettings {
@@ -43,12 +43,14 @@ export interface SettingsResponse {
 
 class SettingsService {
   async getSettings(): Promise<SettingsResponse> {
-    const response = await api.get<SettingsResponse>('/settings');
+    const response = await api.get<SettingsResponse>("/settings");
     return response.data;
   }
 
-  async updateSettings(settings: Partial<PlatformSettings>): Promise<SettingsResponse> {
-    const response = await api.put<SettingsResponse>('/settings', settings);
+  async updateSettings(
+    settings: Partial<PlatformSettings>,
+  ): Promise<SettingsResponse> {
+    const response = await api.put<SettingsResponse>("/settings", settings);
     return response.data;
   }
 }

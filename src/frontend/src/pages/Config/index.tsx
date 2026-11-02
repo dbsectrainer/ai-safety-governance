@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import {
   Alert,
   Box,
@@ -17,18 +17,18 @@ import {
   Tabs,
   TextField,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Extension as ExtensionIcon,
   Notifications as NotificationsIcon,
   Save as SaveIcon,
   Security as SecurityIcon,
   Settings as SettingsIcon,
-} from '@mui/icons-material';
-import { useSnackbar } from 'notistack';
-import { settingsService } from '../../services/settings';
-import type { PlatformSettings } from '../../services/settings';
-import { getErrorMessage } from '../../services/api';
+} from "@mui/icons-material";
+import { useSnackbar } from "notistack";
+import { settingsService } from "../../services/settings";
+import type { PlatformSettings } from "../../services/settings";
+import { getErrorMessage } from "../../services/api";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -53,10 +53,10 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const configSections = [
-  { id: 'general', label: 'General Settings', icon: <SettingsIcon /> },
-  { id: 'security', label: 'Security', icon: <SecurityIcon /> },
-  { id: 'integrations', label: 'Integrations', icon: <ExtensionIcon /> },
-  { id: 'notifications', label: 'Notifications', icon: <NotificationsIcon /> },
+  { id: "general", label: "General Settings", icon: <SettingsIcon /> },
+  { id: "security", label: "Security", icon: <SecurityIcon /> },
+  { id: "integrations", label: "Integrations", icon: <ExtensionIcon /> },
+  { id: "notifications", label: "Notifications", icon: <NotificationsIcon /> },
 ];
 
 const Config = () => {
@@ -65,7 +65,7 @@ const Config = () => {
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ const Config = () => {
         const response = await settingsService.getSettings();
         if (!cancelled) {
           setSettings(response.settings);
-          setError('');
+          setError("");
         }
       } catch (err) {
         if (!cancelled) {
@@ -98,7 +98,9 @@ const Config = () => {
     patch: Partial<PlatformSettings[K]>,
   ) => {
     setSettings((current) =>
-      current ? { ...current, [section]: { ...current[section], ...patch } } : current,
+      current
+        ? { ...current, [section]: { ...current[section], ...patch } }
+        : current,
     );
   };
 
@@ -107,17 +109,17 @@ const Config = () => {
       return;
     }
     setIsSaving(true);
-    setError('');
+    setError("");
     try {
       const response = await settingsService.updateSettings(settings);
       setSettings(response.settings);
       setShowSuccess(true);
-      enqueueSnackbar('Configuration saved', { variant: 'success' });
+      enqueueSnackbar("Configuration saved", { variant: "success" });
       window.setTimeout(() => setShowSuccess(false), 3000);
     } catch (err) {
       const message = getErrorMessage(err);
       setError(message);
-      enqueueSnackbar(message, { variant: 'error' });
+      enqueueSnackbar(message, { variant: "error" });
     } finally {
       setIsSaving(false);
     }
@@ -125,7 +127,13 @@ const Config = () => {
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px" role="status">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="400px"
+        role="status"
+      >
         <CircularProgress />
       </Box>
     );
@@ -137,7 +145,7 @@ const Config = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Configuration Management
         </Typography>
-        <Alert severity="error">{error || 'Settings are unavailable.'}</Alert>
+        <Alert severity="error">{error || "Settings are unavailable."}</Alert>
       </Box>
     );
   }
@@ -166,11 +174,17 @@ const Config = () => {
           </Typography>
           <Button
             variant="contained"
-            startIcon={isSaving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
+            startIcon={
+              isSaving ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <SaveIcon />
+              )
+            }
             onClick={() => void handleSave()}
             disabled={isSaving}
           >
-            {isSaving ? 'Saving...' : 'Save Changes'}
+            {isSaving ? "Saving..." : "Save Changes"}
           </Button>
         </Box>
 
@@ -186,18 +200,19 @@ const Config = () => {
         )}
 
         <Alert severity="info" sx={{ mb: 2 }}>
-          Only non-secret settings are stored here. Webhooks, API tokens and credentials must be
-          provided through environment variables or a secrets manager.
+          Only non-secret settings are stored here. Webhooks, API tokens and
+          credentials must be provided through environment variables or a
+          secrets manager.
         </Alert>
 
-        <Paper sx={{ width: '100%' }}>
+        <Paper sx={{ width: "100%" }}>
           <Tabs
             value={tabValue}
             onChange={(_event, newValue: number) => setTabValue(newValue)}
             aria-label="configuration tabs"
             variant="scrollable"
             allowScrollButtonsMobile
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
+            sx={{ borderBottom: 1, borderColor: "divider" }}
           >
             {configSections.map((section) => (
               <Tab
@@ -205,7 +220,7 @@ const Config = () => {
                 icon={section.icon}
                 label={section.label}
                 iconPosition="start"
-                sx={{ minHeight: 64, textTransform: 'none', px: 2 }}
+                sx={{ minHeight: 64, textTransform: "none", px: 2 }}
               />
             ))}
           </Tabs>
@@ -217,7 +232,9 @@ const Config = () => {
                   fullWidth
                   label="Platform Name"
                   value={settings.general.platform_name}
-                  onChange={(e) => updateSection('general', { platform_name: e.target.value })}
+                  onChange={(e) =>
+                    updateSection("general", { platform_name: e.target.value })
+                  }
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -228,8 +245,9 @@ const Config = () => {
                     value={settings.general.environment}
                     label="Environment"
                     onChange={(e) =>
-                      updateSection('general', {
-                        environment: e.target.value as PlatformSettings['general']['environment'],
+                      updateSection("general", {
+                        environment: e.target
+                          .value as PlatformSettings["general"]["environment"],
                       })
                     }
                   >
@@ -246,8 +264,9 @@ const Config = () => {
                   label="Data Retention (days)"
                   value={settings.general.data_retention_days}
                   onChange={(e) =>
-                    updateSection('general', {
-                      data_retention_days: Number.parseInt(e.target.value, 10) || 0,
+                    updateSection("general", {
+                      data_retention_days:
+                        Number.parseInt(e.target.value, 10) || 0,
                     })
                   }
                   inputProps={{ min: 1, max: 3650 }}
@@ -260,8 +279,9 @@ const Config = () => {
                   label="Max Concurrent Models"
                   value={settings.general.max_concurrent_models}
                   onChange={(e) =>
-                    updateSection('general', {
-                      max_concurrent_models: Number.parseInt(e.target.value, 10) || 0,
+                    updateSection("general", {
+                      max_concurrent_models:
+                        Number.parseInt(e.target.value, 10) || 0,
                     })
                   }
                   inputProps={{ min: 1, max: 100 }}
@@ -273,7 +293,9 @@ const Config = () => {
                     <Switch
                       checked={settings.general.debug_mode}
                       onChange={(e) =>
-                        updateSection('general', { debug_mode: e.target.checked })
+                        updateSection("general", {
+                          debug_mode: e.target.checked,
+                        })
                       }
                     />
                   }
@@ -287,15 +309,17 @@ const Config = () => {
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
-                  <InputLabel id="password-policy-label">Password Policy</InputLabel>
+                  <InputLabel id="password-policy-label">
+                    Password Policy
+                  </InputLabel>
                   <Select
                     labelId="password-policy-label"
                     value={settings.security.password_policy}
                     label="Password Policy"
                     onChange={(e) =>
-                      updateSection('security', {
+                      updateSection("security", {
                         password_policy: e.target
-                          .value as PlatformSettings['security']['password_policy'],
+                          .value as PlatformSettings["security"]["password_policy"],
                       })
                     }
                   >
@@ -312,7 +336,7 @@ const Config = () => {
                   label="Session Timeout (minutes)"
                   value={settings.security.session_timeout}
                   onChange={(e) =>
-                    updateSection('security', {
+                    updateSection("security", {
                       session_timeout: Number.parseInt(e.target.value, 10) || 0,
                     })
                   }
@@ -325,7 +349,9 @@ const Config = () => {
                   label="IP Whitelist"
                   placeholder="Comma-separated IP addresses"
                   value={settings.security.ip_whitelist}
-                  onChange={(e) => updateSection('security', { ip_whitelist: e.target.value })}
+                  onChange={(e) =>
+                    updateSection("security", { ip_whitelist: e.target.value })
+                  }
                 />
               </Grid>
               <Grid item xs={12}>
@@ -334,7 +360,9 @@ const Config = () => {
                     <Switch
                       checked={settings.security.mfa_enabled}
                       onChange={(e) =>
-                        updateSection('security', { mfa_enabled: e.target.checked })
+                        updateSection("security", {
+                          mfa_enabled: e.target.checked,
+                        })
                       }
                     />
                   }
@@ -347,7 +375,9 @@ const Config = () => {
                     <Switch
                       checked={settings.security.audit_logging}
                       onChange={(e) =>
-                        updateSection('security', { audit_logging: e.target.checked })
+                        updateSection("security", {
+                          audit_logging: e.target.checked,
+                        })
                       }
                     />
                   }
@@ -367,27 +397,33 @@ const Config = () => {
                     value={settings.integrations.aws_region}
                     label="AWS Region"
                     onChange={(e) =>
-                      updateSection('integrations', { aws_region: e.target.value })
+                      updateSection("integrations", {
+                        aws_region: e.target.value,
+                      })
                     }
                   >
                     <MenuItem value="us-east-1">US East (N. Virginia)</MenuItem>
                     <MenuItem value="us-west-2">US West (Oregon)</MenuItem>
                     <MenuItem value="eu-west-1">EU (Ireland)</MenuItem>
-                    <MenuItem value="ap-southeast-1">Asia Pacific (Singapore)</MenuItem>
+                    <MenuItem value="ap-southeast-1">
+                      Asia Pacific (Singapore)
+                    </MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
-                  <InputLabel id="monitoring-service-label">Monitoring Service</InputLabel>
+                  <InputLabel id="monitoring-service-label">
+                    Monitoring Service
+                  </InputLabel>
                   <Select
                     labelId="monitoring-service-label"
                     value={settings.integrations.monitoring_service}
                     label="Monitoring Service"
                     onChange={(e) =>
-                      updateSection('integrations', {
+                      updateSection("integrations", {
                         monitoring_service: e.target
-                          .value as PlatformSettings['integrations']['monitoring_service'],
+                          .value as PlatformSettings["integrations"]["monitoring_service"],
                       })
                     }
                   >
@@ -404,15 +440,17 @@ const Config = () => {
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
-                  <InputLabel id="alert-threshold-label">Alert Threshold</InputLabel>
+                  <InputLabel id="alert-threshold-label">
+                    Alert Threshold
+                  </InputLabel>
                   <Select
                     labelId="alert-threshold-label"
                     value={settings.notifications.alert_threshold}
                     label="Alert Threshold"
                     onChange={(e) =>
-                      updateSection('notifications', {
+                      updateSection("notifications", {
                         alert_threshold: e.target
-                          .value as PlatformSettings['notifications']['alert_threshold'],
+                          .value as PlatformSettings["notifications"]["alert_threshold"],
                       })
                     }
                   >
@@ -428,7 +466,7 @@ const Config = () => {
                     <Switch
                       checked={settings.notifications.email_notifications}
                       onChange={(e) =>
-                        updateSection('notifications', {
+                        updateSection("notifications", {
                           email_notifications: e.target.checked,
                         })
                       }
@@ -443,7 +481,7 @@ const Config = () => {
                     <Switch
                       checked={settings.notifications.slack_notifications}
                       onChange={(e) =>
-                        updateSection('notifications', {
+                        updateSection("notifications", {
                           slack_notifications: e.target.checked,
                         })
                       }
@@ -458,7 +496,9 @@ const Config = () => {
                     <Switch
                       checked={settings.notifications.daily_digest}
                       onChange={(e) =>
-                        updateSection('notifications', { daily_digest: e.target.checked })
+                        updateSection("notifications", {
+                          daily_digest: e.target.checked,
+                        })
                       }
                     />
                   }
@@ -471,7 +511,7 @@ const Config = () => {
                     <Switch
                       checked={settings.notifications.maintenance_alerts}
                       onChange={(e) =>
-                        updateSection('notifications', {
+                        updateSection("notifications", {
                           maintenance_alerts: e.target.checked,
                         })
                       }

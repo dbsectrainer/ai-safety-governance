@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useState } from "react";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import {
   Container,
   Paper,
@@ -9,45 +9,49 @@ import {
   Box,
   Link,
   Alert,
-} from '@mui/material';
-import { useSnackbar } from 'notistack';
-import { authService } from '../../services/auth';
-import { validationPatterns } from '../../config/security';
+} from "@mui/material";
+import { useSnackbar } from "notistack";
+import { authService } from "../../services/auth";
+import { validationPatterns } from "../../config/security";
 
 const Register = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    username: '',
-    full_name: '',
+    email: "",
+    password: "",
+    confirmPassword: "",
+    username: "",
+    full_name: "",
   });
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
   const validateField = (name: string, value: string): string => {
     switch (name) {
-      case 'email':
-        return !validationPatterns.email.test(value) ? 'Please enter a valid email address' : '';
-      case 'password':
+      case "email":
+        return !validationPatterns.email.test(value)
+          ? "Please enter a valid email address"
+          : "";
+      case "password":
         return !validationPatterns.password.test(value)
-          ? 'Password must include uppercase, lowercase, number and special character'
-          : '';
-      case 'confirmPassword':
-        return value !== formData.password ? 'Passwords do not match' : '';
-      case 'username':
+          ? "Password must include uppercase, lowercase, number and special character"
+          : "";
+      case "confirmPassword":
+        return value !== formData.password ? "Passwords do not match" : "";
+      case "username":
         return !validationPatterns.username.test(value)
-          ? 'Username must be 3-16 characters using letters, numbers, _ or -'
-          : '';
-      case 'full_name':
+          ? "Username must be 3-16 characters using letters, numbers, _ or -"
+          : "";
+      case "full_name":
         return value && !validationPatterns.name.test(value)
-          ? 'Full name must be 2-100 characters'
-          : '';
+          ? "Full name must be 2-100 characters"
+          : "";
       default:
-        return '';
+        return "";
     }
   };
 
@@ -63,20 +67,23 @@ const Register = () => {
       ...prev,
       [name]: fieldError,
     }));
-    if (name === 'password' && formData.confirmPassword) {
+    if (name === "password" && formData.confirmPassword) {
       setValidationErrors((prev) => ({
         ...prev,
         confirmPassword:
-          formData.confirmPassword !== value ? 'Passwords do not match' : '',
+          formData.confirmPassword !== value ? "Passwords do not match" : "",
       }));
     }
-    setError('');
+    setError("");
   };
 
   const isFormValid = () => {
     const errors: Record<string, string> = {};
     Object.keys(formData).forEach((key) => {
-      const fieldError = validateField(key, formData[key as keyof typeof formData]);
+      const fieldError = validateField(
+        key,
+        formData[key as keyof typeof formData],
+      );
       if (fieldError) {
         errors[key] = fieldError;
       }
@@ -89,22 +96,25 @@ const Register = () => {
     e.preventDefault();
 
     if (!isFormValid()) {
-      setError('Please fix the validation errors before submitting');
+      setError("Please fix the validation errors before submitting");
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const { email, password, username, full_name } = formData;
       await authService.register({ email, password, username, full_name });
-      enqueueSnackbar('Registration successful! Please sign in.', { variant: 'success' });
-      navigate('/login');
+      enqueueSnackbar("Registration successful! Please sign in.", {
+        variant: "success",
+      });
+      navigate("/login");
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      const errorMessage =
+        err instanceof Error ? err.message : "Registration failed";
       setError(errorMessage);
-      enqueueSnackbar(errorMessage, { variant: 'error' });
+      enqueueSnackbar(errorMessage, { variant: "error" });
     } finally {
       setIsLoading(false);
     }
@@ -116,9 +126,9 @@ const Register = () => {
         sx={{
           marginTop: 8,
           marginBottom: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
         <Typography component="h1" variant="h5" gutterBottom align="center">
@@ -128,10 +138,10 @@ const Register = () => {
           elevation={3}
           sx={{
             padding: { xs: 3, sm: 4 },
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%',
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
           }}
         >
           <Typography component="h2" variant="h5" gutterBottom>
@@ -139,12 +149,17 @@ const Register = () => {
           </Typography>
 
           {error && (
-            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+            <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
               {error}
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }} noValidate>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ width: "100%" }}
+            noValidate
+          >
             <TextField
               margin="normal"
               required
@@ -201,7 +216,7 @@ const Register = () => {
               error={!!validationErrors.password}
               helperText={
                 validationErrors.password ||
-                'At least 8 characters, including uppercase, lowercase, number and special character'
+                "At least 8 characters, including uppercase, lowercase, number and special character"
               }
               disabled={isLoading}
             />
@@ -227,11 +242,19 @@ const Register = () => {
               sx={{ mt: 3, mb: 2, py: 1.25 }}
               disabled={isLoading}
             >
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {isLoading ? "Creating Account..." : "Create Account"}
             </Button>
           </Box>
 
-          <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
             <Link component={RouterLink} to="/" variant="body2">
               Back to home
             </Link>

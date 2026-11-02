@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { useCallback, useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import {
   Alert,
   Box,
@@ -10,29 +10,34 @@ import {
   Paper,
   Tooltip,
   Typography,
-} from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { useNavigate } from 'react-router-dom';
-import { monitoringService } from '../../services/monitoring';
+} from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
+import SettingsIcon from "@mui/icons-material/Settings";
+import { useNavigate } from "react-router-dom";
+import { monitoringService } from "../../services/monitoring";
 import type {
   MetricData,
   ModelMetrics,
   ModelPerformance,
   MonitoringAlert,
   SystemMetrics,
-} from '../../services/monitoring';
-import { getErrorMessage } from '../../services/api';
-import ModelPerformanceCard from '../../components/Monitoring/ModelPerformanceCard';
-import ResourceUtilizationCard from '../../components/Monitoring/ResourceUtilizationCard';
+} from "../../services/monitoring";
+import { getErrorMessage } from "../../services/api";
+import ModelPerformanceCard from "../../components/Monitoring/ModelPerformanceCard";
+import ResourceUtilizationCard from "../../components/Monitoring/ResourceUtilizationCard";
 
 interface ResourceHistoricalData {
   [key: string]: MetricData[];
 }
 
-const initialSystemMetrics: SystemMetrics = { cpu: 0, memory: 0, storage: 0, network: 0 };
+const initialSystemMetrics: SystemMetrics = {
+  cpu: 0,
+  memory: 0,
+  storage: 0,
+  network: 0,
+};
 const initialModelMetrics: ModelMetrics = {
   activeModels: 0,
   responseTime: 0,
@@ -47,12 +52,17 @@ const Monitoring = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics>(initialSystemMetrics);
-  const [modelMetrics, setModelMetrics] = useState<ModelMetrics>(initialModelMetrics);
-  const [modelPerformance, setModelPerformance] = useState<ModelPerformance[]>([]);
-  const [resourceHistory, setResourceHistory] = useState<ResourceHistoricalData>({});
+  const [systemMetrics, setSystemMetrics] =
+    useState<SystemMetrics>(initialSystemMetrics);
+  const [modelMetrics, setModelMetrics] =
+    useState<ModelMetrics>(initialModelMetrics);
+  const [modelPerformance, setModelPerformance] = useState<ModelPerformance[]>(
+    [],
+  );
+  const [resourceHistory, setResourceHistory] =
+    useState<ResourceHistoricalData>({});
   const [alerts, setAlerts] = useState<MonitoringAlert[]>([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const loadData = useCallback(async () => {
     try {
@@ -69,10 +79,10 @@ const Monitoring = () => {
         monitoringService.getSystemMetrics(),
         monitoringService.getModelMetrics(),
         monitoringService.getModelPerformance(),
-        monitoringService.getResourceUtilization('cpu'),
-        monitoringService.getResourceUtilization('memory'),
-        monitoringService.getResourceUtilization('storage'),
-        monitoringService.getResourceUtilization('network'),
+        monitoringService.getResourceUtilization("cpu"),
+        monitoringService.getResourceUtilization("memory"),
+        monitoringService.getResourceUtilization("storage"),
+        monitoringService.getResourceUtilization("network"),
         monitoringService.getAlerts(),
       ]);
 
@@ -86,7 +96,7 @@ const Monitoring = () => {
         network: networkHistory,
       });
       setAlerts(alertData);
-      setError('');
+      setError("");
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -124,18 +134,24 @@ const Monitoring = () => {
   );
 
   const stats = [
-    { label: 'Active Models', value: modelMetrics.activeModels },
+    { label: "Active Models", value: modelMetrics.activeModels },
     {
-      label: 'Accuracy',
-      value: modelMetrics.accuracy ? `${(modelMetrics.accuracy * 100).toFixed(1)}%` : 'No data',
+      label: "Accuracy",
+      value: modelMetrics.accuracy
+        ? `${(modelMetrics.accuracy * 100).toFixed(1)}%`
+        : "No data",
     },
     {
-      label: 'Avg Latency',
-      value: modelMetrics.latency ? `${modelMetrics.latency.toFixed(1)} ms` : 'No data',
+      label: "Avg Latency",
+      value: modelMetrics.latency
+        ? `${modelMetrics.latency.toFixed(1)} ms`
+        : "No data",
     },
     {
-      label: 'Error Rate',
-      value: modelMetrics.errorRate ? `${(modelMetrics.errorRate * 100).toFixed(1)}%` : 'No data',
+      label: "Error Rate",
+      value: modelMetrics.errorRate
+        ? `${(modelMetrics.errorRate * 100).toFixed(1)}%`
+        : "No data",
     },
   ];
 
@@ -174,19 +190,22 @@ const Monitoring = () => {
             <Tooltip title="Configure monitoring settings">
               <IconButton
                 aria-label="Configure monitoring settings"
-                onClick={() => navigate('/config')}
+                onClick={() => navigate("/config")}
               >
                 <SettingsIcon />
               </IconButton>
             </Tooltip>
             <Chip
               icon={isHealthy ? <CheckCircleIcon /> : <ErrorIcon />}
-              label={isHealthy ? 'All Systems Operational' : 'System Warning'}
-              color={isHealthy ? 'success' : 'warning'}
+              label={isHealthy ? "All Systems Operational" : "System Warning"}
+              color={isHealthy ? "success" : "warning"}
               variant="outlined"
             />
             {alerts.length > 0 && (
-              <Chip label={`${alerts.length} alert${alerts.length === 1 ? '' : 's'}`} color="warning" />
+              <Chip
+                label={`${alerts.length} alert${alerts.length === 1 ? "" : "s"}`}
+                color="warning"
+              />
             )}
           </Box>
         </Box>
@@ -226,7 +245,10 @@ const Monitoring = () => {
           <Grid item xs={12}>
             <Fade in timeout={400}>
               <Box>
-                <ModelPerformanceCard data={modelPerformance} isLoading={isLoading} />
+                <ModelPerformanceCard
+                  data={modelPerformance}
+                  isLoading={isLoading}
+                />
               </Box>
             </Fade>
           </Grid>
@@ -238,7 +260,11 @@ const Monitoring = () => {
                   Active Alerts
                 </Typography>
                 {alerts.map((alert) => (
-                  <Alert key={alert.id} severity={alert.severity === 'high' ? 'error' : 'warning'} sx={{ mb: 1 }}>
+                  <Alert
+                    key={alert.id}
+                    severity={alert.severity === "high" ? "error" : "warning"}
+                    sx={{ mb: 1 }}
+                  >
                     {alert.message}
                   </Alert>
                 ))}

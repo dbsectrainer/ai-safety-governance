@@ -13,10 +13,7 @@
     "metadata": {},
     "preserveOutput": "always",
     "reporter": [
-      [
-        "list",
-        null
-      ],
+      ["list", null],
       [
         "html",
         {
@@ -46,9 +43,7 @@
         "name": "chromium",
         "testDir": "/Users/newtechlab/Documents/GitHub/ai-safety-governance/src/frontend/e2e",
         "testIgnore": [],
-        "testMatch": [
-          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
-        ],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
         "timeout": 60000
       }
     ],

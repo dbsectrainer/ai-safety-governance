@@ -43,11 +43,11 @@ spec:
     matchLabels:
       app: ai-safety-governance
   endpoints:
-  - port: metrics
-    interval: 15s
+    - port: metrics
+      interval: 15s
   namespaceSelector:
     matchNames:
-    - default
+      - default
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -58,19 +58,19 @@ metadata:
     team: ai-safety
 spec:
   groups:
-  - name: azure.rules
-    rules:
-    - alert: AzureNodeNotReady
-      expr: kube_node_status_condition{condition="Ready",status="false"} == 1
-      for: 10m
-      labels:
-        severity: critical
-      annotations:
-        description: "Node {{ $labels.node }} has been unready for more than 10 minutes"
-    - alert: AzurePodCrashLooping
-      expr: rate(kube_pod_container_status_restarts_total{namespace!="kube-system"}[15m]) * 60 * 5 > 0
-      for: 15m
-      labels:
-        severity: warning
-      annotations:
-        description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping"
+    - name: azure.rules
+      rules:
+        - alert: AzureNodeNotReady
+          expr: kube_node_status_condition{condition="Ready",status="false"} == 1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            description: "Node {{ $labels.node }} has been unready for more than 10 minutes"
+        - alert: AzurePodCrashLooping
+          expr: rate(kube_pod_container_status_restarts_total{namespace!="kube-system"}[15m]) * 60 * 5 > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping"

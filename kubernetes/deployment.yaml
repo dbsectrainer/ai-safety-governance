@@ -31,106 +31,106 @@ spec:
         runAsUser: 1000
         fsGroup: 2000
       containers:
-      - name: ai-safety-governance
-        image: ${ECR_REGISTRY}/ai-safety-governance:${IMAGE_TAG}
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8080
-          name: http
-        - containerPort: 9090
-          name: metrics
-        env:
-        - name: ENV
-          value: "production"
-        - name: LOG_LEVEL
-          value: "INFO"
-        envFrom:
-        - secretRef:
-            name: ai-safety-secrets
-        resources:
-          requests:
-            cpu: "500m"
-            memory: "512Mi"
-          limits:
-            cpu: "2000m"
-            memory: "2Gi"
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: http
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: http
-          initialDelaySeconds: 5
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        startupProbe:
-          httpGet:
-            path: /health
-            port: http
-          failureThreshold: 30
-          periodSeconds: 10
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-        - name: config
-          mountPath: /app/config
-          readOnly: true
-        - name: certs
-          mountPath: /app/certs
-          readOnly: true
+        - name: ai-safety-governance
+          image: ${ECR_REGISTRY}/ai-safety-governance:${IMAGE_TAG}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9090
+              name: metrics
+          env:
+            - name: ENV
+              value: "production"
+            - name: LOG_LEVEL
+              value: "INFO"
+          envFrom:
+            - secretRef:
+                name: ai-safety-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: config
+              mountPath: /app/config
+              readOnly: true
+            - name: certs
+              mountPath: /app/certs
+              readOnly: true
       volumes:
-      - name: tmp
-        emptyDir: {}
-      - name: config
-        configMap:
-          name: ai-safety-config
-      - name: certs
-        secret:
-          secretName: ai-safety-certs
+        - name: tmp
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: ai-safety-config
+        - name: certs
+          secret:
+            secretName: ai-safety-certs
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - ai-safety-governance
-              topologyKey: kubernetes.io/hostname
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - ai-safety-governance
+                topologyKey: kubernetes.io/hostname
       topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: topology.kubernetes.io/zone
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app: ai-safety-governance
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: ai-safety-governance
       initContainers:
-      - name: init-config
-        image: busybox
-        command: ['sh', '-c', 'chmod 600 /app/config/*']
-        volumeMounts:
-        - name: config
-          mountPath: /app/config
+        - name: init-config
+          image: busybox
+          command: ["sh", "-c", "chmod 600 /app/config/*"]
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
       tolerations:
-      - key: "dedicated"
-        operator: "Equal"
-        value: "ai-safety"
-        effect: "NoSchedule"
+        - key: "dedicated"
+          operator: "Equal"
+          value: "ai-safety"
+          effect: "NoSchedule"
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -156,31 +156,31 @@ spec:
   minReplicas: 3
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
-      - type: Pods
-        value: 1
-        periodSeconds: 60
+        - type: Pods
+          value: 1
+          periodSeconds: 60
     scaleUp:
       stabilizationWindowSeconds: 0
       policies:
-      - type: Pods
-        value: 2
-        periodSeconds: 60
+        - type: Pods
+          value: 2
+          periodSeconds: 60
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -192,33 +192,33 @@ spec:
     matchLabels:
       app: ai-safety-governance
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: ingress-nginx
-    ports:
-    - protocol: TCP
-      port: 8080
-    - protocol: TCP
-      port: 9090
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9090
   egress:
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          name: monitoring
-    ports:
-    - protocol: TCP
-      port: 9090
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          name: logging
-    ports:
-    - protocol: TCP
-      port: 24224
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: logging
+      ports:
+        - protocol: TCP
+          port: 24224
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -232,6 +232,6 @@ spec:
     matchLabels:
       app: ai-safety-governance
   endpoints:
-  - port: metrics
-    interval: 15s
-    path: /metrics
+    - port: metrics
+      interval: 15s
+      path: /metrics

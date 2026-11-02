@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Box,
   Paper,
@@ -8,7 +8,7 @@ import {
   Tooltip,
   CircularProgress,
   useTheme,
-} from '@mui/material';
+} from "@mui/material";
 import {
   BarChart,
   Bar,
@@ -17,8 +17,8 @@ import {
   CartesianGrid,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
-} from 'recharts';
-import { ModelPerformance } from '../../services/monitoring';
+} from "recharts";
+import { ModelPerformance } from "../../services/monitoring";
 
 interface ModelPerformanceCardProps {
   data: ModelPerformance[];
@@ -27,29 +27,37 @@ interface ModelPerformanceCardProps {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'healthy':
-      return 'success';
-    case 'degraded':
-      return 'warning';
-    case 'error':
-      return 'error';
+    case "healthy":
+      return "success";
+    case "degraded":
+      return "warning";
+    case "error":
+      return "error";
     default:
-      return 'default';
+      return "default";
   }
 };
 
-const ModelPerformanceCard: React.FC<ModelPerformanceCardProps> = ({ data, isLoading }) => {
+const ModelPerformanceCard: React.FC<ModelPerformanceCardProps> = ({
+  data,
+  isLoading,
+}) => {
   const theme = useTheme();
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight={400}
+      >
         <CircularProgress />
       </Box>
     );
   }
 
-  const chartData = data.map(model => ({
+  const chartData = data.map((model) => ({
     name: model.modelName,
     accuracy: model.metrics.accuracy * 100,
     latency: model.metrics.latency,
@@ -61,10 +69,10 @@ const ModelPerformanceCard: React.FC<ModelPerformanceCardProps> = ({ data, isLoa
     <Paper
       sx={{
         p: 3,
-        height: '100%',
-        transition: 'transform 0.2s',
-        '&:hover': {
-          transform: 'translateY(-4px)',
+        height: "100%",
+        transition: "transform 0.2s",
+        "&:hover": {
+          transform: "translateY(-4px)",
         },
       }}
     >
@@ -90,18 +98,33 @@ const ModelPerformanceCard: React.FC<ModelPerformanceCardProps> = ({ data, isLoa
 
       {data.length === 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          No model versions registered yet. Add one through the models API to see performance
-          metrics.
+          No model versions registered yet. Add one through the models API to
+          see performance metrics.
         </Typography>
       )}
 
-          <Box sx={{ height: 400 }} data-testid="model-performance-chart">
-            <ResponsiveContainer width="100%" height={data.length === 0 ? 0 : '100%'} aspect={2}>
-          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+      <Box sx={{ height: 400 }} data-testid="model-performance-chart">
+        <ResponsiveContainer
+          width="100%"
+          height={data.length === 0 ? 0 : "100%"}
+          aspect={2}
+        >
+          <BarChart
+            data={chartData}
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
-            <YAxis yAxisId="left" orientation="left" stroke={theme.palette.primary.main} />
-            <YAxis yAxisId="right" orientation="right" stroke={theme.palette.secondary.main} />
+            <YAxis
+              yAxisId="left"
+              orientation="left"
+              stroke={theme.palette.primary.main}
+            />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              stroke={theme.palette.secondary.main}
+            />
             <RechartsTooltip
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
@@ -116,12 +139,16 @@ const ModelPerformanceCard: React.FC<ModelPerformanceCardProps> = ({ data, isLoa
                           variant="body2"
                           sx={{ color: entry.color }}
                         >
-                          {entry.name}: {typeof entry.value === 'number' ? entry.value.toFixed(2) : entry.value}
-                          {entry.name === 'accuracy' || entry.name === 'errorRate'
-                            ? '%'
-                            : entry.name === 'latency'
-                            ? 'ms'
-                            : '/s'}
+                          {entry.name}:{" "}
+                          {typeof entry.value === "number"
+                            ? entry.value.toFixed(2)
+                            : entry.value}
+                          {entry.name === "accuracy" ||
+                          entry.name === "errorRate"
+                            ? "%"
+                            : entry.name === "latency"
+                              ? "ms"
+                              : "/s"}
                         </Typography>
                       ))}
                     </Paper>

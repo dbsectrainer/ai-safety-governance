@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation, Link as RouterLink } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import {
   Container,
   Paper,
@@ -14,28 +14,30 @@ import {
   IconButton,
   CircularProgress,
   Fade,
-} from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useSnackbar } from 'notistack';
-import { authService } from '../../services/auth';
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useSnackbar } from "notistack";
+import { authService } from "../../services/auth";
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
+  const from =
+    (location.state as { from?: { pathname: string } })?.from?.pathname ||
+    "/dashboard";
 
   useEffect(() => {
     if (authService.isAuthenticated()) {
-      navigate('/dashboard', { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [navigate]);
 
@@ -45,19 +47,19 @@ const Login = () => {
 
   const validateForm = () => {
     if (!formData.email) {
-      setError('Email is required');
+      setError("Email is required");
       return false;
     }
     if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
       return false;
     }
     if (!formData.password) {
-      setError('Password is required');
+      setError("Password is required");
       return false;
     }
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long');
+      setError("Password must be at least 8 characters long");
       return false;
     }
     return true;
@@ -71,20 +73,21 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       await authService.login(formData);
-      enqueueSnackbar('Login successful! Welcome back.', {
-        variant: 'success',
+      enqueueSnackbar("Login successful! Welcome back.", {
+        variant: "success",
         autoHideDuration: 3000,
       });
       navigate(from, { replace: true });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unable to sign in.';
+      const errorMessage =
+        err instanceof Error ? err.message : "Unable to sign in.";
       setError(errorMessage);
       enqueueSnackbar(errorMessage, {
-        variant: 'error',
+        variant: "error",
         autoHideDuration: 5000,
       });
     } finally {
@@ -107,9 +110,9 @@ const Login = () => {
           <Box
             sx={{
               marginTop: 8,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
             <Typography
@@ -119,7 +122,7 @@ const Login = () => {
               sx={{
                 color: (theme) => theme.palette.primary.main,
                 fontWeight: 600,
-                textAlign: 'center',
+                textAlign: "center",
               }}
             >
               AI Safety Governance Platform
@@ -129,25 +132,35 @@ const Login = () => {
               elevation={3}
               sx={{
                 padding: { xs: 3, sm: 4 },
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                width: '100%',
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
                 borderRadius: 2,
                 mt: 2,
               }}
             >
-              <Typography component="h2" variant="h5" gutterBottom sx={{ mb: 3 }}>
+              <Typography
+                component="h2"
+                variant="h5"
+                gutterBottom
+                sx={{ mb: 3 }}
+              >
                 Sign In
               </Typography>
 
               {error && (
-                <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+                <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
                   {error}
                 </Alert>
               )}
 
-              <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }} noValidate>
+              <Box
+                component="form"
+                onSubmit={handleSubmit}
+                sx={{ width: "100%" }}
+                noValidate
+              >
                 <TextField
                   margin="normal"
                   required
@@ -160,8 +173,11 @@ const Login = () => {
                   autoFocus
                   value={formData.email}
                   onChange={(e) => {
-                    setFormData((current) => ({ ...current, email: e.target.value }));
-                    setError('');
+                    setFormData((current) => ({
+                      ...current,
+                      email: e.target.value,
+                    }));
+                    setError("");
                   }}
                   disabled={isLoading}
                 />
@@ -171,20 +187,25 @@ const Login = () => {
                   fullWidth
                   name="password"
                   label="Password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   autoComplete="current-password"
                   value={formData.password}
                   onChange={(e) => {
-                    setFormData((current) => ({ ...current, password: e.target.value }));
-                    setError('');
+                    setFormData((current) => ({
+                      ...current,
+                      password: e.target.value,
+                    }));
+                    setError("");
                   }}
                   disabled={isLoading}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          aria-label={showPassword ? 'Hide password' : 'Show password'}
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
                           onClick={togglePasswordVisibility}
                           edge="end"
                         >
@@ -198,7 +219,7 @@ const Login = () => {
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{ mt: 3, mb: 2, py: 1.5, position: 'relative' }}
+                  sx={{ mt: 3, mb: 2, py: 1.5, position: "relative" }}
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -206,24 +227,24 @@ const Login = () => {
                       size={24}
                       color="inherit"
                       sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        marginTop: '-12px',
-                        marginLeft: '-12px',
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        marginTop: "-12px",
+                        marginLeft: "-12px",
                       }}
                     />
                   ) : (
-                    'Sign In'
+                    "Sign In"
                   )}
                 </Button>
 
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
                     gap: 1,
                   }}
                 >

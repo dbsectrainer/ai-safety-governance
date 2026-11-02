@@ -5,6 +5,7 @@ This guide provides instructions for deploying the AI Safety & Governance platfo
 ## Prerequisites
 
 ### Common Requirements
+
 - Docker 20.10+
 - Kubernetes 1.21+
 - Helm 3.0+
@@ -13,6 +14,7 @@ This guide provides instructions for deploying the AI Safety & Governance platfo
 - Istio 1.12+
 
 ### Cloud-Specific CLI Tools
+
 - AWS CLI v2
 - Azure CLI
 - Google Cloud SDK
@@ -20,12 +22,15 @@ This guide provides instructions for deploying the AI Safety & Governance platfo
 ## Cloud Provider Setup
 
 ### AWS Setup
+
 1. Configure AWS CLI:
+
 ```bash
 aws configure
 ```
 
 2. Create EKS cluster:
+
 ```bash
 eksctl create cluster \
   --name ai-safety-cluster \
@@ -40,12 +45,15 @@ eksctl create cluster \
 ```
 
 ### Azure Setup
+
 1. Login to Azure:
+
 ```bash
 az login
 ```
 
 2. Create AKS cluster:
+
 ```bash
 az group create --name ai-safety-rg --location eastus
 az aks create \
@@ -57,12 +65,15 @@ az aks create \
 ```
 
 ### Google Cloud Setup
+
 1. Initialize gcloud:
+
 ```bash
 gcloud init
 ```
 
 2. Create GKE cluster:
+
 ```bash
 gcloud container clusters create ai-safety-cluster \
   --num-nodes 3 \
@@ -73,6 +84,7 @@ gcloud container clusters create ai-safety-cluster \
 ## Container Registry Setup
 
 ### AWS ECR
+
 ```bash
 aws ecr create-repository \
   --repository-name ai-safety-governance \
@@ -80,6 +92,7 @@ aws ecr create-repository \
 ```
 
 ### Azure Container Registry
+
 ```bash
 az acr create \
   --resource-group ai-safety-rg \
@@ -88,6 +101,7 @@ az acr create \
 ```
 
 ### Google Container Registry
+
 ```bash
 gcloud auth configure-docker
 ```
@@ -97,6 +111,7 @@ gcloud auth configure-docker
 ### 1. Build and Push Docker Image
 
 For AWS:
+
 ```bash
 aws ecr get-login-password --region region | docker login --username AWS --password-stdin aws_account_id.dkr.ecr.region.amazonaws.com
 docker build -t ai-safety-governance .
@@ -105,6 +120,7 @@ docker push aws_account_id.dkr.ecr.region.amazonaws.com/ai-safety-governance:lat
 ```
 
 For Azure:
+
 ```bash
 az acr login --name aisafetyacr
 docker build -t ai-safety-governance .
@@ -113,6 +129,7 @@ docker push aisafetyacr.azurecr.io/ai-safety-governance:latest
 ```
 
 For GCP:
+
 ```bash
 docker build -t ai-safety-governance .
 docker tag ai-safety-governance:latest gcr.io/project-id/ai-safety-governance:latest
@@ -131,16 +148,19 @@ kubectl apply -f kubernetes/service.yaml
 ## Cloud-Specific Features
 
 ### AWS
+
 - Use AWS Secrets Manager for secrets
 - Configure CloudWatch for logging
 - Enable AWS X-Ray for tracing
 
 ### Azure
+
 - Use Azure Key Vault for secrets
 - Configure Azure Monitor for logging
 - Enable Application Insights for tracing
 
 ### GCP
+
 - Use Google Secret Manager for secrets
 - Configure Cloud Logging
 - Enable Cloud Trace for tracing
@@ -148,16 +168,19 @@ kubectl apply -f kubernetes/service.yaml
 ## Monitoring Setup
 
 ### AWS
+
 ```bash
 kubectl apply -f devops/monitoring/prometheus_aws.yaml
 ```
 
 ### Azure
+
 ```bash
 kubectl apply -f devops/monitoring/prometheus_azure.yaml
 ```
 
 ### GCP
+
 ```bash
 kubectl apply -f devops/monitoring/prometheus_gcp.yaml
 ```
@@ -165,6 +188,7 @@ kubectl apply -f devops/monitoring/prometheus_gcp.yaml
 ## Security Considerations
 
 ### Cloud Provider Security
+
 1. Enable cloud provider-specific security features:
    - AWS: AWS Security Hub, GuardDuty
    - Azure: Security Center, Sentinel
@@ -176,6 +200,7 @@ kubectl apply -f devops/monitoring/prometheus_gcp.yaml
    - GCP: IAM roles and service accounts
 
 ### Network Security
+
 1. Configure network policies
 2. Enable service mesh mTLS
 3. Set up cloud-specific firewalls
@@ -183,16 +208,19 @@ kubectl apply -f devops/monitoring/prometheus_gcp.yaml
 ## Cost Optimization
 
 ### AWS
+
 - Use EC2 Spot Instances
 - Enable AWS Cost Explorer
 - Set up AWS Budgets
 
 ### Azure
+
 - Use Azure Spot VMs
 - Enable Azure Cost Management
 - Set up budget alerts
 
 ### GCP
+
 - Use Preemptible VMs
 - Enable Cloud Billing
 - Set up budget alerts
@@ -200,6 +228,7 @@ kubectl apply -f devops/monitoring/prometheus_gcp.yaml
 ## Disaster Recovery
 
 ### Backup Strategy
+
 1. Configure cloud-specific backup solutions:
    - AWS: AWS Backup
    - Azure: Azure Backup
@@ -211,6 +240,7 @@ kubectl apply -f devops/monitoring/prometheus_gcp.yaml
    - GCP: Cross-Region Replication
 
 ### High Availability
+
 1. Multi-zone deployment
 2. Load balancing:
    - AWS: ALB/NLB
@@ -220,11 +250,13 @@ kubectl apply -f devops/monitoring/prometheus_gcp.yaml
 ## Compliance and Governance
 
 ### Data Residency
+
 - AWS: Choose appropriate regions for data sovereignty
 - Azure: Use Azure Policy for data residency
 - GCP: Configure data locations
 
 ### Audit Logging
+
 - AWS: CloudTrail
 - Azure: Azure Activity Log
 - GCP: Cloud Audit Logs
@@ -232,12 +264,14 @@ kubectl apply -f devops/monitoring/prometheus_gcp.yaml
 ## Maintenance
 
 ### Updates and Patches
+
 1. Configure automatic updates for:
    - Kubernetes clusters
    - Node pools
    - Container images
 
 ### Monitoring and Alerts
+
 1. Set up alerts for:
    - Resource utilization
    - Cost thresholds
@@ -247,12 +281,14 @@ kubectl apply -f devops/monitoring/prometheus_gcp.yaml
 ## Troubleshooting
 
 ### Common Issues
+
 1. Cluster connectivity issues
 2. Image pull errors
 3. Resource constraints
 4. Network policy conflicts
 
 ### Debug Tools
+
 - kubectl logs
 - Cloud provider monitoring dashboards
 - Istio debugging tools
@@ -261,11 +297,13 @@ kubectl apply -f devops/monitoring/prometheus_gcp.yaml
 ## Migration Between Clouds
 
 ### Preparation
+
 1. Export application state
 2. Back up all data
 3. Document configuration
 
 ### Migration Steps
+
 1. Set up new cloud infrastructure
 2. Migrate data
 3. Update DNS

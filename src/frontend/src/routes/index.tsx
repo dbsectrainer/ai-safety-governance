@@ -1,25 +1,25 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
-import { CircularProgress, Box } from '@mui/material';
-import ProtectedRoute from '../components/ProtectedRoute';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { CircularProgress, Box } from "@mui/material";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 // Lazy load components for better initial load performance
-const Landing = lazy(() => import('../pages/Landing'));
-const Dashboard = lazy(() => import('../pages/Dashboard'));
-const Users = lazy(() => import('../pages/Users'));
-const Config = lazy(() => import('../pages/Config'));
-const Monitoring = lazy(() => import('../pages/Monitoring'));
-const Compliance = lazy(() => import('../pages/Compliance'));
-const Security = lazy(() => import('../pages/Security'));
-const Login = lazy(() => import('../pages/Auth/Login'));
-const Register = lazy(() => import('../pages/Auth/Register'));
-const Unauthorized = lazy(() => import('../pages/Auth/Unauthorized'));
+const Landing = lazy(() => import("../pages/Landing"));
+const Dashboard = lazy(() => import("../pages/Dashboard"));
+const Users = lazy(() => import("../pages/Users"));
+const Config = lazy(() => import("../pages/Config"));
+const Monitoring = lazy(() => import("../pages/Monitoring"));
+const Compliance = lazy(() => import("../pages/Compliance"));
+const Security = lazy(() => import("../pages/Security"));
+const Login = lazy(() => import("../pages/Auth/Login"));
+const Register = lazy(() => import("../pages/Auth/Register"));
+const Unauthorized = lazy(() => import("../pages/Auth/Unauthorized"));
 
 const LoadingFallback = () => (
-  <Box 
-    display="flex" 
-    justifyContent="center" 
-    alignItems="center" 
+  <Box
+    display="flex"
+    justifyContent="center"
+    alignItems="center"
     height="100vh"
   >
     <CircularProgress />
@@ -48,7 +48,7 @@ const AppRoutes = () => {
         <Route
           path="/users"
           element={
-            <ProtectedRoute requiredRoles={['admin']}>
+            <ProtectedRoute requiredRoles={["admin"]}>
               <Users />
             </ProtectedRoute>
           }
@@ -56,7 +56,7 @@ const AppRoutes = () => {
         <Route
           path="/config"
           element={
-            <ProtectedRoute requiredRoles={['admin']}>
+            <ProtectedRoute requiredRoles={["admin"]}>
               <Config />
             </ProtectedRoute>
           }
@@ -72,7 +72,7 @@ const AppRoutes = () => {
         <Route
           path="/compliance"
           element={
-            <ProtectedRoute requiredRoles={['admin', 'compliance-officer']}>
+            <ProtectedRoute requiredRoles={["admin", "compliance-officer"]}>
               <Compliance />
             </ProtectedRoute>
           }
@@ -80,7 +80,7 @@ const AppRoutes = () => {
         <Route
           path="/security"
           element={
-            <ProtectedRoute requiredRoles={['admin', 'security-officer']}>
+            <ProtectedRoute requiredRoles={["admin", "security-officer"]}>
               <Security />
             </ProtectedRoute>
           }

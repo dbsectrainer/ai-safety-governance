@@ -1,15 +1,15 @@
-import api from './api';
+import api from "./api";
 
 export interface SecurityCheck {
   name: string;
   passed: boolean;
   description: string;
-  severity: 'low' | 'medium' | 'high';
+  severity: "low" | "medium" | "high";
 }
 
 export interface SecurityEvent {
   id: string;
-  type: 'info' | 'warning';
+  type: "info" | "warning";
   message: string;
   timestamp: string;
 }
@@ -17,8 +17,8 @@ export interface SecurityEvent {
 export interface SecurityRecommendation {
   id: string;
   message: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'pending' | 'in_progress' | 'completed';
+  priority: "low" | "medium" | "high";
+  status: "pending" | "in_progress" | "completed";
 }
 
 export interface SecuritySummary {
@@ -37,7 +37,7 @@ export interface SecuritySummary {
 
 class SecurityService {
   async getSummary(): Promise<SecuritySummary> {
-    const response = await api.get<SecuritySummary>('/security/summary');
+    const response = await api.get<SecuritySummary>("/security/summary");
     return response.data;
   }
 }

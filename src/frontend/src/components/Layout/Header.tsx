@@ -9,15 +9,15 @@ import {
   Toolbar,
   Tooltip,
   Typography,
-} from '@mui/material';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import MenuIcon from '@mui/icons-material/Menu';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import { authService } from '../../services/auth';
-import type { AuthUser } from '../../config/security';
-import { isAdministrator } from '../../config/security';
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import MenuIcon from "@mui/icons-material/Menu";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import { authService } from "../../services/auth";
+import type { AuthUser } from "../../config/security";
+import { isAdministrator } from "../../config/security";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -57,10 +57,10 @@ const Header = ({ onMenuClick }: HeaderProps) => {
   const handleLogout = async () => {
     setAnchorEl(null);
     await authService.logout();
-    navigate('/login', { replace: true });
+    navigate("/login", { replace: true });
   };
 
-  const displayName = user?.full_name || user?.username || 'Account';
+  const displayName = user?.full_name || user?.username || "Account";
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
@@ -68,8 +68,8 @@ const Header = ({ onMenuClick }: HeaderProps) => {
       position="sticky"
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
-        bgcolor: 'background.paper',
-        color: 'text.primary',
+        bgcolor: "background.paper",
+        color: "text.primary",
         boxShadow: 1,
       }}
     >
@@ -84,19 +84,37 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           <MenuIcon />
         </IconButton>
 
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{ flexGrow: 1, fontSize: { xs: "1rem", sm: "1.25rem" } }}
+        >
           AI Safety Governance Platform
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 2 } }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: { xs: 0.5, sm: 2 },
+          }}
+        >
           <Tooltip title="View monitoring">
-            <IconButton color="inherit" aria-label="View monitoring" onClick={() => navigate('/monitoring')}>
+            <IconButton
+              color="inherit"
+              aria-label="View monitoring"
+              onClick={() => navigate("/monitoring")}
+            >
               <NotificationsIcon />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Account settings">
-            <IconButton onClick={handleMenu} color="inherit" aria-label="Open account menu">
+            <IconButton
+              onClick={handleMenu}
+              color="inherit"
+              aria-label="Open account menu"
+            >
               <Avatar sx={{ width: 32, height: 32 }}>
                 {user ? initial : <AccountCircle />}
               </Avatar>
@@ -107,9 +125,9 @@ const Header = ({ onMenuClick }: HeaderProps) => {
         <Menu
           id="menu-appbar"
           anchorEl={anchorEl}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           keepMounted
-          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
@@ -119,7 +137,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
                 {displayName}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {user?.email || ''}
+                {user?.email || ""}
               </Typography>
             </Box>
           </MenuItem>
@@ -128,7 +146,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             <MenuItem
               onClick={() => {
                 handleClose();
-                navigate('/config');
+                navigate("/config");
               }}
             >
               Settings
