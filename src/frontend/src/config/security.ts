@@ -1,55 +1,27 @@
-import { AxiosRequestConfig } from 'axios';
-
-// CSRF Token handling
-export const getCsrfToken = (): string => {
-  return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-};
-
-// Security headers configuration
-export const securityHeaders: Record<string, string> = {
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';",
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'X-XSS-Protection': '1; mode=block',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-};
-
-// Axios security configuration
-export const axiosSecurityConfig: AxiosRequestConfig = {
-  withCredentials: true,
-  xsrfHeaderName: 'X-CSRF-Token',
-  xsrfCookieName: 'csrf_token',
-};
-
-// Input validation patterns
+// Input validation patterns shared by the authentication forms. The backend
+// enforces the same rules; client-side validation is only a UX helper.
 export const validationPatterns = {
   email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-  password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+  password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,128}$/,
   username: /^[a-zA-Z0-9_-]{3,16}$/,
-  name: /^[a-zA-Z\s-]{2,50}$/,
+  name: /^[a-zA-Z\s'-]{2,100}$/,
 };
 
-// XSS prevention utilities
-export const sanitizeInput = (input: string): string => {
-  const div = document.createElement('div');
-  div.textContent = input;
-  return div.innerHTML;
-};
+export interface AuthUser {
+  id: number;
+  username: string;
+  email: string;
+  full_name: string | null;
+  is_active: boolean;
+  is_superuser: boolean;
+  roles: string[];
+  created_at: string;
+  updated_at: string;
+}
 
-export const validateInput = (input: string, pattern: RegExp): boolean => {
-  return pattern.test(input);
-};
-
-// Authentication state management
 export interface AuthState {
   isAuthenticated: boolean;
-  user: null | {
-    id: string;
-    username: string;
-    email: string;
-    roles: string[];
-  };
+  user: AuthUser | null;
   token: string | null;
 }
 
@@ -58,3 +30,7 @@ export const initialAuthState: AuthState = {
   user: null,
   token: null,
 };
+
+/** Whether the user should be treated as an administrator in the UI. */
+export const isAdministrator = (user: AuthUser | null): boolean =>
+  Boolean(user?.is_superuser || user?.roles?.includes('admin'));

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from './api';
 
 export interface MetricData {
   timestamp: number;
@@ -35,75 +35,43 @@ export interface ModelPerformance {
   lastUpdated: string;
 }
 
+export interface MonitoringAlert {
+  id: string;
+  type: string;
+  severity: 'low' | 'medium' | 'high';
+  message: string;
+  timestamp: string;
+}
+
 class MonitoringService {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = '/api/monitoring'; // Update with your API base URL
-  }
-
   async getSystemMetrics(): Promise<SystemMetrics> {
-    try {
-      const response = await axios.get(`${this.baseUrl}/system`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching system metrics:', error);
-      throw error;
-    }
+    const response = await api.get<SystemMetrics>('/monitoring/system');
+    return response.data;
   }
 
   async getModelMetrics(): Promise<ModelMetrics> {
-    try {
-      const response = await axios.get(`${this.baseUrl}/models/metrics`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching model metrics:', error);
-      throw error;
-    }
+    const response = await api.get<ModelMetrics>('/monitoring/models/metrics');
+    return response.data;
   }
 
-  async getPerformanceData(timeRange: string = '24h'): Promise<MetricData[]> {
-    try {
-      const response = await axios.get(`${this.baseUrl}/performance`, {
-        params: { timeRange }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching performance data:', error);
-      throw error;
-    }
+  async getPerformanceData(): Promise<MetricData[]> {
+    const response = await api.get<MetricData[]>('/monitoring/performance');
+    return response.data;
   }
 
   async getModelPerformance(): Promise<ModelPerformance[]> {
-    try {
-      const response = await axios.get(`${this.baseUrl}/models/performance`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching model performance:', error);
-      throw error;
-    }
+    const response = await api.get<ModelPerformance[]>('/monitoring/models/performance');
+    return response.data;
   }
 
-  async getResourceUtilization(resource: string, timeRange: string = '24h'): Promise<MetricData[]> {
-    try {
-      const response = await axios.get(`${this.baseUrl}/resources/${resource}`, {
-        params: { timeRange }
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching ${resource} utilization:`, error);
-      throw error;
-    }
+  async getResourceUtilization(resource: string): Promise<MetricData[]> {
+    const response = await api.get<MetricData[]>(`/monitoring/resources/${resource}`);
+    return response.data;
   }
 
-  async getAlerts(): Promise<any[]> {
-    try {
-      const response = await axios.get(`${this.baseUrl}/alerts`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching alerts:', error);
-      throw error;
-    }
+  async getAlerts(): Promise<MonitoringAlert[]> {
+    const response = await api.get<MonitoringAlert[]>('/monitoring/alerts');
+    return response.data;
   }
 }
 

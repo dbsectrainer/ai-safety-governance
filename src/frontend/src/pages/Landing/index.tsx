@@ -76,6 +76,7 @@ const Landing = () => {
             color: 'white',
             py: 8,
             mb: 6,
+            overflow: 'hidden',
           }}
         >
           <Container maxWidth="lg">

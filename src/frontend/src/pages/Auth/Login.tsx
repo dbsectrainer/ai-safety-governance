@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
-import { debounce } from 'lodash';
 import { authService } from '../../services/auth';
 
 const Login = () => {
@@ -31,23 +30,17 @@ const Login = () => {
     email: '',
     password: '',
   });
-  const [attempts, setAttempts] = useState(0);
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
-  const handleInputChange = useCallback(
-    debounce((name: string, value: string) => {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
-      setError('');
-    }, 300),
-    []
-  );
+  useEffect(() => {
+    if (authService.isAuthenticated()) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+    setShowPassword((visible) => !visible);
   };
 
   const validateForm = () => {
@@ -72,17 +65,8 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
 
-    if (attempts >= 5) {
-      setError('Too many login attempts. Please try again later.');
-      enqueueSnackbar('Account temporarily locked. Please try again later.', { 
-        variant: 'error',
-        autoHideDuration: 5000
-      });
+    if (!validateForm()) {
       return;
     }
 
@@ -91,20 +75,17 @@ const Login = () => {
 
     try {
       await authService.login(formData);
-      enqueueSnackbar('Login successful! Welcome back.', { 
+      enqueueSnackbar('Login successful! Welcome back.', {
         variant: 'success',
-        autoHideDuration: 3000
+        autoHideDuration: 3000,
       });
       navigate(from, { replace: true });
     } catch (err) {
-      setAttempts(prev => prev + 1);
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : 'Unable to sign in. Please check your credentials and try again.';
+      const errorMessage = err instanceof Error ? err.message : 'Unable to sign in.';
       setError(errorMessage);
-      enqueueSnackbar(errorMessage, { 
+      enqueueSnackbar(errorMessage, {
         variant: 'error',
-        autoHideDuration: 5000
+        autoHideDuration: 5000,
       });
     } finally {
       setIsLoading(false);
@@ -115,7 +96,10 @@ const Login = () => {
     <>
       <Helmet>
         <title>Sign In - AI Safety Governance Platform</title>
-        <meta name="description" content="Sign in to access your AI Safety Governance Platform dashboard" />
+        <meta
+          name="description"
+          content="Sign in to access your AI Safety Governance Platform dashboard"
+        />
       </Helmet>
 
       <Container component="main" maxWidth="xs">
@@ -128,13 +112,14 @@ const Login = () => {
               alignItems: 'center',
             }}
           >
-            <Typography 
-              component="h1" 
-              variant="h4" 
+            <Typography
+              component="h1"
+              variant="h4"
               gutterBottom
-              sx={{ 
-                color: theme => theme.palette.primary.main,
-                fontWeight: 600
+              sx={{
+                color: (theme) => theme.palette.primary.main,
+                fontWeight: 600,
+                textAlign: 'center',
               }}
             >
               AI Safety Governance Platform
@@ -143,7 +128,7 @@ const Login = () => {
             <Paper
               elevation={3}
               sx={{
-                padding: 4,
+                padding: { xs: 3, sm: 4 },
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -152,36 +137,17 @@ const Login = () => {
                 mt: 2,
               }}
             >
-              <Typography 
-                component="h2" 
-                variant="h5" 
-                gutterBottom
-                sx={{ mb: 3 }}
-              >
+              <Typography component="h2" variant="h5" gutterBottom sx={{ mb: 3 }}>
                 Sign In
               </Typography>
 
               {error && (
-                <Alert 
-                  severity="error" 
-                  sx={{ 
-                    width: '100%', 
-                    mb: 2,
-                    '& .MuiAlert-message': {
-                      width: '100%'
-                    }
-                  }}
-                >
+                <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
                   {error}
                 </Alert>
               )}
 
-              <Box 
-                component="form" 
-                onSubmit={handleSubmit} 
-                sx={{ width: '100%' }}
-                noValidate
-              >
+              <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }} noValidate>
                 <TextField
                   margin="normal"
                   required
@@ -189,13 +155,15 @@ const Login = () => {
                   id="email"
                   label="Email Address"
                   name="email"
+                  type="email"
                   autoComplete="email"
                   autoFocus
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  disabled={isLoading}
-                  InputProps={{
-                    'aria-label': 'Email Address',
+                  value={formData.email}
+                  onChange={(e) => {
+                    setFormData((current) => ({ ...current, email: e.target.value }));
+                    setError('');
                   }}
+                  disabled={isLoading}
                 />
                 <TextField
                   margin="normal"
@@ -206,14 +174,17 @@ const Login = () => {
                   type={showPassword ? 'text' : 'password'}
                   id="password"
                   autoComplete="current-password"
-                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  value={formData.password}
+                  onChange={(e) => {
+                    setFormData((current) => ({ ...current, password: e.target.value }));
+                    setError('');
+                  }}
                   disabled={isLoading}
                   InputProps={{
-                    'aria-label': 'Password',
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          aria-label="toggle password visibility"
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
                           onClick={togglePasswordVisibility}
                           edge="end"
                         >
@@ -227,17 +198,13 @@ const Login = () => {
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{ 
-                    mt: 3, 
-                    mb: 2,
-                    py: 1.5,
-                    position: 'relative'
-                  }}
+                  sx={{ mt: 3, mb: 2, py: 1.5, position: 'relative' }}
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <CircularProgress
                       size={24}
+                      color="inherit"
                       sx={{
                         position: 'absolute',
                         top: '50%',
@@ -251,37 +218,19 @@ const Login = () => {
                   )}
                 </Button>
 
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: 1
-                }}>
-                  <Link 
-                    component={RouterLink} 
-                    to="/forgot-password"
-                    variant="body2"
-                    sx={{ 
-                      textDecoration: 'none',
-                      '&:hover': {
-                        textDecoration: 'underline'
-                      }
-                    }}
-                  >
-                    Forgot password?
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                  }}
+                >
+                  <Link component={RouterLink} to="/" variant="body2">
+                    Back to home
                   </Link>
-                  <Link 
-                    component={RouterLink} 
-                    to="/register" 
-                    variant="body2"
-                    sx={{ 
-                      textDecoration: 'none',
-                      '&:hover': {
-                        textDecoration: 'underline'
-                      }
-                    }}
-                  >
+                  <Link component={RouterLink} to="/register" variant="body2">
                     Don't have an account? Sign Up
                   </Link>
                 </Box>

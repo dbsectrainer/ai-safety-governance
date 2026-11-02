@@ -2,6 +2,7 @@
 export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
+  watchman: false,
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       tsconfig: 'tsconfig.test.json',

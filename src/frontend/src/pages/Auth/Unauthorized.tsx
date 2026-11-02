@@ -58,7 +58,7 @@ const Unauthorized = () => {
             <Button
               variant="contained"
               startIcon={<HomeIcon />}
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/dashboard')}
             >
               Go to Dashboard
             </Button>

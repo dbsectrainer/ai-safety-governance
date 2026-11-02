@@ -5,6 +5,7 @@ import {
   Typography,
   Grid,
   LinearProgress,
+  CircularProgress,
   Tooltip,
   useTheme,
 } from '@mui/material';
@@ -47,6 +48,18 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
     { key: 'storage', label: 'STORAGE Usage' },
     { key: 'network', label: 'NETWORK Usage' },
   ];
+
+  const hasHistory = Object.values(historicalData).some(
+    (samples) => Array.isArray(samples) && samples.length > 0,
+  );
+
+  if (isLoading) {
+    return (
+      <Paper sx={{ p: 3, minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress role="status" aria-label="Loading resource utilization" />
+      </Paper>
+    );
+  }
 
   return (
     <Paper
@@ -93,6 +106,7 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
                     color={getUtilizationColor(
                       currentMetrics[key as keyof SystemMetrics]
                     )}
+                    aria-label={`${currentMetrics[key as keyof SystemMetrics]}% utilized`}
                     sx={{ height: 8, borderRadius: 4 }}
                   />
                 </Tooltip>
@@ -104,7 +118,12 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
         {/* Historical Usage Chart */}
         <Grid item xs={12} md={6}>
           <Box sx={{ height: 300 }} data-testid="resource-utilization-chart">
-            <ResponsiveContainer width="100%" height="100%" aspect={2}>
+            {!hasHistory && (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                No historical samples yet. A new sample is recorded every 30 seconds.
+              </Typography>
+            )}
+            <ResponsiveContainer width="100%" height={hasHistory ? '100%' : 0} aspect={2}>
               <LineChart margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
@@ -122,7 +141,7 @@ const ResourceUtilizationCard: React.FC<ResourceUtilizationCardProps> = ({
                           <Typography variant="body2" sx={{ mb: 1 }}>
                             {format(label as number, 'HH:mm')}
                           </Typography>
-                          {payload.map((entry: any) => {
+                          {payload.map((entry) => {
                             const value = typeof entry.value === 'number' 
                               ? entry.value.toFixed(2) 
                               : entry.value;

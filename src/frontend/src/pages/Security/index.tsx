@@ -1,250 +1,153 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import {
+  Alert,
   Box,
-  Typography,
-  Grid,
-  Paper,
-  CircularProgress,
-  IconButton,
-  Tooltip,
   Button,
   Chip,
-  useTheme,
+  CircularProgress,
+  Divider,
   Fade,
+  Grid,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Divider,
+  Paper,
+  Tooltip,
+  Typography,
+  useTheme,
 } from '@mui/material';
 import {
-  Shield as ShieldIcon,
-  Lock as LockIcon,
-  VpnKey as VpnKeyIcon,
-  Security as SecurityIcon,
-  Refresh as RefreshIcon,
-  Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Schedule as ScheduleIcon,
-  Settings as SettingsIcon,
   Download as DownloadIcon,
+  Error as ErrorIcon,
+  Lock as LockIcon,
+  Refresh as RefreshIcon,
+  Schedule as ScheduleIcon,
+  Security as SecurityIcon,
+  Settings as SettingsIcon,
+  Shield as ShieldIcon,
+  VpnKey as VpnKeyIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-
-interface SecurityMetric {
-  id: string;
-  title: string;
-  value: string;
-  icon: JSX.Element;
-  description: string;
-  status: 'success' | 'warning' | 'error';
-  lastUpdated: Date;
-}
-
-interface SecurityEvent {
-  id: string;
-  type: 'info' | 'warning' | 'error';
-  message: string;
-  timestamp: Date;
-}
-
-interface SecurityRecommendation {
-  id: string;
-  message: string;
-  priority: 'high' | 'medium' | 'low';
-  status: 'pending' | 'in_progress' | 'completed';
-}
-
-const SecurityMetricCard = ({ metric }: { metric: SecurityMetric }) => {
-  const theme = useTheme();
-
-  return (
-    <Fade in timeout={800}>
-      <Paper
-        sx={{
-          p: 3,
-          height: '100%',
-          transition: 'transform 0.2s, box-shadow 0.2s',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: theme.shadows[8],
-          },
-        }}
-      >
-        <Box display="flex" alignItems="flex-start" justifyContent="space-between" mb={2}>
-          <Box display="flex" alignItems="center" gap={2}>
-            {metric.icon}
-            <Box>
-              <Typography variant="h6">{metric.title}</Typography>
-              <Typography variant="h4" color="primary" sx={{ mt: 1 }}>
-                {metric.value}
-              </Typography>
-            </Box>
-          </Box>
-          <Chip
-            size="small"
-            icon={
-              metric.status === 'success' ? (
-                <CheckCircleIcon />
-              ) : metric.status === 'warning' ? (
-                <WarningIcon />
-              ) : (
-                <ErrorIcon />
-              )
-            }
-            label={metric.status.charAt(0).toUpperCase() + metric.status.slice(1)}
-            color={metric.status}
-          />
-        </Box>
-        <Typography variant="body2" color="text.secondary">
-          {metric.description}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-          Last updated: {format(metric.lastUpdated, 'MMM d, yyyy HH:mm')}
-        </Typography>
-      </Paper>
-    </Fade>
-  );
-};
+import { useNavigate } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
+import { securityService } from '../../services/security';
+import type { SecuritySummary } from '../../services/security';
+import { getErrorMessage } from '../../services/api';
 
 const Security = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  const [summary, setSummary] = useState<SecuritySummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [metrics, setMetrics] = useState<SecurityMetric[]>([
-    {
-      id: '1',
-      title: 'Security Score',
-      value: '95%',
-      icon: <ShieldIcon color="primary" sx={{ fontSize: 40 }} />,
-      description: 'Overall platform security rating based on multiple factors',
-      status: 'success',
-      lastUpdated: new Date(),
-    },
-    {
-      id: '2',
-      title: 'Active Sessions',
-      value: '24',
-      icon: <LockIcon color="primary" sx={{ fontSize: 40 }} />,
-      description: 'Number of currently authenticated user sessions',
-      status: 'success',
-      lastUpdated: new Date(),
-    },
-    {
-      id: '3',
-      title: 'Access Policies',
-      value: '12',
-      icon: <VpnKeyIcon color="primary" sx={{ fontSize: 40 }} />,
-      description: 'Number of active security policies and access controls',
-      status: 'warning',
-      lastUpdated: new Date(),
-    },
-    {
-      id: '4',
-      title: 'Security Events',
-      value: '2',
-      icon: <SecurityIcon color="primary" sx={{ fontSize: 40 }} />,
-      description: 'Number of security incidents detected in the last 24 hours',
-      status: 'warning',
-      lastUpdated: new Date(),
-    },
-  ]);
+  const [error, setError] = useState('');
 
-  const [events, setEvents] = useState<SecurityEvent[]>([
-    {
-      id: '1',
-      type: 'warning',
-      message: 'Failed login attempt detected',
-      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-    },
-    {
-      id: '2',
-      type: 'info',
-      message: 'Security policy updated',
-      timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
-    },
-    {
-      id: '3',
-      type: 'info',
-      message: 'Access permissions modified',
-      timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
-    },
-    {
-      id: '4',
-      type: 'info',
-      message: 'System security scan completed',
-      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    },
-  ]);
-
-  const [recommendations, setRecommendations] = useState<SecurityRecommendation[]>([
-    {
-      id: '1',
-      message: 'Enable two-factor authentication for all admin accounts',
-      priority: 'high',
-      status: 'pending',
-    },
-    {
-      id: '2',
-      message: 'Review and update access policies',
-      priority: 'medium',
-      status: 'in_progress',
-    },
-    {
-      id: '3',
-      message: 'Schedule regular security audits',
-      priority: 'medium',
-      status: 'completed',
-    },
-    {
-      id: '4',
-      message: 'Update security monitoring configurations',
-      priority: 'low',
-      status: 'pending',
-    },
-  ]);
-
-  useEffect(() => {
-    const loadData = async () => {
+  const loadData = useCallback(async (background = false) => {
+    if (background) {
+      setIsRefreshing(true);
+    } else {
       setIsLoading(true);
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // In a real implementation, we would fetch actual data from the backend
-      } catch (error) {
-        console.error('Error loading security data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
+    }
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // In a real implementation, we would fetch fresh data from the backend
+      const data = await securityService.getSummary();
+      setSummary(data);
+      setError('');
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
+      setIsLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   const handleExportReport = () => {
-    // Implementation for exporting security report
-    console.log('Exporting security report...');
+    if (!summary) {
+      return;
+    }
+    const blob = new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `security-report-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    enqueueSnackbar('Security report downloaded', { variant: 'success' });
   };
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px" role="status">
         <CircularProgress />
       </Box>
     );
   }
+
+  if (error || !summary) {
+    return (
+      <Box sx={{ pb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Security Overview
+        </Typography>
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={() => void loadData()}>
+              Retry
+            </Button>
+          }
+        >
+          {error || 'Security data is unavailable.'}
+        </Alert>
+      </Box>
+    );
+  }
+
+  const metrics = [
+    {
+      id: 'score',
+      title: 'Security Score',
+      value: `${summary.metrics.security_score}%`,
+      icon: <ShieldIcon color="primary" sx={{ fontSize: 40 }} />,
+      description: 'Observable security checks currently passing',
+      status: summary.metrics.security_score >= 80 ? 'success' : 'warning',
+    },
+    {
+      id: 'users',
+      title: 'Active Users',
+      value: summary.metrics.active_users,
+      icon: <LockIcon color="primary" sx={{ fontSize: 40 }} />,
+      description: 'Enabled user accounts',
+      status: 'success',
+    },
+    {
+      id: 'policies',
+      title: 'Access Policies',
+      value: summary.metrics.access_policies,
+      icon: <VpnKeyIcon color="primary" sx={{ fontSize: 40 }} />,
+      description: 'Roles defined for role-based access control',
+      status: summary.metrics.access_policies > 0 ? 'success' : 'warning',
+    },
+    {
+      id: 'events',
+      title: 'Events (24h)',
+      value: summary.metrics.events_24h,
+      icon: <SecurityIcon color="primary" sx={{ fontSize: 40 }} />,
+      description: 'Audit events recorded in the last 24 hours',
+      status: 'success',
+    },
+  ] as const;
 
   return (
     <>
@@ -257,74 +160,90 @@ const Security = () => {
       </Helmet>
 
       <Box sx={{ pb: 4 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={4} gap={2}>
           <Typography variant="h4" component="h1">
             Security Overview
           </Typography>
-          <Box>
+          <Box display="flex" alignItems="center" gap={1}>
             <Tooltip title="Refresh data">
-              <IconButton onClick={handleRefresh} disabled={isRefreshing} sx={{ mr: 1 }}>
+              <IconButton
+                onClick={() => void loadData(true)}
+                disabled={isRefreshing}
+                aria-label="Refresh security data"
+              >
                 <RefreshIcon />
               </IconButton>
             </Tooltip>
             <Tooltip title="Security settings">
-              <IconButton sx={{ mr: 1 }}>
+              <IconButton aria-label="Security settings" onClick={() => navigate('/config')}>
                 <SettingsIcon />
               </IconButton>
             </Tooltip>
-            <Button
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              onClick={handleExportReport}
-            >
+            <Button variant="contained" startIcon={<DownloadIcon />} onClick={handleExportReport}>
               Export Report
             </Button>
           </Box>
         </Box>
 
         <Grid container spacing={3}>
-          {/* Security Metrics */}
           {metrics.map((metric) => (
             <Grid item xs={12} md={6} lg={3} key={metric.id}>
-              <SecurityMetricCard metric={metric} />
+              <Fade in timeout={400}>
+                <Paper sx={{ p: 3, height: '100%' }}>
+                  <Box display="flex" alignItems="flex-start" justifyContent="space-between" mb={2}>
+                    <Box display="flex" alignItems="center" gap={2}>
+                      {metric.icon}
+                      <Box>
+                        <Typography variant="h6">{metric.title}</Typography>
+                        <Typography variant="h4" color="primary" sx={{ mt: 1 }}>
+                          {metric.value}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Chip
+                      size="small"
+                      icon={
+                        metric.status === 'success' ? (
+                          <CheckCircleIcon />
+                        ) : (
+                          <WarningIcon />
+                        )
+                      }
+                      label={metric.status}
+                      color={metric.status}
+                    />
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {metric.description}
+                  </Typography>
+                </Paper>
+              </Fade>
             </Grid>
           ))}
 
-          {/* Recent Security Events */}
           <Grid item xs={12} md={6}>
-            <Fade in timeout={800}>
-              <Paper
-                sx={{
-                  p: 3,
-                  height: '100%',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  },
-                }}
-              >
+            <Fade in timeout={400}>
+              <Paper sx={{ p: 3, height: '100%' }}>
                 <Typography variant="h6" gutterBottom>
-                  Recent Security Events
+                  Control Checks
                 </Typography>
                 <List>
-                  {events.map((event, index) => (
-                    <Box key={event.id}>
+                  {summary.checks.map((check, index) => (
+                    <Box key={check.name}>
                       <ListItem>
                         <ListItemIcon>
-                          {event.type === 'warning' ? (
-                            <WarningIcon color="warning" />
-                          ) : event.type === 'error' ? (
-                            <ErrorIcon color="error" />
-                          ) : (
+                          {check.passed ? (
                             <CheckCircleIcon color="success" />
+                          ) : (
+                            <ErrorIcon color="error" />
                           )}
                         </ListItemIcon>
                         <ListItemText
-                          primary={event.message}
-                          secondary={format(event.timestamp, 'MMM d, yyyy HH:mm')}
+                          primary={check.name.replace('_', ' ')}
+                          secondary={check.description}
                         />
                       </ListItem>
-                      {index < events.length - 1 && <Divider />}
+                      {index < summary.checks.length - 1 && <Divider />}
                     </Box>
                   ))}
                 </List>
@@ -332,24 +251,50 @@ const Security = () => {
             </Fade>
           </Grid>
 
-          {/* Security Recommendations */}
           <Grid item xs={12} md={6}>
-            <Fade in timeout={800}>
-              <Paper
-                sx={{
-                  p: 3,
-                  height: '100%',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  },
-                }}
-              >
+            <Fade in timeout={400}>
+              <Paper sx={{ p: 3, height: '100%' }}>
                 <Typography variant="h6" gutterBottom>
-                  Security Recommendations
+                  Recent Security Events
+                </Typography>
+                {summary.events.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">
+                    No audit events recorded in the last 24 hours.
+                  </Typography>
+                ) : (
+                  <List>
+                    {summary.events.map((event, index) => (
+                      <Box key={event.id}>
+                        <ListItem>
+                          <ListItemIcon>
+                            {event.type === 'warning' ? (
+                              <WarningIcon color="warning" />
+                            ) : (
+                              <CheckCircleIcon color="success" />
+                            )}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={event.message}
+                            secondary={format(new Date(event.timestamp), 'MMM d, yyyy HH:mm')}
+                          />
+                        </ListItem>
+                        {index < summary.events.length - 1 && <Divider />}
+                      </Box>
+                    ))}
+                  </List>
+                )}
+              </Paper>
+            </Fade>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Fade in timeout={400}>
+              <Paper sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Recommendations
                 </Typography>
                 <List>
-                  {recommendations.map((recommendation, index) => (
+                  {summary.recommendations.map((recommendation, index) => (
                     <Box key={recommendation.id}>
                       <ListItem>
                         <ListItemIcon>
@@ -371,18 +316,22 @@ const Security = () => {
                                 recommendation.priority === 'high'
                                   ? 'error'
                                   : recommendation.priority === 'medium'
-                                  ? 'warning'
-                                  : 'default'
+                                    ? 'warning'
+                                    : 'default'
                               }
                               sx={{ mt: 0.5 }}
                             />
                           }
                         />
                       </ListItem>
-                      {index < recommendations.length - 1 && <Divider />}
+                      {index < summary.recommendations.length - 1 && <Divider />}
                     </Box>
                   ))}
                 </List>
+                <Typography variant="caption" color="text.secondary">
+                  Generated {format(new Date(summary.generated_at), 'MMM d, yyyy HH:mm')} ·{' '}
+                  {theme.palette.mode} theme
+                </Typography>
               </Paper>
             </Fade>
           </Grid>

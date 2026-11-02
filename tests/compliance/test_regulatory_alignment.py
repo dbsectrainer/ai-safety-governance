@@ -1,8 +1,9 @@
-import unittest
-import sys
-import os
 import json
-from datetime import datetime, timedelta
+import os
+import shutil
+import sys
+import tempfile
+import unittest
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -19,8 +20,11 @@ class TestRegulatoryAlignmentSystem(unittest.TestCase):
         """
         Set up test environment for Regulatory Alignment System.
         """
-        # Use a temporary config for testing
-        self.test_config_path = 'tests/test_compliance_config.json'
+        # Use a temporary config and audit directory so tests do not write into
+        # the repository's compliance_logs directory.
+        self.test_dir = tempfile.mkdtemp(prefix='compliance-test-')
+        self.test_config_path = os.path.join(self.test_dir, 'compliance_config.json')
+        self.audit_dir = os.path.join(self.test_dir, 'audit_logs')
         with open(self.test_config_path, 'w') as f:
             json.dump({
                 "check_frequency_days": 30,
@@ -29,15 +33,15 @@ class TestRegulatoryAlignmentSystem(unittest.TestCase):
             }, f)
         
         self.regulatory_system = RegulatoryAlignmentSystem(
-            config_path=self.test_config_path
+            config_path=self.test_config_path,
+            audit_trail_dir=self.audit_dir,
         )
     
     def tearDown(self):
         """
         Clean up test environment.
         """
-        if os.path.exists(self.test_config_path):
-            os.remove(self.test_config_path)
+        shutil.rmtree(self.test_dir, ignore_errors=True)
     
     def test_config_loading(self):
         """
@@ -146,7 +150,7 @@ class TestRegulatoryAlignmentSystem(unittest.TestCase):
         results = self.regulatory_system.run_compliance_checks()
         
         # Verify that the error was logged
-        log_files = os.listdir(self.regulatory_system.audit_trail.output_dir)
+        log_files = os.listdir(self.audit_dir)
         self.assertTrue(any('compliance_audit' in log_file for log_file in log_files))
 
 if __name__ == '__main__':

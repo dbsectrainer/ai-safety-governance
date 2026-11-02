@@ -1,18 +1,21 @@
 """
 Alembic environment configuration for database migrations.
 """
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
-import os
+
 import sys
+from logging.config import fileConfig
+from pathlib import Path
 
-# Add the src directory to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from alembic import context
+from sqlalchemy import engine_from_config, pool
 
-from database import Base
-from database.models import User, Role, UserRole, AuditLog, ModelVersion, MonitoringLog, ComplianceRecord
+# Make the repository root importable (``src.database``).
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.database import Base, get_database_url  # noqa: E402
+from src.database import models  # noqa: E402,F401  (register tables)
 
 # this is the Alembic Config object
 config = context.config
@@ -24,37 +27,33 @@ if config.config_file_name is not None:
 # Add your model's MetaData object here for 'autogenerate' support
 target_metadata = Base.metadata
 
-def get_url():
-    """Construct database URL from environment variables."""
-    user = os.getenv("POSTGRES_USER", "postgres")
-    password = os.getenv("POSTGRES_PASSWORD", "postgres")
-    host = os.getenv("POSTGRES_HOST", "db")
-    port = os.getenv("POSTGRES_PORT", "5432")
-    db = os.getenv("POSTGRES_DB", "ai_safety_governance")
-    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+
+def get_url() -> str:
+    """Use the same URL resolution as the application."""
+    return get_database_url()
+
 
 def run_migrations_offline():
-    """
-    Run migrations in 'offline' mode.
-    """
+    """Run migrations in 'offline' mode."""
     url = get_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_as_batch=url.startswith("sqlite"),
     )
 
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online():
-    """
-    Run migrations in 'online' mode.
-    """
-    configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = get_url()
-    
+    """Run migrations in 'online' mode."""
+    url = get_url()
+    configuration = config.get_section(config.config_ini_section) or {}
+    configuration["sqlalchemy.url"] = url
+
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
@@ -64,11 +63,14 @@ def run_migrations_online():
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
-            target_metadata=target_metadata
+            target_metadata=target_metadata,
+            render_as_batch=url.startswith("sqlite"),
+            compare_type=True,
         )
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

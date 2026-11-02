@@ -9,9 +9,12 @@ services:
       - ./src/frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:5002
+      # Empty API URL means the browser uses Vite's /api proxy (same origin).
+      - VITE_API_URL=
+      - VITE_API_PROXY_TARGET=http://backend:5000
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
   backend:
     build: .
@@ -19,13 +22,25 @@ services:
       - "5002:5000"
     volumes:
       - ./src:/app/src
-      - ./start.sh:/app/start.sh
-    env_file:
-      - config/secrets.env
-    command: sh -c "chmod +x /app/src/start.sh && /app/src/start.sh"
+      - ./config:/app/config:ro
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ai_safety_governance
+      - SECRET_KEY=${SECRET_KEY:-dev-only-change-this-secret}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-}
+      - DB_AUTO_INIT=false
+      - WEB_CONCURRENCY=${WEB_CONCURRENCY:-2}
     depends_on:
-      - db
-      - prometheus
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   db:
     image: postgres:15
@@ -37,6 +52,11 @@ services:
       - POSTGRES_DB=ai_safety_governance
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_safety_governance"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   prometheus:
     image: prom/prometheus:latest
@@ -50,6 +70,7 @@ services:
     ports:
       - "3000:3000"
     environment:
+      # Local development only. Override credentials outside a trusted machine.
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:

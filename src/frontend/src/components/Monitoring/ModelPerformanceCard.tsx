@@ -88,8 +88,15 @@ const ModelPerformanceCard: React.FC<ModelPerformanceCardProps> = ({ data, isLoa
         </Grid>
       </Box>
 
+      {data.length === 0 && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          No model versions registered yet. Add one through the models API to see performance
+          metrics.
+        </Typography>
+      )}
+
           <Box sx={{ height: 400 }} data-testid="model-performance-chart">
-            <ResponsiveContainer width="100%" height="100%" aspect={2}>
+            <ResponsiveContainer width="100%" height={data.length === 0 ? 0 : '100%'} aspect={2}>
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />

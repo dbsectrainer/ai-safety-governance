@@ -24,32 +24,27 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     username: '',
-    name: '',
+    full_name: '',
   });
-
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const validateField = (name: string, value: string): string => {
     switch (name) {
       case 'email':
-        return !validationPatterns.email.test(value)
-          ? 'Please enter a valid email address'
-          : '';
+        return !validationPatterns.email.test(value) ? 'Please enter a valid email address' : '';
       case 'password':
         return !validationPatterns.password.test(value)
-          ? 'Password must contain at least 8 characters, including uppercase, lowercase, number and special character'
+          ? 'Password must include uppercase, lowercase, number and special character'
           : '';
       case 'confirmPassword':
-        return value !== formData.password
-          ? 'Passwords do not match'
-          : '';
+        return value !== formData.password ? 'Passwords do not match' : '';
       case 'username':
         return !validationPatterns.username.test(value)
-          ? 'Username must be 3-16 characters and can contain letters, numbers, underscore and hyphen'
+          ? 'Username must be 3-16 characters using letters, numbers, _ or -'
           : '';
-      case 'name':
-        return !validationPatterns.name.test(value)
-          ? 'Name must be 2-50 characters and can contain letters, spaces and hyphens'
+      case 'full_name':
+        return value && !validationPatterns.name.test(value)
+          ? 'Full name must be 2-100 characters'
           : '';
       default:
         return '';
@@ -58,25 +53,33 @@ const Register = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    
-    const error = validateField(name, value);
-    setValidationErrors(prev => ({
+
+    const fieldError = validateField(name, value);
+    setValidationErrors((prev) => ({
       ...prev,
-      [name]: error,
+      [name]: fieldError,
     }));
-    
-    setError(''); // Clear general error when user types
+    if (name === 'password' && formData.confirmPassword) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        confirmPassword:
+          formData.confirmPassword !== value ? 'Passwords do not match' : '',
+      }));
+    }
+    setError('');
   };
 
   const isFormValid = () => {
     const errors: Record<string, string> = {};
-    Object.keys(formData).forEach(key => {
-      const error = validateField(key, formData[key as keyof typeof formData]);
-      if (error) errors[key] = error;
+    Object.keys(formData).forEach((key) => {
+      const fieldError = validateField(key, formData[key as keyof typeof formData]);
+      if (fieldError) {
+        errors[key] = fieldError;
+      }
     });
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -84,7 +87,7 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isFormValid()) {
       setError('Please fix the validation errors before submitting');
       return;
@@ -94,9 +97,8 @@ const Register = () => {
     setError('');
 
     try {
-      // Destructure and omit confirmPassword from registration data
-      const { email, password, username, name } = formData;
-      await authService.register({ email, password, username, name });
+      const { email, password, username, full_name } = formData;
+      await authService.register({ email, password, username, full_name });
       enqueueSnackbar('Registration successful! Please sign in.', { variant: 'success' });
       navigate('/login');
     } catch (err) {
@@ -113,18 +115,19 @@ const Register = () => {
       <Box
         sx={{
           marginTop: 8,
+          marginBottom: 4,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
         }}
       >
-        <Typography component="h1" variant="h5" gutterBottom>
+        <Typography component="h1" variant="h5" gutterBottom align="center">
           AI Safety Governance Platform
         </Typography>
         <Paper
           elevation={3}
           sx={{
-            padding: 4,
+            padding: { xs: 3, sm: 4 },
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -141,7 +144,7 @@ const Register = () => {
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }} noValidate>
             <TextField
               margin="normal"
               required
@@ -149,6 +152,7 @@ const Register = () => {
               id="email"
               label="Email Address"
               name="email"
+              type="email"
               autoComplete="email"
               value={formData.email}
               onChange={handleInputChange}
@@ -172,16 +176,15 @@ const Register = () => {
             />
             <TextField
               margin="normal"
-              required
               fullWidth
-              id="name"
-              label="Full Name"
-              name="name"
+              id="full_name"
+              label="Full Name (optional)"
+              name="full_name"
               autoComplete="name"
-              value={formData.name}
+              value={formData.full_name}
               onChange={handleInputChange}
-              error={!!validationErrors.name}
-              helperText={validationErrors.name}
+              error={!!validationErrors.full_name}
+              helperText={validationErrors.full_name}
               disabled={isLoading}
             />
             <TextField
@@ -196,7 +199,10 @@ const Register = () => {
               value={formData.password}
               onChange={handleInputChange}
               error={!!validationErrors.password}
-              helperText={validationErrors.password}
+              helperText={
+                validationErrors.password ||
+                'At least 8 characters, including uppercase, lowercase, number and special character'
+              }
               disabled={isLoading}
             />
             <TextField
@@ -218,16 +224,19 @@ const Register = () => {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{ mt: 3, mb: 2, py: 1.25 }}
               disabled={isLoading}
             >
               {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </Box>
 
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Link component={RouterLink} to="/" variant="body2">
+              Back to home
+            </Link>
             <Link component={RouterLink} to="/login" variant="body2">
-              {"Already have an account? Sign In"}
+              Already have an account? Sign In
             </Link>
           </Box>
         </Paper>

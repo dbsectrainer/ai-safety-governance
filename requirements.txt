@@ -1,28 +1,31 @@
 # Web Framework
-fastapi>=0.68.0
-uvicorn>=0.15.0
-python-multipart>=0.0.5
-email-validator>=1.1.3
-gunicorn>=20.1.0
+fastapi>=0.110,<1.0
+uvicorn>=0.27,<1.0
+python-multipart>=0.0.9
+email-validator>=2.0
+gunicorn>=21.2
 
 # Database
-sqlalchemy>=1.4.23
-alembic>=1.7.1
-psycopg2-binary>=2.9.1
-pymysql>=1.0.2
+sqlalchemy>=2.0,<3.0
+alembic>=1.13,<2.0
+psycopg2-binary>=2.9.9
+pymysql>=1.1.0
 
 # Security & Authentication
-python-jose[cryptography]>=3.3.0
+python-jose[cryptography]>=3.3,<4.0
 passlib[bcrypt]>=1.7.4
-cryptography>=3.4.0
+# passlib 1.7.4 is not compatible with bcrypt >= 4.1 (it reads the removed
+# __about__ attribute). Pin the compatible line until passlib is replaced.
+bcrypt>=4.0.1,<4.1
+cryptography>=42.0
+
+# System monitoring
+psutil>=5.9
 
 # Testing & Development
-pytest>=6.2.5
-pytest-cov>=2.12.0
-httpx>=0.18.2
-black>=21.5b2
-flake8>=3.9.0
-mypy>=0.910
-
-# API Documentation
-openapi-schema-pydantic>=1.2.4
+pytest>=7.4
+pytest-cov>=4.1
+httpx>=0.27
+black>=24.1
+flake8>=7.0
+mypy>=1.8

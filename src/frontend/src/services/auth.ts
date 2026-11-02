@@ -1,28 +1,6 @@
-import axios, { AxiosError } from 'axios';
-import { axiosSecurityConfig, AuthState, validationPatterns } from '../config/security';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const API_V1 = `${API_URL}/api/v1`;
-
-// Create axios instance with security configurations
-const authApi = axios.create({
-  baseURL: `${API_V1}`,
-  ...axiosSecurityConfig,
-});
-
-// Add request interceptor for token handling
-authApi.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+import api, { getErrorMessage } from './api';
+import type { AuthState, AuthUser } from '../config/security';
+import { validationPatterns } from '../config/security';
 
 interface LoginCredentials {
   email: string;
@@ -31,21 +9,19 @@ interface LoginCredentials {
 
 interface RegisterData extends LoginCredentials {
   username: string;
-  name: string;
+  full_name: string;
 }
 
 interface LoginResponse {
   access_token: string;
   token_type: string;
-  user: {
-    id: string;
-    email: string;
-    username: string;
-    roles: string[];
-  };
+  user?: AuthUser;
 }
 
 class AuthService {
+  private userCache: { token: string; user: AuthUser | null } | null = null;
+  private userRequest: Promise<AuthUser | null> | null = null;
+
   private validateEmail(email: string): boolean {
     return validationPatterns.email.test(email);
   }
@@ -58,20 +34,26 @@ class AuthService {
     if (!this.validateEmail(credentials.email)) {
       throw new Error('Invalid email format');
     }
-
     if (!this.validatePassword(credentials.password)) {
-      throw new Error('Invalid password format');
+      throw new Error(
+        'Password must be at least 8 characters and include uppercase, lowercase, number and special character',
+      );
     }
 
     try {
       const formData = new FormData();
-      formData.append('username', credentials.email); // FastAPI OAuth2 expects 'username'
+      formData.append('username', credentials.email);
       formData.append('password', credentials.password);
 
-      const response = await authApi.post<LoginResponse>('/auth/token', formData);
-      const { access_token, user } = response.data;
-      
+      const response = await api.post<LoginResponse>('/auth/token', formData);
+      const { access_token } = response.data;
       localStorage.setItem('token', access_token);
+
+      const user = response.data.user ?? (await this.getCurrentUser());
+      if (!user) {
+        throw new Error('Login succeeded but the user profile could not be loaded');
+      }
+      this.userCache = { token: access_token, user };
 
       return {
         isAuthenticated: true,
@@ -79,13 +61,8 @@ class AuthService {
         token: access_token,
       };
     } catch (error) {
-      if (error instanceof AxiosError) {
-        throw new Error(
-          error.response?.data?.detail || 
-          'Login failed. Please check your credentials and try again.'
-        );
-      }
-      throw error;
+      localStorage.removeItem('token');
+      throw new Error(getErrorMessage(error));
     }
   }
 
@@ -93,54 +70,76 @@ class AuthService {
     if (!this.validateEmail(data.email)) {
       throw new Error('Invalid email format');
     }
-
     if (!this.validatePassword(data.password)) {
-      throw new Error('Invalid password format');
+      throw new Error(
+        'Password must be at least 8 characters and include uppercase, lowercase, number and special character',
+      );
     }
-
     if (!validationPatterns.username.test(data.username)) {
-      throw new Error('Invalid username format');
+      throw new Error('Username must be 3-16 characters using letters, numbers, _ or -');
     }
-
-    if (!validationPatterns.name.test(data.name)) {
-      throw new Error('Invalid name format');
+    if (data.full_name && !validationPatterns.name.test(data.full_name)) {
+      throw new Error('Full name must be 2-100 characters');
     }
 
     try {
-      await authApi.post('/auth/register', data);
+      await api.post('/auth/register', {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        full_name: data.full_name || null,
+      });
     } catch (error) {
-      if (error instanceof AxiosError) {
-        throw new Error(
-          error.response?.data?.detail || 
-          'Registration failed. Please try again later.'
-        );
-      }
-      throw error;
+      throw new Error(getErrorMessage(error));
     }
   }
 
   async logout(): Promise<void> {
     try {
-      await authApi.post('/auth/logout');
+      await api.post('/auth/logout');
     } catch (error) {
-      console.error('Logout error:', error);
+      // Logout is client-side; an unavailable API must not trap the user.
+      console.warn('Logout request failed:', getErrorMessage(error));
     } finally {
       localStorage.removeItem('token');
+      this.userCache = null;
+      this.userRequest = null;
     }
   }
 
-  async getCurrentUser(): Promise<AuthState['user']> {
-    try {
-      const response = await authApi.get('/users/me');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching current user:', error);
+  async getCurrentUser(): Promise<AuthUser | null> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.userCache = null;
       return null;
     }
+    if (this.userCache?.token === token) {
+      return this.userCache.user;
+    }
+    if (!this.userRequest) {
+      this.userRequest = (async () => {
+        try {
+          const response = await api.get<AuthUser>('/users/me');
+          return response.data;
+        } catch {
+          return null;
+        } finally {
+          this.userRequest = null;
+        }
+      })();
+    }
+    const user = await this.userRequest;
+    this.userCache = { token, user };
+    return user;
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+    return Boolean(localStorage.getItem('token'));
+  }
+
+  async hasRole(role: string): Promise<boolean> {
+    const user = await this.getCurrentUser();
+    return Boolean(user?.is_superuser || user?.roles?.includes(role));
   }
 }
 

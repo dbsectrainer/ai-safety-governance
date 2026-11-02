@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Box, useTheme } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Box, useMediaQuery, useTheme } from '@mui/material';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
@@ -9,33 +9,37 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const theme = useTheme();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+
+  useEffect(() => {
+    setIsSidebarOpen(!isMobile);
+  }, [isMobile]);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen((open) => !open);
   };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar isOpen={isSidebarOpen} />
+      <Sidebar
+        isOpen={isSidebarOpen}
+        isMobile={isMobile}
+        onClose={() => setIsSidebarOpen(false)}
+      />
       <Box
         component="main"
         sx={{
           flexGrow: 1,
+          minWidth: 0,
           bgcolor: theme.palette.background.default,
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
-          width: { sm: `calc(100% - ${isSidebarOpen ? 240 : 0}px)` },
-          ml: { sm: isSidebarOpen ? '240px' : 0 },
-          transition: theme.transitions.create(['margin', 'width'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
         }}
       >
         <Header onMenuClick={toggleSidebar} />
-        <Box sx={{ p: 3, flexGrow: 1 }}>{children}</Box>
+        <Box sx={{ p: { xs: 2, sm: 3 }, flexGrow: 1 }}>{children}</Box>
       </Box>
     </Box>
   );

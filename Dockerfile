@@ -1,7 +1,7 @@
-# Use Python 3.8 slim image
-FROM python:3.8-slim
+# Production image for the FastAPI backend.
+# Python 3.12 matches the version used in CI; the previous 3.8 image is EOL.
+FROM python:3.12-slim
 
-# Set working directory
 WORKDIR /app
 
 # Create non-root user
@@ -13,37 +13,31 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Install system dependencies and cleanup in single layer
+# Install only runtime system dependencies and clean apt lists in the same layer.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Copy requirements file
+# Copy requirements first for better layer caching
 COPY requirements.txt .
 
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . .
 
-# Make start script executable
-RUN chmod +x /app/src/start.sh
+# Make start script executable and give the unprivileged user ownership of the
+# writable runtime directories (SQLite fallback, compliance reports, tmp).
+RUN chmod +x /app/src/start.sh \
+    && mkdir -p /app/compliance_logs \
+    && chown -R appuser:appuser /app
 
-# Set correct permissions
-RUN chown -R appuser:appuser /app
-
-# Switch to non-root user
 USER appuser
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS http://localhost:5000/health || exit 1
 
-# Expose port
 EXPOSE 5000
 
-# Run the startup script
 CMD ["/app/src/start.sh"]

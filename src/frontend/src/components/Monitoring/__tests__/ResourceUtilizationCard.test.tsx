@@ -128,7 +128,7 @@ describe('ResourceUtilizationCard', () => {
     );
 
     // Each progress bar should have a tooltip with the correct utilization text
-    Object.entries(mockSystemMetrics).forEach(([_, value]) => {
+    Object.values(mockSystemMetrics).forEach((value) => {
       const progressBar = screen.getByRole('progressbar', { name: `${value}% utilized` });
       expect(progressBar).toHaveAttribute('aria-label', `${value}% utilized`);
     });

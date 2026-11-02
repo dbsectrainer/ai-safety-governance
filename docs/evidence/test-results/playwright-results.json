@@ -1,0 +1,365 @@
+{
+  "config": {
+    "configFile": "/Users/newtechlab/Documents/GitHub/ai-safety-governance/src/frontend/playwright.config.ts",
+    "rootDir": "/Users/newtechlab/Documents/GitHub/ai-safety-governance/src/frontend/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "/Users/newtechlab/Documents/GitHub/ai-safety-governance/docs/evidence/test-results/playwright-report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "/Users/newtechlab/Documents/GitHub/ai-safety-governance/docs/evidence/test-results/playwright-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/newtechlab/Documents/GitHub/ai-safety-governance/docs/evidence/test-results/playwright-artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/newtechlab/Documents/GitHub/ai-safety-governance/src/frontend/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.55.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "admin.spec.ts",
+      "file": "admin.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "administrator dashboard shows live metrics, growth and activity",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "d4043a9dd1ab94463227-36ce6400814029884d72",
+          "file": "admin.spec.ts",
+          "line": 5,
+          "column": 1
+        },
+        {
+          "title": "administrator can create, edit, deactivate and delete a user",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "d4043a9dd1ab94463227-194768fe39450529660b",
+          "file": "admin.spec.ts",
+          "line": 36,
+          "column": 1
+        },
+        {
+          "title": "administrator can run compliance checks and export a report",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "d4043a9dd1ab94463227-93020b948a58c98084a1",
+          "file": "admin.spec.ts",
+          "line": 100,
+          "column": 1
+        },
+        {
+          "title": "monitoring page displays live host and model metrics",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "d4043a9dd1ab94463227-8f7afc618dc36943f277",
+          "file": "admin.spec.ts",
+          "line": 140,
+          "column": 1
+        },
+        {
+          "title": "security page displays observable control checks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "d4043a9dd1ab94463227-39f43b66ddc163e0317a",
+          "file": "admin.spec.ts",
+          "line": 158,
+          "column": 1
+        },
+        {
+          "title": "administrator settings persist after a reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "d4043a9dd1ab94463227-d52e8e895e0102ecc7e0",
+          "file": "admin.spec.ts",
+          "line": 174,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "auth.spec.ts",
+      "file": "auth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "a new user can register, sign in, and view the dashboard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-48f40a44825364dd73f2",
+          "file": "auth.spec.ts",
+          "line": 3,
+          "column": 1
+        },
+        {
+          "title": "an administrator can sign out",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-a3a76f9ffba82ccefc3c",
+          "file": "auth.spec.ts",
+          "line": 44,
+          "column": 1
+        },
+        {
+          "title": "a regular user is denied admin pages but can use the dashboard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-a7e25567c357b9209a04",
+          "file": "auth.spec.ts",
+          "line": 59,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "public.spec.ts",
+      "file": "public.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "landing page renders and remains usable on desktop and mobile",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "349fc90c6061c792a808-e75a0808f52bde55fa6a",
+          "file": "public.spec.ts",
+          "line": 3,
+          "column": 1
+        },
+        {
+          "title": "login page is reachable from the landing page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "349fc90c6061c792a808-431cd826b5e84afe231a",
+          "file": "public.spec.ts",
+          "line": 39,
+          "column": 1
+        },
+        {
+          "title": "unauthenticated dashboard access redirects to login",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "349fc90c6061c792a808-6780ee423406b4c35f94",
+          "file": "public.spec.ts",
+          "line": 57,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "responsive.spec.ts",
+      "file": "responsive.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "mobile navigation opens, routes, and stays within the viewport",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "e0223b006feb3d306446-34eaadbecf203dc590b7",
+          "file": "responsive.spec.ts",
+          "line": 3,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-02T00:35:56.979Z",
+    "duration": 64.61500000000001,
+    "expected": 0,
+    "skipped": 13,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
